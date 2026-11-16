@@ -1,4 +1,4 @@
-# Charmlet artwork
+# CharmBits artwork
 
 The 0.6.0 trial bundles ten original SVG charms and 134 rendered PNG designs for offline use. Original-source records appear below; the final dated entry documents the generated trial collection. Inclusion in the trial does not approve the public-release lineup or grant a reuse licence.
 

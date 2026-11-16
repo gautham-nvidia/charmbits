@@ -36,34 +36,38 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 		assert.equal(count, exceptions[group] ?? 2, group);
 	}
 	const future = { ...CHARMS[0], id: 'trial:future-paid-design' };
-	const fresh = new AccessController({ directory: join(directory, 'fresh'), secrets });
+	const fresh = new AccessController({ application: 'vscode', directory: join(directory, 'fresh'), secrets });
 	await fresh.initialize(undefined);
 	assert.equal(fresh.catalogue([...CHARMS, future]).length, 31);
-	const reopen = new AccessController({ directory: join(directory, 'fresh'), secrets });
+	assert.equal(fresh.snapshot.label, 'Free for VS Code');
+	assert.equal(fresh.snapshot.activationLabel, 'Import charm access');
+	const reopen = new AccessController({ application: 'vscode', directory: join(directory, 'fresh'), secrets });
 	await reopen.initialize({ version: 1 }); // Existing metadata wins even if an old-looking preference is later supplied.
 	assert.equal(reopen.catalogue([...CHARMS, future]).length, 31);
-	const beta = new AccessController({ directory: join(directory, 'beta'), secrets });
+	const beta = new AccessController({ application: 'desktop', directory: join(directory, 'beta'), secrets });
 	await beta.initialize({ version: 1, charmId: 'live:robot' });
 	assert.equal(betaCatalogue.length, 234);
 	assert.equal(new Set(betaCatalogue).size, 234);
 	assert.deepEqual(new Set(beta.catalogue([...CHARMS, future]).map(charm => charm.id)),
 		new Set([...betaCatalogue, ...starter].filter(id => CHARMS.some(charm => charm.id === id))));
 	assert.equal(beta.catalogue(CHARMS).some(charm => charm.group === 'Sports Icons'), false);
-	const newPreferences = new AccessController({ directory: join(directory, 'new-preferences'), secrets });
+	const newPreferences = new AccessController({ application: 'vscode', directory: join(directory, 'new-preferences'), secrets });
 	await newPreferences.initialize(DEFAULT_STATE);
 	assert.equal(newPreferences.catalogue(CHARMS).length, 31);
 });
 
-test('native signed access expires without losing purchases, photos or earned flowers and rejects forged activation', async context => {
+(['vscode', 'desktop'] as const).forEach(application => test(`native ${application} signed access expires without losing purchases, photos or earned flowers and rejects forged activation`, async context => {
 	const directory = mkdtempSync(join(tmpdir(), 'charmlet-signed-access-'));
 	context.after(() => rm(directory, { recursive: true, force: true }));
 	let now = Date.UTC(2026, 10, 12, 12), stored: string | undefined;
 	const keys = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
 	const publicKeys = { test: await crypto.subtle.exportKey('jwk', keys.publicKey) };
-	const options = { directory, keys: publicKeys, now: () => now,
+	const options = { application, directory, keys: publicKeys, now: () => now,
 		secrets: { get: async () => stored, set: async (value: string) => { stored = value; } } };
 	const controller = new AccessController(options);
 	await controller.initialize(DEFAULT_STATE);
+	assert.equal(controller.catalogue(CHARMS).length, 31);
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free starter');
 	const base: AccessGrant = { iss: 'charmlet', aud: 'charmlet-apps', sub: 'a'.repeat(64),
 		iat: now / 1000, kind: 'trial', items: ['trial:new-electric-guitar'],
 		trialStartedAt: now / 1000, exp: now / 1000 + 30 * 86400 };
@@ -71,6 +75,7 @@ test('native signed access expires without losing purchases, photos or earned fl
 	const file = (value: string) => Buffer.from(JSON.stringify({ format: 'charmlet-access', version: 1, token: value }));
 	await controller.importDocument(file(token));
 	assert.equal(controller.catalogue(CHARMS).length, CHARMS.length);
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Pro trial');
 	const photo = { ...CHARMS[0], id: 'pack:photo-personal:portrait' };
 	const flower = { ...CHARMS[0], id: 'garden:hibiscus' };
 	now += 30 * 86400000;
@@ -80,6 +85,8 @@ test('native signed access expires without losing purchases, photos or earned fl
 		assert(ids.includes(id));
 	}
 	assert.equal(ids.includes('live:robot'), false);
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free + your items');
+	if (application === 'vscode') { assert.match(controller.snapshot.detail, /All VS Code features are free/); }
 	const reopened = new AccessController(options);
 	await reopened.initialize(DEFAULT_STATE);
 	assert.deepEqual(reopened.catalogue([...CHARMS, photo, flower]).map(charm => charm.id), ids);
@@ -90,11 +97,12 @@ test('native signed access expires without losing purchases, photos or earned fl
 	const { exp: _expiry, trialStartedAt: _start, ...paid } = base;
 	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'pro', iat: now / 1000 }, keys.privateKey, 'test')));
 	assert.equal(reopened.catalogue(CHARMS).length, CHARMS.length);
+	assert.equal(reopened.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'CharmBits Pro');
 	now += 1000;
 	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'items', iat: now / 1000 }, keys.privateKey, 'test')));
 	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), false);
 	await assert.rejects(reopened.importDocument(file(token)), /older/);
-});
+}));
 
 test('missing or invalid saved values restore a usable charm', () => {
 	assert.deepEqual(restoreState(undefined), DEFAULT_STATE);

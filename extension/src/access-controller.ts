@@ -13,12 +13,19 @@ interface SecretStore {
 	set(value: string): Promise<void>;
 }
 interface AccessRecord { version: 1; betaLegacy: boolean; lastSeenAt: number }
-interface AccessOptions { directory: string; secrets: SecretStore; keys?: AccessKeyring; now?: () => number }
+interface AccessOptions {
+	application: 'vscode' | 'desktop';
+	directory: string;
+	secrets: SecretStore;
+	keys?: AccessKeyring;
+	now?: () => number;
+}
 interface StoredGrant { token: string; grant: AccessGrant }
 
 export interface AccessSnapshot {
 	label: string;
 	detail: string;
+	activationLabel: string;
 	canActivate: boolean;
 	canBrowse: boolean;
 }
@@ -89,14 +96,23 @@ export class AccessController {
 			&& currentAccess(grant, this.now(), this.record.lastSeenAt))?.grant;
 		const owned = this.grants.some(({ grant }) => grant.items.length > 0);
 		const expired = this.grants.some(({ grant }) => grant.kind === 'trial');
+		const vscode = this.options.application === 'vscode';
+		const charmDetail = pro ? 'Your full charm collection is unlocked.'
+			: trial ? `Extra charm preview until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
+				: this.record.betaLegacy ? 'Your existing beta collection is retained.'
+					: expired ? 'Your charm preview has ended. Purchases, photos and progress remain.'
+						: owned ? 'Your purchased charms are available.'
+							: 'Starter charms are included; paid charms are optional.';
 		return {
-			label: pro ? 'Charmlet Pro' : trial ? 'Pro trial' : this.record.betaLegacy ? 'Beta collection'
+			label: vscode ? 'Free for VS Code' : pro ? 'CharmBits Pro' : trial ? 'Pro trial' : this.record.betaLegacy ? 'Beta collection'
 				: owned ? 'Free + your items' : 'Free starter',
-			detail: pro ? 'All in-app charms. One permanent purchase for your current apps.'
+			detail: vscode ? `All VS Code features are free. ${charmDetail}`
+				: pro ? 'All in-app charms. One permanent purchase for your current apps.'
 				: trial ? `Full access until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
 					: this.record.betaLegacy ? 'Your existing beta collection is retained.'
 						: expired ? 'Your trial has ended. Free charms, purchases, photos and progress remain.'
 							: 'Choose a starter companion. Your photos, garden and imported packs stay yours.',
+			activationLabel: vscode ? 'Import charm access' : 'Activate access',
 			canActivate: Object.keys(this.keys).length > 0,
 			canBrowse: this.website() !== undefined,
 		};
@@ -158,7 +174,7 @@ export class AccessController {
 				await this.importDocument(Buffer.from(JSON.stringify({ format: 'charmlet-access', version: 1, token })));
 			} catch {
 				// Offline use retains the last signed grant; trial expiry is still enforced locally.
-				console.warn('Charmlet could not refresh online access; using its last signed activation.');
+				console.warn('CharmBits could not refresh online access; using its last signed activation.');
 			}
 		}
 	}

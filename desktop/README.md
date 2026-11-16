@@ -1,8 +1,10 @@
-# Charmlet desktop developer beta
+# CharmBits desktop developer beta
 
-Charmlet Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
+CharmBits Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
 
-The **0.11.0 candidate** starts with just the charm and cord. New profiles have 31 free starter charms; existing beta profiles keep their beta access. Signed trial/purchase activation is shared with VS Code, with provider setup still required. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+The **0.12.0 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Pro charm access also works in the free VS Code extension; provider setup is still required. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+
+The public app and archive names are now CharmBits. The internal app name remains `Charmlet` to preserve the existing profile, single-instance lock and macOS encrypted-access keychain entry. The bundle ID, saved filenames and pack/activation formats also stay stable.
 
 The packaged `dist/PRIVACY.md` explains local storage and optional activation refresh. The shared [privacy notice](../extension/PRIVACY.md) and [service setup guide](../service/README.md) cover email verification and purchases. Personal photos, focus notes and garden progress remain local.
 
@@ -26,7 +28,7 @@ Select **Twisty Cube**, **Sliding Tiles** or **Lights Out** and open **Tools > P
 
 **Appearance > Cord material** matches the charm or remembers your chosen cord. **Focus > Small wins** records achievements and completed live focus sessions, with undo and optional celebrations. **Photo charms** opens a local crop and frame editor: only the finished keepsake is stored, with no uploads. Sunny blinks, glances toward a nearby pointer and reacts to squeezing and wins; Reduced Motion stops idle animation. All these controls stay tucked away until selected.
 
-<img src="../docs/store-assets/desktop-minimal.png" width="960" alt="Actual Charmlet desktop views: charm only, optional background and toolbar, and the selected Focus panel">
+<img src="../docs/store-assets/desktop-minimal.png" width="960" alt="Actual desktop views: charm only, optional background and toolbar, and the selected Focus panel">
 
 ## Local commands
 
@@ -38,7 +40,7 @@ npm.cmd --prefix desktop run test
 npm.cmd --prefix desktop run package
 ```
 
-The Windows 0.9.0 packaging target is an unsigned folder under `desktop/release/0.9.0/Charmlet-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. The earlier [playful charms verification log](../docs/phase-11-playful-charms.md) describes its own candidate. Signing, notarization, update service, store listing and public distribution remain release work.
+The Windows 0.12.0 packaging target is an unsigned folder under `desktop/release/0.12.0/CharmBits-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. The earlier [playful charms verification log](../docs/phase-11-playful-charms.md) describes its own candidate. Signing, notarization, update service, store listing and public distribution remain release work.
 
 For a portable download, archive and test the extracted application.
 

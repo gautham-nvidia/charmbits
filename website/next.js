@@ -119,7 +119,7 @@ function setupWorkspace() {
       const inEditor = hero.dataset.workspace === 'vscode';
       document.querySelector('#workspace-title').textContent = inEditor ? 'Inside VS Code' : 'Your desktop';
       document.querySelector('#placement-copy').textContent = inEditor
-        ? 'Inside the Charmlet sidebar: your companion, focus sessions and small wins beside your code.'
+        ? 'Inside the free CharmBits sidebar: your companion, focus sessions and small wins beside your code.'
         : 'A floating charm above your other apps. Drag it to the spot that feels right.';
       place();
     });
@@ -305,8 +305,11 @@ try {
   const commerce = await loadCommerce();
   for (const node of document.querySelectorAll('[data-starter-count]')) node.textContent = commerce.starterCount;
   const dialog = document.querySelector('#signup-preview'), trigger = document.querySelector('#email-download');
+  const marketplace = data.distribution?.marketplace;
+  if (marketplace) trigger.textContent = 'Install free from Marketplace ↗';
   let signup;
   trigger.addEventListener('click', () => {
+    if (marketplace) { location.assign(marketplace); return; }
     dialog.showModal();
     signup ??= setupSignup(document.querySelector('#download-signup')).catch(error => {
       document.querySelector('[data-signup-message]').textContent = error.message;
@@ -316,6 +319,7 @@ try {
   dialog.addEventListener('close', () => trigger.focus());
   const status = await availability();
   for (const node of document.querySelectorAll('[data-audience-status]')) {
+    node.hidden = Boolean(marketplace);
     node.textContent = status.configured ? 'Confirm your email to receive downloads. Offers are optional.'
       : 'Email signup is not open yet. This preview does not collect or send email.';
   }

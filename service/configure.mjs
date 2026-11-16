@@ -55,7 +55,7 @@ if (process.argv.includes('--check')) {
     }
   };
   try {
-    console.log('Charmlet public configuration. Finish Cloudflare project/bucket/database and sender setup first.');
+    console.log('CharmBits public configuration. Finish Cloudflare project/bucket/database and sender setup first.');
     const websiteOrigin = await ask('Website HTTPS origin', access.websiteOrigin, validOrigin);
     const apiOrigin = await ask('Worker HTTPS origin', access.apiOrigin, validOrigin);
     const contactEmail = await ask('Public support email', commerce.contactEmail, email);

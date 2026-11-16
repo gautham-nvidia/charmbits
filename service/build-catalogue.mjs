@@ -60,9 +60,9 @@ export async function buildCommerceCatalogue({ privateAssets = false } = {}) {
     products.push(product);
   }
   products.push({
-    sku: 'pro', name: 'Charmlet Pro', kind: 'pro', priceCents: settings.proPriceCents,
+    sku: 'pro', name: 'CharmBits Pro', kind: 'pro', priceCents: settings.proPriceCents,
     regularPriceCents: 1749, items: [], available: true, delivery: 'activation',
-    description: 'The complete in-app collection across VS Code, Windows desktop and Mac desktop. One purchase.',
+    description: 'Desktop Pro and the full in-app charm collection. The charms also work in the free VS Code extension. One purchase.',
   });
   const extension = JSON.parse(await readFile(join(repo, 'extension/package.json'), 'utf8'));
   const desktop = JSON.parse(await readFile(join(repo, 'desktop/package.json'), 'utf8'));
@@ -71,12 +71,12 @@ export async function buildCommerceCatalogue({ privateAssets = false } = {}) {
     throw error;
   });
   const releases = [
-    { sku: 'app-vscode', name: 'VS Code extension', source: join(repo, 'extension', `charmlet-${extension.version}.vsix`),
-      filename: `charmlet-${extension.version}.vsix` },
-    { sku: 'app-windows', name: 'Windows desktop (x64)', source: join(repo, 'desktop/distribution', `Charmlet-desktop-${desktop.version}-win32-x64.zip`),
-      filename: `Charmlet-desktop-${desktop.version}-win32-x64.zip` },
-    { sku: 'app-macos', name: 'Mac desktop (Apple silicon)', source: join(repo, 'desktop/distribution', `Charmlet-desktop-${desktop.version}-darwin-arm64.tar.gz`),
-      filename: `Charmlet-desktop-${desktop.version}-darwin-arm64.tar.gz` },
+    { sku: 'app-vscode', name: 'VS Code extension', source: join(repo, 'extension', `charmbits-${extension.version}.vsix`),
+      filename: `charmbits-${extension.version}.vsix` },
+    { sku: 'app-windows', name: 'Windows desktop (x64)', source: join(repo, 'desktop/distribution', `CharmBits-desktop-${desktop.version}-win32-x64.zip`),
+      filename: `CharmBits-desktop-${desktop.version}-win32-x64.zip` },
+    { sku: 'app-macos', name: 'Mac desktop (Apple silicon)', source: join(repo, 'desktop/distribution', `CharmBits-desktop-${desktop.version}-darwin-arm64.tar.gz`),
+      filename: `CharmBits-desktop-${desktop.version}-darwin-arm64.tar.gz` },
   ];
   for (const release of releases) {
     const product = { sku: release.sku, name: release.name, kind: 'installer', priceCents: 0, items: [],

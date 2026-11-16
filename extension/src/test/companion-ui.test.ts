@@ -160,7 +160,7 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 		expect(version).toMatch(/^\d+\.\d+\.\d+$/);
 		const cliPath = resolveCliPathFromVSCodeExecutablePath(executablePath);
 		const args = [`--user-data-dir=${join(profile, 'user')}`, `--extensions-dir=${join(profile, 'extensions')}`,
-			'--install-extension', resolve(`charmlet-${version}.vsix`), '--force'];
+			'--install-extension', resolve(`charmbits-${version}.vsix`), '--force'];
 		let executable = cliPath;
 		const cliEnvironment = { ...environment };
 		if (process.platform === 'win32') {
@@ -203,7 +203,7 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 			testWindow.setIgnoreMouseEvents(true);
 			testWindow.setSize(1400, 900);
 		});
-		await expect(window.locator('.part.activitybar a.action-label[aria-label="Charmlet"]')).toBeVisible({ timeout: 30000 });
+		await expect(window.locator('.part.activitybar a.action-label[aria-label="CharmBits"]')).toBeVisible({ timeout: 30000 });
 		return { ...paths, app, window };
 	} catch (error) {
 		// A launch failure occurs before the caller owns the editor. Preserve its
@@ -256,7 +256,7 @@ test('companion focus and learning persist across a real editor reload', async (
 	});
 	const { window, preferencesPath, companionPath } = editor;
 	try {
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(window);
 		const stage = frame.locator('#stage');
 		await expect(stage).toHaveAttribute('data-companion-ready', 'true');
@@ -368,7 +368,7 @@ test('companion focus and learning persist across a real editor reload', async (
 		expect(learningCard(restored.learning.cardId)?.kind).toBe('fact');
 		await expect(frame.locator('#message-source')).toBeVisible();
 
-		await command(window, 'Charmlet: Focus Session');
+		await command(window, 'CharmBits: Focus Session');
 		await expect(frame.locator('#companion-tools')).toBeVisible();
 		const focusTab = frame.getByRole('tab', { name: 'Focus', exact: true });
 		const learnTab = frame.getByRole('tab', { name: 'Learn', exact: true });
@@ -411,7 +411,7 @@ test('garden rewards and gentle reminders persist through the real editor', asyn
 	});
 	const { window, companionPath } = editor;
 	try {
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-ready', 'true');
 		await expect(frame.locator('#companion-tools')).toBeHidden();
@@ -499,7 +499,7 @@ test('garden entry is visible before opening companion tools', async ({}, testIn
 	});
 	const { window, companionPath } = editor;
 	try {
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(window);
 		const entry = frame.getByRole('button', { name: 'Open garden', exact: true });
 		await expect(frame.locator('#companion-tools')).toBeHidden();
@@ -516,7 +516,7 @@ test('garden entry is visible before opening companion tools', async ({}, testIn
 		const plantId = JSON.parse(readFileSync(companionPath, 'utf8')).garden.plant.id;
 		await frame.getByRole('tab', { name: 'Garden', exact: true }).press('Escape');
 		await expect(entry).toBeFocused();
-		await command(window, 'Charmlet: Open Garden');
+		await command(window, 'CharmBits: Open Garden');
 		await expect(frame.locator('#garden-panel')).toBeVisible();
 		await expect(frame.getByRole('button', { name: 'Water plant', exact: true })).toBeDisabled();
 		frame = await reloadCharm(window);
@@ -536,7 +536,7 @@ test('motivation has no category heading and reminder checkboxes remain compact'
 		writeFileSync(companionPath, `${JSON.stringify(state)}\n`);
 	});
 	try {
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		const frame = await readyFrame(editor.window);
 		await expect.soft(frame.locator('.message-meta')).toBeHidden();
 		await expect(frame.locator('#message-text')).not.toBeEmpty();
@@ -560,7 +560,7 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		writeFileSync(companionPath, `${JSON.stringify(state)}\n`);
 	}, process.env.CHARMLET_TEST_PACKAGED === '1');
 	try {
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		await expect(frame.locator('#companion-tools')).toBeHidden();
 		await expect(frame.locator('#care-cue')).toBeVisible();
@@ -570,7 +570,8 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		const version = JSON.parse(readFileSync(resolve('package.json'), 'utf8')).version;
 		await expect(frame.locator('#app-version')).toHaveText(`v${version}`);
 		await expect(frame.locator('.app-footer')).toContainText('Made in Silicon Valley');
-		await expect(frame.locator('#website-placeholder')).toHaveText('Website — coming soon');
+		await expect(frame.locator('#website-placeholder')).toHaveText('More charms ↗');
+		await expect(frame.locator('#website-placeholder')).toBeEnabled();
 		await frame.getByRole('button', { name: 'Done', exact: true }).click();
 		await expect(frame.locator('#care-cue')).toBeHidden();
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
@@ -632,7 +633,7 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		await editor.app.evaluate(({ dialog }, path) => {
 			dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] });
 		}, reviewPack);
-		await command(editor.window, 'Charmlet: Import Charm Pack');
+		await command(editor.window, 'CharmBits: Import Charm Pack');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'pack:review-starter-redraws-1:starter-terminal');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-persisted', 'true');
 		await expect.poll(() => frame.locator('#charm-image').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(216);
@@ -659,14 +660,14 @@ test('imported artwork attaches to its silhouette and rebounds while focus ticks
 	const pointerFrames: Frame[] = [];
 	try {
 		await window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		const frame = await readyFrame(window);
 		const reviewPack = resolve('..', 'website', 'packs', 'review', 'art-new-red-panda-r1-p2.charmlet.json');
 		const pack = JSON.parse(readFileSync(reviewPack, 'utf8'));
 		await editor.app.evaluate(({ dialog }, path) => {
 			dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] });
 		}, reviewPack);
-		await command(window, 'Charmlet: Import Charm Pack');
+		await command(window, 'CharmBits: Import Charm Pack');
 		// Import updates the catalogue before show() finishes restoring focus.
 		await expect(window.getByText(`Imported ${pack.name}.`, { exact: true })).toBeVisible();
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', `pack:${pack.id}:${pack.charms[0].id}`);
@@ -750,7 +751,7 @@ test('imported artwork attaches to its silhouette and rebounds while focus ticks
 			await editor.app.evaluate(({ dialog }, file) => {
 				dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [file] });
 			}, path);
-			await command(window, 'Charmlet: Import Charm Pack');
+			await command(window, 'CharmBits: Import Charm Pack');
 			await expect(window.getByText(`Imported ${imported.name}.`, { exact: true })).toBeVisible();
 		}
 		for (const [group, count, name] of [
@@ -782,7 +783,7 @@ test('soft charms squeeze at their attachment and festive defaults protect manua
 	const { window, preferencesPath } = editor;
 	try {
 		await window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(window);
 		await expect(frame.locator('#message-text')).toHaveText(MESSAGES[0]);
 		const review = JSON.parse(readFileSync(resolve('..', 'website', 'art-review.json'), 'utf8'));
@@ -794,7 +795,7 @@ test('soft charms squeeze at their attachment and festive defaults protect manua
 			await editor.app.evaluate(({ dialog }, path) => {
 				dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] });
 			}, path);
-			await command(window, 'Charmlet: Import Charm Pack');
+			await command(window, 'CharmBits: Import Charm Pack');
 			const id = `pack:${pack.id}:${pack.charms[0].id}`;
 			imported.push(id);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', id);
@@ -803,7 +804,7 @@ test('soft charms squeeze at their attachment and festive defaults protect manua
 			await expect(window.getByText(`Imported ${pack.name}.`, { exact: true })).toBeVisible();
 		}
 		const [pumpkin, ball] = imported;
-		// Only Charmlet reads the simulated date. Keep the IDE's clock, native
+		// Only CharmBits reads the simulated date. Keep the IDE's clock, native
 		// event timestamps, animation frames and real timers intact.
 		const setReviewDate = (date: Date) => frame.evaluate(now => {
 			Date.now = () => now;
@@ -929,11 +930,14 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a ne
 		if (installedPersonalization) {
 			await expect(editor.window.getByRole('button', { name: /^Restricted Mode/ })).toBeVisible();
 		}
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(31);
+		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');
+		await expect(frame.locator('#access-detail')).toContainText('All VS Code features are free.');
+		await expect(frame.locator('#activate-access')).toHaveText('Import charm access');
 		await expect(frame.getByRole('button', { name: 'Select Nimbus - Live Cloud', exact: true })).toHaveCount(0);
 		const cali = CHARMS.find(charm => charm.id === 'live:cali')!;
 		await frame.getByRole('button', { name: `Select ${cali.name}`, exact: true }).click();
@@ -944,6 +948,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a ne
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cali');
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(31);
+		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');
 		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-starter-picker.png') });
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
@@ -959,7 +964,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'playful charms'} reacts t
 	}, installedPersonalization);
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		const appearance = async () => {
 			await frame.getByRole('button', { name: 'Charm settings', exact: true }).focus();
@@ -1060,7 +1065,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'puzzle collection'} keeps
 			charmPinned: true, reducedMotion: true, showMessages: false }));
 	}, installedPersonalization);
 	try {
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		const choose = async (id: string) => {
 			await frame.getByRole('button', { name: 'Charm settings', exact: true }).focus();
@@ -1159,7 +1164,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'live collection'} has res
 	}, installedPersonalization);
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		const holdTrace = await tracePointerInput(editor.window);
 		const choose = async (name: string, group: string) => {
@@ -1332,7 +1337,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'mascot companion'} keeps 
 	}, installedPersonalization);
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		const focus = async () => {
 			await frame.getByRole('button', { name: 'Focus', exact: true }).focus();
@@ -1542,7 +1547,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'personalization'} keeps l
 	}, installedPersonalization);
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
-		await command(editor.window, 'Charmlet: Show Charm');
+		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
 		const expectWins = async (total: number) => {
 			await expect.poll(async () => {
@@ -1691,7 +1696,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 		try {
 			const restricted = editor.window.getByRole('button', { name: /^Restricted Mode/ });
 			await expect(restricted).toBeVisible();
-			await command(editor.window, 'Charmlet: Show Charm');
+			await command(editor.window, 'CharmBits: Show Charm');
 			let frame = await readyFrame(editor.window);
 			const expectDailyWatering = async (lastWateredDay: string | null) => {
 				expect(lastWateredDay).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -1730,7 +1735,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 			}
 			expect(readGarden()).toEqual(gardenBeforeTrial);
 			await frame.locator('#app').screenshot({ path: testInfo.outputPath('installed-trial-flower.png') });
-			await command(editor.window, 'Charmlet: Open Garden');
+			await command(editor.window, 'CharmBits: Open Garden');
 			await frame.getByRole('button', { name: 'Plant a seed', exact: true }).click();
 			await expect(frame.locator('#stage')).toHaveAttribute('data-companion-persisted', 'true');
 			await frame.getByRole('button', { name: 'Water plant', exact: true }).click();
@@ -1740,7 +1745,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 			await expectDailyWatering(watered.lastWateredDay);
 			frame = await reloadCharm(editor.window);
 			await expect(restricted).toBeVisible();
-			await command(editor.window, 'Charmlet: Open Garden');
+			await command(editor.window, 'CharmBits: Open Garden');
 			await expect(frame.locator('#garden-count')).toHaveText('1 / 11 waterings');
 			expect(JSON.parse(readFileSync(editor.companionPath, 'utf8')).garden).toEqual(watered);
 			// A real reload can cross midnight. The saved watering stays unchanged,
@@ -1762,7 +1767,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 			writeFileSync(editor.companionPath, `${JSON.stringify(overnight)}\n`);
 			frame = await reloadCharm(editor.window);
 			await expect(restricted).toBeVisible();
-			await command(editor.window, 'Charmlet: Open Garden');
+			await command(editor.window, 'CharmBits: Open Garden');
 			await expect(frame.locator('#garden-count')).toHaveText('1 / 11 waterings');
 			expect(JSON.parse(readFileSync(editor.companionPath, 'utf8')).garden.plant.id).toBe(watered.plant?.id);
 			await expect(frame.getByRole('button', { name: 'Water plant', exact: true })).toBeEnabled();

@@ -11,7 +11,7 @@ export class StateWriter<State> {
 		const operation = this.tail.catch(() => undefined).then(async () => {
 			await this.write(value);
 			if (!this.matches(value, await this.read())) {
-				throw new Error('Charmlet could not confirm its saved settings.');
+				throw new Error('CharmBits could not confirm its saved settings.');
 			}
 		});
 		this.tail = operation;

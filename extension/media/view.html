@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src __CSP__ data:; style-src __CSP__; script-src 'nonce-__NONCE__';">
   <link rel="stylesheet" href="__STYLE__">
-  <title>Charmlet</title>
+  <title>CharmBits</title>
 </head>
 <body>
-  <main id="app" aria-label="Charmlet">
+  <main id="app" aria-label="CharmBits">
     <div id="stage" data-ready="false" data-running="false" data-persisted="true" data-companion-ready="false" data-companion-persisted="true">
       <div class="identity"><span id="charm-swatch" class="swatch" aria-hidden="true"></span><span id="charm-name">Terminal</span></div>
       <div id="rig"><div id="hanging" hidden>
@@ -23,7 +23,7 @@
       <div class="message-body"><div id="message-meta" class="message-meta" hidden><span id="card-kind"></span><span id="card-topic"></span></div><p id="message-text"></p><p id="message-answer" hidden></p><div class="message-links"><button id="reveal-answer" type="button" hidden>Reveal answer</button><button id="message-source" type="button" hidden>Read source</button></div></div>
       <button id="next-message" type="button" aria-label="Next coding message" title="Next message"></button>
     </div>
-    <nav id="primary-nav" class="tools" aria-label="Charmlet tools">
+    <nav id="primary-nav" class="tools" aria-label="CharmBits tools">
       <button id="charms-toggle" type="button" aria-label="Browse charms" aria-controls="charm-picker" aria-expanded="false" aria-haspopup="dialog">Charms</button>
       <button id="companion-toggle" type="button" aria-label="Focus" title="Focus session" aria-controls="companion-tools" aria-expanded="false"><span id="care-badge" aria-hidden="true" hidden></span><span>Focus</span></button>
       <button id="garden-readout" type="button" aria-label="Open garden" aria-controls="companion-tools" aria-expanded="false" title="Plant your first seed">Garden</button>
@@ -31,7 +31,7 @@
       <button id="settings-toggle" type="button" aria-label="Charm settings" title="Settings" aria-controls="settings-menu" aria-expanded="false" aria-haspopup="menu">Settings</button>
     </nav>
     <div class="readout"><span id="phase" role="status" aria-live="polite">Parked</span><button id="focus-readout" type="button" aria-label="Open focus session" hidden>Focus</button><output id="length">126 px</output></div>
-    <footer class="app-footer" aria-label="About Charmlet"><span id="website-placeholder">Website — coming soon</span><span>Made in Silicon Valley <span id="app-version">v__APP_VERSION__</span></span></footer>
+    <footer class="app-footer" aria-label="About CharmBits"><button id="website-placeholder" type="button" disabled>More charms ↗</button><span>Made in Silicon Valley <span id="app-version">v__APP_VERSION__</span></span></footer>
     <div id="tools-backdrop" hidden aria-hidden="true"></div>
     <section id="charm-picker" class="tool-popup" role="dialog" aria-labelledby="picker-title" aria-modal="false" hidden>
       <header class="popup-heading"><div><h2 id="picker-title">Browse charms</h2><p>Find a little something that's you.</p></div><button id="picker-photo" type="button">Add photo</button><button id="picker-close" type="button" class="popup-close" aria-label="Close charm picker"></button></header>

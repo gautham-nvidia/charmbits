@@ -37,4 +37,4 @@ await copyFile(join(repo, 'extension', 'THIRD_PARTY_NOTICES.md'), join(dist, 'TH
 await copyFile(join(repo, 'extension', 'ARTWORK.md'), join(dist, 'ARTWORK.md'));
 await copyFile(join(repo, 'extension', 'PRIVACY.md'), join(dist, 'PRIVACY.md'));
 await copyFile(join(root, 'README.md'), join(dist, 'DESKTOP_BETA.md'));
-console.log('Built Charmlet desktop beta.');
+console.log('Built CharmBits desktop beta.');

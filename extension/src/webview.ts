@@ -88,6 +88,7 @@ const nextMessage = element<HTMLButtonElement>('next-message');
 const importPack = element<HTMLButtonElement>('import-pack');
 const removePack = element<HTMLButtonElement>('remove-pack');
 const browsePacks = element<HTMLButtonElement>('browse-packs');
+const websiteLink = element<HTMLButtonElement>('website-placeholder');
 const activateAccess = element<HTMLButtonElement>('activate-access');
 const mediaRoot = new URL('.', charmImage.src);
 let charms: readonly CharmDefinition[] = CHARMS;
@@ -787,7 +788,9 @@ rotateMessages.addEventListener('change', () => {
 });
 importPack.addEventListener('click', () => api.postMessage({ type: 'command', command: 'charmlet.importPack' }));
 activateAccess.addEventListener('click', () => api.postMessage({ type: 'command', command: 'charmlet.importPack' }));
-browsePacks.addEventListener('click', () => api.postMessage({ type: 'browse-packs' }));
+for (const button of [browsePacks, websiteLink]) {
+	button.addEventListener('click', () => api.postMessage({ type: 'browse-packs' }));
+}
 removePack.addEventListener('click', () => api.postMessage({ type: 'command', command: 'charmlet.removePack' }));
 sizeInput.addEventListener('input', () => {
 	state.size = Number(sizeInput.value);
@@ -844,7 +847,10 @@ window.addEventListener('message', event => {
 		if (typeof access.label === 'string' && typeof access.detail === 'string') {
 			element<HTMLElement>('access-label').textContent = access.label;
 			element<HTMLElement>('access-detail').textContent = access.detail;
+			if (typeof access.activationLabel === 'string') { activateAccess.textContent = access.activationLabel; }
 			browsePacks.disabled = access.canBrowse !== true;
+			websiteLink.disabled = browsePacks.disabled;
+			websiteLink.textContent = access.canBrowse ? 'More charms ↗' : 'Website — coming soon';
 			activateAccess.disabled = access.canActivate !== true;
 		}
 	}

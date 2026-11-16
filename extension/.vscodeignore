@@ -10,6 +10,7 @@ playwright.config.mjs
 .gitignore
 .yarnrc
 esbuild.js
+package-vsix.mjs
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs

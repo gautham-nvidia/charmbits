@@ -1,6 +1,6 @@
-# Charmlet website
+# CharmBits website
 
-The homepage shows where Charmlet hangs on Desktop and in VS Code, then demonstrates focus, encouragement, cheers and breaks. **`charms.html`** is the searchable **234-charm gallery**, with sixteen collections including 34 Music Icons. The free starter has 31 fixed picks; the shop shows additional free claims, small extras and the planned $7.49 launch / $17.49 regular Pro purchase. Email delivery and sales are off in the checked-in configuration.
+The homepage shows where CharmBits hangs on Desktop and in VS Code, then demonstrates focus, encouragement, cheers and breaks. **`charms.html`** is the searchable **261-charm gallery**, with eighteen collections including 34 Music Icons, 17 Sports Icons and 13 US skylines. VS Code features are free, with 31 starter charms and optional paid charms. Desktop retains its 30-day trial and the planned $7.49 launch / $17.49 regular Pro purchase. Email delivery and sales are off in the checked-in configuration.
 
 The site is static and uses the extension's locked build dependencies. It does not call an image-generation service. The [brand kit](../docs/charmlet-brand-kit.md) records the visual direction. The [current hosting and payment guide](../service/README.md) covers Cloudflare, Brevo, Lemon Squeezy and protected file delivery. Earlier Vercel and merchant comparisons remain background; merchandise is deferred.
 
@@ -17,11 +17,11 @@ The site is static and uses the extension's locked build dependencies. It does n
 | `site.css`, `site.js` | Shared styling, public product metadata and Reduced Motion-aware reveals |
 | `assets/fonts/` | Self-hosted Manrope and Bricolage Grotesque, with their font licences |
 | `demo.ts` | Shared app physics, live renderer and puzzle preview; bounded page-specific size/camera |
-| `trial-collections.mjs` | Sixteen current themed collections, ordered with the shared app helper |
+| `trial-collections.mjs` | Eighteen current themed collections, ordered with the shared app helper |
 | `launch.json`, `launch.mjs` | Validated public desktop/shop links; null means hidden |
 | `distribution.json`, `distribution.mjs` | Validated Marketplace/Open VSX links; null means unpublished |
 | `review.html`, `review.js`, `review.css` | Owner artwork review and version-labelled actual-app captures |
-| `art-review.json`, `art-curation.*` | 253 current/archived records and 210 featured designs |
+| `art-review.json`, `art-curation.*` | Current/archived artwork records and the validated featured selection |
 | `artist-artwork.json` | Bounded artist inventory, prompts and approved original pack/PNG hashes |
 | `art-review-jobs.mjs`, `art-review-revisions.json`, `art-refresh-jobs.json`, `art-collection-refresh.json` | Source briefs, revisions and additional collections |
 | `assets/review/`, `packs/review/` | Prepared PNG/WebP images and versioned data-only packs |

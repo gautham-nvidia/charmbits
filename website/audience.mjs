@@ -9,7 +9,7 @@ export function validateAudience(input) {
   if (input.contactEmail != null) {
     if (typeof input.contactEmail !== 'string' || input.contactEmail.length > 254
       || !/^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(input.contactEmail)) {
-      throw new Error('Use the public contact email address for Charmlet.');
+      throw new Error('Use the public contact email address for CharmBits.');
     }
     result.contactEmail = input.contactEmail;
   }
@@ -41,7 +41,7 @@ export async function setupAudience() {
       : 'Email signup is not open yet. This preview does not collect or send email.';
   }
   for (const node of document.querySelectorAll('[data-audience-contact]')) {
-    node.textContent = audience.contactEmail ?? 'The Charmlet contact address will appear here when signup opens.';
+    node.textContent = audience.contactEmail ?? 'The CharmBits contact address will appear here when signup opens.';
   }
   const dialog = document.querySelector('#signup-preview');
   const trigger = document.querySelector('#email-download');

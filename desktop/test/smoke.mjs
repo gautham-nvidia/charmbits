@@ -33,9 +33,9 @@ const mode = packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : '
 const arch = process.arch;
 const executablePath = packaged
   ? process.platform === 'win32'
-    ? join(bundleRoot, `Charmlet-win32-${arch}`, 'Charmlet.exe')
+    ? join(bundleRoot, `CharmBits-win32-${arch}`, 'CharmBits.exe')
     : process.platform === 'darwin'
-      ? join(bundleRoot, `Charmlet-darwin-${arch}`, 'Charmlet.app', 'Contents', 'MacOS', 'Charmlet')
+      ? join(bundleRoot, `CharmBits-darwin-${arch}`, 'CharmBits.app', 'Contents', 'MacOS', 'CharmBits')
       : (() => { throw new Error(`Packaged smoke supports only win32/darwin, not ${process.platform}.`); })()
   : require('electron');
 const launchArgs = packaged ? [] : [root];
@@ -89,6 +89,15 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       await window.locator('#stage[data-ready="true"][data-companion-ready="true"]').waitFor({ timeout: 30000 });
       const startup = await diagnostic(application);
       assert.equal(startup.measuredWindowState.alwaysOnTop, true, 'Every fresh desktop launch must be topmost.');
+      assert.equal(await application.evaluate(({ app }) => app.getName()), 'Charmlet', 'The profile and safe-storage identity stays compatible.');
+      if (process.platform === 'darwin') {
+        const menu = await application.evaluate(({ Menu }) => {
+          const applicationMenu = Menu.getApplicationMenu().items[0];
+          return { label: applicationMenu.label,
+            actions: applicationMenu.submenu.items.filter(item => ['about', 'quit'].includes(item.role)).map(item => item.label) };
+        });
+        assert.deepEqual(menu, { label: 'CharmBits', actions: ['About CharmBits', 'Quit CharmBits'] });
+      }
       await window.evaluate(() => {
         globalThis.__charmletTestEvents = [];
         const record = value => {
@@ -357,8 +366,8 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(window.locator('#charm')).not.toHaveClass(/dragging/);
 
   await openTools(window);
-  await window.getByRole('button', { name: 'Move Charmlet', exact: true }).press('Shift+ArrowRight');
-  await window.getByRole('button', { name: 'Move Charmlet', exact: true }).press('Shift+ArrowDown');
+  await window.getByRole('button', { name: 'Move CharmBits', exact: true }).press('Shift+ArrowRight');
+  await window.getByRole('button', { name: 'Move CharmBits', exact: true }).press('Shift+ArrowDown');
   await expect.poll(async () => (await diagnostic(application)).anchor).toEqual({ x: start.anchor.x + 20, y: start.anchor.y + 20 });
   const moved = (await diagnostic(application)).anchor;
   const anchorPath = join(profile, 'anchor', 'preferences.json');
@@ -420,7 +429,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await window.getByRole('button', { name: 'Resume', exact: true }).click();
   await expect.poll(() => JSON.parse(readFileSync(companionPath, 'utf8')).focus.status, { timeout: 5000 }).toBe('running');
 
-  await window.getByRole('button', { name: 'Hide Charmlet to tray', exact: true }).click();
+  await window.getByRole('button', { name: 'Hide CharmBits to tray', exact: true }).click();
   await expect.poll(async () => (await diagnostic(application)).visible, { timeout: 5000 }).toBe(false);
   await application.evaluate(({ powerMonitor }) => powerMonitor.emit('suspend'));
   await expect.poll(() => JSON.parse(readFileSync(companionPath, 'utf8')).focus.status, { timeout: 5000 }).toBe('paused');

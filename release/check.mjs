@@ -24,10 +24,11 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
   assert.match(manifest.version, /^\d+\.\d+\.\d+$/, 'Release version must be a stable three-part version.');
   if (expectedVersion) assert.equal(manifest.version, expectedVersion, 'Requested version differs from source.');
   assert.equal(manifest.name, 'charmlet');
+  assert.equal(manifest.displayName, 'CharmBits: Coding Charms');
   assert.equal(manifest.publisher, 'gautham-nvidia');
   assert.equal(manifest.pricing, 'Free', 'Core extension must remain free.');
-  assert.equal(manifest.bugs?.url, 'https://github.com/gautham-nvidia/charmlet/issues', 'Support route is missing.');
-  for (const key of ['name', 'publisher', 'version', 'pricing', 'license', 'description', 'homepage', 'bugs', 'keywords', 'categories', 'engines', 'icon', 'main', 'capabilities', 'contributes', 'dependencies']) {
+  assert.equal(manifest.bugs?.url, 'https://github.com/gautham-nvidia/charmbits/issues', 'Support route is missing.');
+  for (const key of ['name', 'displayName', 'publisher', 'version', 'pricing', 'license', 'description', 'homepage', 'bugs', 'keywords', 'categories', 'engines', 'icon', 'main', 'capabilities', 'contributes', 'dependencies']) {
     assert.deepEqual(packaged[key], manifest[key], `VSIX ${key} differs from source.`);
   }
   assert.deepEqual({ id: identity.Id, publisher: identity.Publisher, version: identity.Version },
@@ -41,7 +42,7 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
   if (catalogue.extensionDownload === './download.html') {
     assert.equal(siteVsix, null, 'The public website must not contain an installer that bypasses email verification.');
   } else {
-    assert.equal(catalogue.extensionDownload, './downloads/charmlet.vsix');
+    assert.equal(catalogue.extensionDownload, './downloads/charmbits.vsix');
     assert.ok(siteVsix?.equals(vsix), 'Website download differs from the reviewed VSIX.');
   }
   return { id: `${manifest.publisher}.${manifest.name}`, version: manifest.version, bytes: vsix.length, sha256: sha256(vsix), packagedFiles: files.size };
@@ -57,8 +58,18 @@ export function publicationBlockers({ manifest, files, target, environment = {} 
   if (!files.get('extension/artwork-license.md')?.length) {
     blockers.push('Approve the bundled artwork terms and add extension/ARTWORK-LICENSE.md.');
   }
-  if (['marketplace', 'both'].includes(target) && !environment.VSCE_PAT?.trim()) {
-    blockers.push('Configure VSCE_PAT for the owned gautham-nvidia Marketplace publisher.');
+  if (['marketplace', 'both'].includes(target)) {
+    const authentication = environment.CHARMLET_RELEASE_AUTH || 'pat';
+    if (authentication === 'oidc') {
+      if (environment.GITHUB_ACTIONS !== 'true' || !environment.ACTIONS_ID_TOKEN_REQUEST_URL?.trim()
+        || !environment.ACTIONS_ID_TOKEN_REQUEST_TOKEN?.trim()) {
+        blockers.push('Use GitHub Actions with id-token: write and a configured Marketplace Trusted Publishing policy.');
+      }
+    } else if (authentication !== 'pat') {
+      blockers.push('Choose pat or oidc for CHARMLET_RELEASE_AUTH.');
+    } else if (!environment.VSCE_PAT?.trim()) {
+      blockers.push('Configure VSCE_PAT for the owned gautham-nvidia Marketplace publisher, or use the trusted publishing workflow.');
+    }
   }
   if (['open-vsx', 'both'].includes(target) && !environment.OVSX_PAT?.trim()) {
     blockers.push('Configure OVSX_PAT for the owned gautham-nvidia Open VSX namespace.');
@@ -75,11 +86,11 @@ export async function checkRelease({ root = repo, target = 'artifact', expectedV
   const extension = join(root, 'extension');
   const manifest = JSON.parse(await readFile(join(extension, 'package.json'), 'utf8'));
   assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
-  const packagePath = join(extension, `charmlet-${manifest.version}.vsix`);
+  const packagePath = join(extension, `charmbits-${manifest.version}.vsix`);
   const [{ manifest: packaged, xmlManifest }, files, vsix, catalogue, siteVsix] = await Promise.all([
     readVSIXPackage(packagePath), readZip(packagePath, () => true), readFile(packagePath),
     readFile(join(root, 'website/dist/catalogue.json'), 'utf8').then(JSON.parse),
-    readFile(join(root, 'website/dist/downloads/charmlet.vsix')).catch(error => {
+    readFile(join(root, 'website/dist/downloads/charmbits.vsix')).catch(error => {
       if (error.code === 'ENOENT') return null;
       throw error;
     }),
@@ -108,7 +119,7 @@ export async function checkRelease({ root = repo, target = 'artifact', expectedV
   };
   await mkdir(join(root, 'release/dist'), { recursive: true });
   await writeFile(join(root, 'release/dist/release.json'), `${JSON.stringify(result, null, 2)}\n`);
-  await writeFile(join(root, 'release/dist/SHA256SUMS'), `${result.sha256}  charmlet-${manifest.version}.vsix\n`);
+  await writeFile(join(root, 'release/dist/SHA256SUMS'), `${result.sha256}  charmbits-${manifest.version}.vsix\n`);
   if (strict) {
     assert.equal(result.sourceDirty, false, 'Commit the reviewed release source before publication.');
     requirePublicationReady(options);

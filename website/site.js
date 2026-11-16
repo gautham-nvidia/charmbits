@@ -2,7 +2,7 @@ let cataloguePromise;
 
 export function loadCatalogue() {
   cataloguePromise ??= fetch(new URL('./catalogue.json', import.meta.url)).then(response => {
-    if (!response.ok) throw new Error('The Charmlet collection could not be loaded.');
+    if (!response.ok) throw new Error('The CharmBits collection could not be loaded.');
     return response.json();
   });
   return cataloguePromise;
@@ -18,11 +18,17 @@ export function element(tag, className = '', text = '') {
 export function applyProductMetadata(data) {
   for (const node of document.querySelectorAll('[data-charm-count]')) node.textContent = String(data.charms.length);
   for (const node of document.querySelectorAll('[data-collection-count]')) node.textContent = String(data.collections.length);
-  for (const node of document.querySelectorAll('[data-release-label]')) node.textContent = `Charmlet ${data.version} · Free starter, optional Pro`;
+  for (const node of document.querySelectorAll('[data-release-label]')) node.textContent = `CharmBits ${data.version} · Free for VS Code · Optional Desktop Pro`;
   for (const link of document.querySelectorAll('.extension-download')) {
-    link.href = data.extensionDownload;
-    if (data.extensionDownload.endsWith('.vsix')) link.download = `charmlet-${data.version}.vsix`;
+    const destination = data.distribution?.marketplace || data.extensionDownload;
+    link.href = destination;
+    if (destination.endsWith('.vsix')) link.download = `charmbits-${data.version}.vsix`;
     else link.removeAttribute('download');
+  }
+  if (data.distribution?.marketplace) {
+    for (const node of document.querySelectorAll('[data-free-install-note], [data-marketplace-status]')) {
+      node.textContent = 'Install the free extension directly from VS Code Marketplace. No CharmBits email signup or account is needed.';
+    }
   }
   const stores = document.querySelector('#store-links');
   if (stores) {

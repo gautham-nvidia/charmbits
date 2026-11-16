@@ -3,6 +3,13 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
+## 0.15.0 - Unreleased (CharmBits)
+
+- Renamed the app and its public website to CharmBits, keeping the Terminal logo and artwork.
+- Made the free VS Code offering explicit: all extension features stay free, with optional paid charms. Desktop keeps its existing 30-day trial and Pro rules.
+- Retained extension, desktop storage and activation identities so settings, photos, packs, progress and purchases carry forward.
+- Updated download names and Marketplace copy; publication still requires publisher access and approved source/artwork terms.
+
 ## 0.14.0 - Unreleased (Sports Icons and tech-city collection)
 
 - Added 17 Sports Icons to the Pro collection, including Dhoni, Tendulkar, Curry, Hamilton, Federer, Nadal and Phelps. Sports Icons are not sold individually; artwork remains subject to publication review.

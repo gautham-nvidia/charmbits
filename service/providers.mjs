@@ -13,12 +13,12 @@ export function createProviders(env, fetcher = fetch) {
     async email(to, link, offers, purpose) {
       await providerJson('https://api.brevo.com/v3/smtp/email', {
         method: 'POST', headers: brevoHeaders,
-        body: JSON.stringify({ sender: { name: 'Charmlet', email: env.MAIL_FROM }, to: [{ email: to }],
-          subject: offers ? 'Confirm your Charmlet email and offers' : 'Your Charmlet download link',
-          textContent: `Confirm your email to continue with Charmlet:\n\n${link}\n\n`
+        body: JSON.stringify({ sender: { name: 'CharmBits', email: env.MAIL_FROM }, to: [{ email: to }],
+          subject: offers ? 'Confirm your CharmBits email and offers' : 'Your CharmBits download link',
+          textContent: `Confirm your email to continue with CharmBits:\n\n${link}\n\n`
             + 'This link expires in 15 minutes and works once. No username or password is needed.\n'
             + (purpose === 'trial' ? 'Confirming starts your one-time 30-day Pro trial, unless this email has already used it. No card or automatic charge.\n' : '')
-            + (offers ? 'You chose occasional Charmlet news and offer codes. Confirming this link confirms that choice. You can unsubscribe from every marketing email.\n'
+            + (offers ? 'You chose occasional CharmBits news and offer codes. Confirming this link confirms that choice. You can unsubscribe from every marketing email.\n'
               : 'This download request does not subscribe you to marketing.\n')
             + 'If you did not request this email, you can ignore it.' }),
       }, fetcher);
@@ -59,8 +59,8 @@ export function createProviders(env, fetcher = fetch) {
           custom_price: cart.amount,
           product_options: { enabled_variants: [Number(cart.variantId)],
             redirect_url: `${env.WEB_ORIGIN}/download.html?checkout=complete`,
-            description: cart.kind === 'pro' ? 'Charmlet Pro: all current apps, one permanent purchase.'
-              : `${cart.items.length} Charmlet digital item${cart.items.length === 1 ? '' : 's'}.` },
+            description: cart.kind === 'pro' ? 'CharmBits Pro: desktop and the full charm collection, one permanent purchase.'
+              : `${cart.items.length} CharmBits digital item${cart.items.length === 1 ? '' : 's'}.` },
           checkout_data: { custom: { charmlet_cart: cart.id } },
           checkout_options: { discount: cart.kind === 'pro' },
           expires_at: new Date(cart.createdAt + 30 * 60000).toISOString(),

@@ -179,8 +179,8 @@ await build({
   format: 'iife', outfile: join(dist, 'studio', 'studio.js'),
   minify: true, sourcemap: false, target: ['es2022'],
 });
-const vsix = `charmlet-${manifest.version}.vsix`;
-if (privateReview) await copyFile(join(repo, 'extension', vsix), join(dist, 'downloads', 'charmlet.vsix'));
+const vsix = `charmbits-${manifest.version}.vsix`;
+if (privateReview) await copyFile(join(repo, 'extension', vsix), join(dist, 'downloads', 'charmbits.vsix'));
 const charms = [
   ...ORIGINAL_CHARMS.map(item => ({ ...item, kind: 'included', preview: `./assets/default/${item.file}` })),
   ...[...LIVE_CHARMS, ...FIDGET_CHARMS].map(item => ({ ...item, kind: 'extra', live: true, includedInTrial: true,
@@ -264,9 +264,9 @@ const collections = currentWorlds.map(world => ({ ...world, charmIds: orderedCha
   .filter(charm => charm.collectionId === world.id).map(charm => charm.id) }));
 if (!trial.length || charms.length !== ORIGINAL_CHARMS.length + trial.length + LIVE_CHARMS.length + FIDGET_CHARMS.length) throw new Error('The complete trial must appear in the gallery.');
 await writeFile(join(dist, 'catalogue.json'), `${JSON.stringify({ version: manifest.version,
-  extensionDownload: privateReview ? './downloads/charmlet.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews,
+  extensionDownload: privateReview ? './downloads/charmbits.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews,
   sportsWishlist: collectionConfig.sportsWishlist }, null, 2)}\n`, 'utf8');
-console.log(`Built Charmlet gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included, ${review?.featured ?? 0} selected review designs.`);
+console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included, ${review?.featured ?? 0} selected review designs.`);
 const { publicData } = await buildCommerceCatalogue();
 await writeFile(join(dist, 'commerce-public.json'), `${JSON.stringify(publicData, null, 2)}\n`);
 await writeFile(join(dist, '_headers'), `/*\n${Object.entries(securityHeaders(publicData.apiOrigin)).map(([name, value]) => `  ${name}: ${value}`).join('\n')}\n`);

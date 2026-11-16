@@ -1,6 +1,6 @@
-# Charmlet Photo Studio preparation
+# CharmBits Photo Studio preparation
 
-Photo Studio is an optional gated website service for creating a personal data-only Charmlet pack. It is **Coming Soon and unavailable by default**. The extension, desktop app, importer and existing gallery remain free.
+Photo Studio is an optional gated website service for creating a personal data-only CharmBits pack. It is **Coming Soon and unavailable by default**. All VS Code features, including local photo tools and the importer, are free; extra charms are optional purchases. Desktop retains its starter, 30-day trial and Pro rules. Legacy exported pack metadata and the `.charmlet.json` format remain compatible.
 
 ## Hosting boundary
 

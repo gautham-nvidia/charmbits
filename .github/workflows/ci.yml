@@ -146,14 +146,14 @@ jobs:
       - name: Retain installable prototype
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: charmlet-${{ matrix.label }}-vscode-${{ matrix.vscode }}-${{ github.sha }}
+          name: charmbits-${{ matrix.label }}-vscode-${{ matrix.vscode }}-${{ github.sha }}
           path: extension/*.vsix
           if-no-files-found: error
           retention-days: 14
       - name: Retain companion gallery
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: charmlet-gallery-${{ matrix.label }}-vscode-${{ matrix.vscode }}-${{ github.sha }}
+          name: charmbits-gallery-${{ matrix.label }}-vscode-${{ matrix.vscode }}-${{ github.sha }}
           path: website/dist/
           if-no-files-found: error
           retention-days: 14

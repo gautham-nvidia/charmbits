@@ -99,7 +99,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 	writeFileSync(join(storage, 'preferences.json'),
 		JSON.stringify({ ...DEFAULT_STATE, editionVersion: undefined }));
 	const scratchFile = join(profile, 'charmlet-trial.ts');
-	writeFileSync(scratchFile, "export const greeting = 'Hello, Charmlet!';\n");
+	writeFileSync(scratchFile, "export const greeting = 'Hello, CharmBits!';\n");
 	const environment: Record<string, string> = {};
 	for (const [key, value] of Object.entries(process.env)) {
 		if (value !== undefined && key !== 'ELECTRON_RUN_AS_NODE') {
@@ -148,14 +148,14 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 		writeFileSync(testInfo.outputPath('editor-window.json'), `${JSON.stringify(windowGeometry, null, 2)}\n`);
 		await window.waitForLoadState('domcontentloaded');
 		await expect(window.locator('.monaco-workbench')).toBeVisible({ timeout: 30000 });
-		await expect(window.locator('.part.editor .view-lines').first()).toContainText('Hello, Charmlet!', { timeout: 30000 });
-		await expect(window.locator('.part.activitybar a.action-label[aria-label="Charmlet"]')).toBeVisible({ timeout: 30000 });
+		await expect(window.locator('.part.editor .view-lines').first()).toContainText('Hello, CharmBits!', { timeout: 30000 });
+		await expect(window.locator('.part.activitybar a.action-label[aria-label="CharmBits"]')).toBeVisible({ timeout: 30000 });
 		await window.keyboard.press(`${primaryModifier}+Shift+P`);
 		const input = commandInput(window);
 		await expect(input).toBeVisible();
 		await input.fill('>');
-		await input.pressSequentially('Charmlet: Show Charm', { delay: 30 });
-		await expect(window.locator('.quick-input-list')).toContainText('Charmlet: Show Charm', { timeout: 15000 });
+		await input.pressSequentially('CharmBits: Show Charm', { delay: 30 });
+		await expect(window.locator('.quick-input-list')).toContainText('CharmBits: Show Charm', { timeout: 15000 });
 		await window.keyboard.press('Enter');
 		await expect.poll(() => window.frames().map(frame => frame.url()).join('\n'), { timeout: 30000 })
 			.toContain('vscode-webview');
@@ -168,15 +168,15 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 		await input.pressSequentially('View: Move View', { delay: 30 });
 		await expect(window.locator('.quick-input-list')).toContainText('View: Move View');
 		await window.locator('.quick-input-list').getByText('View: Move View', { exact: true }).click();
-		await input.fill('Charmlet');
-		await expect(window.locator('.quick-input-list')).toContainText('Charmlet');
-		await window.locator('.quick-input-list .monaco-list-row').filter({ has: window.getByText('Charmlet', { exact: true }) }).click();
+		await input.fill('CharmBits');
+		await expect(window.locator('.quick-input-list')).toContainText('CharmBits');
+		await window.locator('.quick-input-list .monaco-list-row').filter({ has: window.getByText('CharmBits', { exact: true }) }).click();
 		await input.fill('New Secondary Side Bar');
 		await expect(window.locator('.quick-input-list')).toContainText('New Secondary Side Bar');
 		await window.keyboard.press('Enter');
 		await expect(window.locator('.quick-input-widget')).toBeHidden();
 		let frame = await readyFrame(window);
-		await expect(window.locator('.part.auxiliarybar a.action-label[aria-label="Charmlet"]')).toBeVisible();
+		await expect(window.locator('.part.auxiliarybar a.action-label[aria-label="CharmBits"]')).toBeVisible();
 		await expect.poll(() => frame.locator('#stage').evaluate(stage => stage.clientHeight)).toBeGreaterThan(350);
 		await menuAction(frame, 'reset');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '126');
@@ -225,7 +225,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 		await frame.locator('#charm').click();
 		await browserFrames(window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		await expect(window.locator('.part.editor .monaco-editor.focused')).toBeVisible();
 		await window.keyboard.press(endOfDocument);
 		await window.keyboard.press('Enter');
@@ -363,7 +363,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			expect(JSON.parse(readFileSync(preferencesPath, 'utf8')).charmId).toBe(lastCharm.id);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '146');
 			await expect(frame.locator('#motion')).toHaveAttribute('aria-checked', 'false');
-			await command(window, 'Charmlet: Reset Charm');
+			await command(window, 'CharmBits: Reset Charm');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', lastCharm.id);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '126');
 			await menuAction(frame, 'toggle');
@@ -816,7 +816,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 				dialog.showOpenDialog = (() => Promise.resolve({ canceled: false, filePaths: [path] })) as typeof dialog.showOpenDialog;
 			}, selectedPack);
 			try {
-				await command(window, 'Charmlet: Import Charm Pack');
+				await command(window, 'CharmBits: Import Charm Pack');
 				await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'pack:probe-card:probe-card');
 			} finally {
 				await app.evaluate(({ dialog }) => {
@@ -856,7 +856,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			await expect(frame.locator('#charm-image')).toHaveAttribute('src', /^data:image\/png;base64,/);
 			await expect.poll(() => frame.locator('#charm-image').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(288);
 			await window.screenshot({ path: testInfo.outputPath('imported-probe-card.png') });
-			await command(window, 'Charmlet: Remove Charm Pack');
+			await command(window, 'CharmBits: Remove Charm Pack');
 			await window.locator('.quick-input-list').getByText('Probe Card', { exact: true }).click();
 			await expect(frame.locator('#charm-select option')).toHaveCount(betaCatalogue.length);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');

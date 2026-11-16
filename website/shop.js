@@ -52,7 +52,7 @@ function render() {
     const card = element('article', 'store-card'), image = element('img');
     image.src = product.preview; image.alt = ''; image.width = 144; image.height = 168; image.loading = 'lazy';
     card.append(image, element('span', 'store-category', product.collection), element('h3', '', product.name));
-    const label = product.proOnly ? 'Included with Charmlet Pro' : product.review ? 'Artwork study'
+    const label = product.proOnly ? 'Included with CharmBits Pro' : product.review ? 'Artwork study'
       : product.starter ? 'In your free starter' : formatPrice(product.priceCents);
     card.append(element('p', 'store-price', label));
     if (product.review) card.append(element('p', 'store-caption', 'A concept study. Public distribution and sale are not open.'));

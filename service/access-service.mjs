@@ -82,7 +82,7 @@ export function createAccessService(env, catalogue, dependencies = {}) {
   }
 
   async function startEmail(request) {
-    if (request.headers.get('origin') !== config.origin) throw new HttpError(403, 'Open the Charmlet website to continue.');
+    if (request.headers.get('origin') !== config.origin) throw new HttpError(403, 'Open the CharmBits website to continue.');
     const data = await readJson(request), email = emailAddress(data.email);
     if (!['download', 'trial'].includes(data.purpose) || typeof data.offers !== 'boolean') {
       throw new HttpError(400, 'Choose a download or trial request.');

@@ -31,10 +31,12 @@ assert.deepEqual(validateDistribution({ marketplace, openVsx }, manifest), { mar
 assert.throws(() => validateDistribution({ marketplace: marketplace.replace('https:', 'http:'), openVsx: null }, manifest));
 assert.throws(() => validateDistribution({ marketplace: marketplace.replace(manifest.publisher, 'other'), openVsx: null }, manifest));
 const desktop = {
-  windows: 'https://github.com/gautham-nvidia/charmlet/releases/download/trial-0.12.0/Charmlet-desktop-0.9.0-win32-x64.zip',
-  macos: 'https://github.com/gautham-nvidia/charmlet/releases/download/trial-0.12.0/Charmlet-desktop-0.9.0-darwin-arm64.tar.gz',
+  windows: 'https://github.com/gautham-nvidia/charmbits/releases/download/trial-0.15.0/CharmBits-desktop-0.12.0-win32-x64.zip',
+  macos: 'https://github.com/gautham-nvidia/charmbits/releases/download/trial-0.15.0/CharmBits-desktop-0.12.0-darwin-arm64.tar.gz',
 };
 const enabled = validateLaunch({ desktop, shop: { provider: 'shopify', url: 'https://charmlet-test.myshopify.com/' } });
+const legacyWindows = 'https://github.com/gautham-nvidia/charmlet/releases/download/trial-0.12.0/Charmlet-desktop-0.9.0-win32-x64.zip';
+assert.equal(validateLaunch({ desktop: { windows: legacyWindows } }).desktop.windows, legacyWindows);
 assert.deepEqual(validateLaunch({ desktop: {}, shop: null }), { desktop: { windows: null, macos: null }, shop: null });
 assert.throws(() => validateLaunch({ desktop: { windows: desktop.windows.replace('github.com', 'github.com.invalid') } }));
 assert.throws(() => validateLaunch({ desktop: { macos: desktop.windows } }));
@@ -332,7 +334,7 @@ try {
   await page.goto(new URL('shop.html', base).href, { waitUntil: 'networkidle' });
   await page.locator('#store-collection').selectOption('Sports Icons');
   await expect(page.locator('.store-card')).toHaveCount(17);
-  await expect(page.locator('.store-price')).toHaveText(Array(17).fill('Included with Charmlet Pro'));
+  await expect(page.locator('.store-price')).toHaveText(Array(17).fill('Included with CharmBits Pro'));
   await expect(page.locator('.store-card button')).toHaveCount(0);
   await page.locator('#store-price').selectOption('0');
   await expect(page.locator('.store-card')).toHaveCount(0);
@@ -451,7 +453,7 @@ try {
   assert.equal(await page.evaluate(() => JSON.stringify(localStorage).includes('offers@charmlet.test')), false);
   assert.equal(calls.some(call => call.path === 'trial/start'), false);
   await page.goto(new URL(`download.html#verify=${proof}`, base).href, { waitUntil: 'networkidle' });
-  await expect(page.locator('#download-status')).toContainText('subscribed to Charmlet');
+  await expect(page.locator('#download-status')).toContainText('subscribed to CharmBits');
   await expect(page.locator('#edition-detail')).toContainText('trial has not started');
   await page.locator('#close-downloads').click();
   await page.goto(new URL('download.html?checkout=1', base).href, { waitUntil: 'networkidle' });
@@ -466,7 +468,7 @@ try {
   await expect(page.locator('#continue-checkout')).toBeEnabled();
   assert.equal(calls.filter(call => call.path === 'library').length, 0, 'Entering from a basket must not poll for a payment');
   await page.locator('#start-trial').click();
-  await expect(page.locator('#edition-name')).toContainText('30-day Pro trial');
+  await expect(page.locator('#edition-name')).toContainText('30-day Desktop Pro trial');
   await expect(page.locator('#start-trial')).toBeHidden();
   const [activation] = await Promise.all([page.waitForEvent('download'), page.locator('#save-access').click()]);
   const activationPath = join(output, 'fixture-access.charmlet.json');
@@ -492,19 +494,31 @@ try {
   await page.goto(new URL('download.html?checkout=complete', base).href, { waitUntil: 'networkidle' });
   await expect(page.locator('#continue-checkout')).toBeDisabled();
   paid = true;
-  await expect(page.locator('#edition-name')).toContainText('Charmlet Pro', { timeout: 12000 });
+  await expect(page.locator('#edition-name')).toContainText('CharmBits Pro', { timeout: 12000 });
   await expect(page.locator('#checkout-section')).toBeHidden();
   assert.equal(calls.filter(call => call.path === 'checkout').length, 1);
   assert.equal(await page.evaluate(() => localStorage.getItem('charmlet-basket-v1')), '[]');
   await page.locator('#close-downloads').click();
   await expect(page.locator('#confirm-email')).toBeVisible();
   assert.equal(await page.evaluate(() => sessionStorage.getItem('charmlet-download-session-v1')), null);
+  // A published free extension goes directly to the store, without the email portal.
+  await page.route('**/catalogue.json', route => route.fulfill({
+    json: { ...data, distribution: { marketplace, openVsx: null } },
+  }));
+  await page.route('https://marketplace.visualstudio.com/**', route => route.fulfill({
+    contentType: 'text/html', body: '<title>Isolated Marketplace fixture</title><link rel="icon" href="data:,">',
+  }));
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await expect(page.locator('#email-download')).toContainText('Install free from Marketplace');
+  await expect(page.locator('[data-free-install-note]')).toContainText('No CharmBits email signup');
+  await page.locator('#email-download').click();
+  await expect(page).toHaveURL(marketplace);
   assert.deepEqual(errors, []);
   const result = { version: manifest.version, charms: 261, artists: 34, athletes: 17, skylines: 13, collections: 18,
     desktop: true, mobileWidths: [390, 320, 768], liveCompanions: 15, puzzleBoards: 3,
     publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,
-    popupDismissal: true, compactAutoTheme: true, consoleErrors: errors };
+    popupDismissal: true, compactAutoTheme: true, marketplaceDirectInstall: true, consoleErrors: errors };
   await writeFile(join(output, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);
   console.log(JSON.stringify(result));
 } finally { await browser.close(); }

@@ -11,7 +11,7 @@ const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const release = join(root, 'release', manifest.version);
 const paths = await packager({
   dir: root,
-  name: 'Charmlet',
+  name: 'CharmBits',
   appVersion: manifest.version,
   appBundleId: 'dev.charmlet.desktop',
   platform: process.platform,

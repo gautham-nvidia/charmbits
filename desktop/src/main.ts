@@ -28,6 +28,7 @@ import { DESKTOP_HEADER, matchesDesktopView, MESSAGES_HEIGHT, restoreDesktopView
 protocol.registerSchemesAsPrivileged([{
 	scheme: 'charmlet', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: false },
 }]);
+// Compatibility identity: existing profiles and macOS safeStorage keys depend on this name.
 app.setName('Charmlet');
 const ownedProfile = process.env.CHARMLET_DESKTOP_PROFILE;
 if (ownedProfile) { app.setPath('userData', resolve(ownedProfile)); }
@@ -84,7 +85,7 @@ function updateTrayStatus() {
 	const focus = snapshot?.state.focus;
 	const focusText = focus && focus.status !== 'idle'
 		? `${focus.phase === 'focus' ? 'Focus' : 'Break'} ${focus.status} · ${formatFocusTime(snapshot!.remainingMs)}` : undefined;
-	tray.setToolTip(backgroundNotice ? `Charmlet · ${backgroundNotice}` : reminder ? `Charmlet · ${reminder}` : focusText ? `Charmlet · ${focusText}` : 'Charmlet desktop beta');
+	tray.setToolTip(backgroundNotice ? `CharmBits · ${backgroundNotice}` : reminder ? `CharmBits · ${reminder}` : focusText ? `CharmBits · ${focusText}` : 'CharmBits desktop');
 	if (process.platform === 'darwin') { tray.setTitle(reminder || backgroundNotice ? '•' : ''); }
 }
 function latchBackgroundNotice(message: string) {
@@ -270,11 +271,11 @@ function runExplicitAction(title: string, action: () => Promise<void>) {
 async function importPack() {
 	if (!mainWindow) { return; }
 	const selection = await dialog.showOpenDialog(mainWindow, {
-		properties: ['openFile'], filters: [{ name: 'Charmlet Pack', extensions: ['json'] }], buttonLabel: 'Import Charm Pack',
+		properties: ['openFile'], filters: [{ name: 'CharmBits Pack', extensions: ['json'] }], buttonLabel: 'Import Charm Pack',
 	});
 	if (!selection.filePaths[0]) { return; }
 	const info = await lstat(selection.filePaths[0]);
-	if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_PACK_BYTES) { throw new Error('Choose a bounded regular Charmlet pack file.'); }
+	if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_PACK_BYTES) { throw new Error('Choose a bounded regular CharmBits pack file.'); }
 	const bytes = await readFile(selection.filePaths[0]);
 	if (await access!.importDocument(bytes)) {
 		await saveCatalogue();
@@ -349,7 +350,7 @@ async function handleAction(event: IpcMainEvent, message: unknown) {
 			sendForGeneration(generation, { type: 'photo-result', requestId });
 		} catch {
 			sendForGeneration(generation, { type: 'photo-result', requestId,
-				error: 'Charmlet could not finish saving or removing the keepsake. Try again. Your original photo is unchanged.' });
+				error: 'CharmBits could not finish saving or removing the keepsake. Try again. Your original photo is unchanged.' });
 		}
 	} else if (value.type === 'companion-action' && Number.isSafeInteger(value.requestId) && Number(value.requestId) >= 0) {
 		const requestId = Number(value.requestId);
@@ -367,7 +368,7 @@ async function handleAction(event: IpcMainEvent, message: unknown) {
 			if (!selected) { throw new Error('Flower not owned.'); }
 			await saveCatalogue(selected.id, generation);
 			sendForGeneration(generation, { type: 'companion-result', requestId });
-		} catch { sendForGeneration(generation, { type: 'companion-result', requestId, error: 'Charmlet could not hang that flower.' }); }
+		} catch { sendForGeneration(generation, { type: 'companion-result', requestId, error: 'CharmBits could not hang that flower.' }); }
 	} else if (value.type === 'learning-source' && typeof value.cardId === 'string') {
 		const card = learningCard(value.cardId);
 		if (card?.source) { await shell.openExternal(card.source.url); }
@@ -436,7 +437,9 @@ function createTray() {
 	if (process.platform === 'darwin') {
 		app.dock?.setIcon(nativeImage.createFromPath(join(root, 'media', 'marketplace-icon.png')));
 		Menu.setApplicationMenu(Menu.buildFromTemplate([
-			{ label: 'Charmlet', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'quit' }] },
+			{ label: 'CharmBits', submenu: [
+				{ role: 'about', label: 'About CharmBits' }, { type: 'separator' }, { role: 'quit', label: 'Quit CharmBits' },
+			] },
 			{ label: 'Edit', submenu: [
 				{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' },
 			] },
@@ -469,11 +472,12 @@ async function failInitialization(error: unknown) {
 	await Promise.allSettled([companion?.dispose(), preferenceWriter?.flush(), placementWriter?.flush(), desktopViewWriter?.flush()].filter((value): value is Promise<void> => value !== undefined));
 	tray?.destroy();
 	if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.destroy(); }
-	dialog.showErrorBox('Charmlet could not start', error instanceof Error ? error.message : 'Unknown startup error.');
+	dialog.showErrorBox('CharmBits could not start', error instanceof Error ? error.message : 'Unknown startup error.');
 	app.quit();
 }
 
 async function initialize() {
+	app.setAboutPanelOptions({ applicationName: 'CharmBits' });
 	await registerResources();
 	const loadedPacks = await loadPacks(join(profile, 'packs'));
 	packs = loadedPacks.packs;
@@ -482,7 +486,7 @@ async function initialize() {
 	const vault = new StateStore<{ encryptedTokens: string }>(join(profile, 'license-vault'));
 	const secureStorage = () => safeStorage.isEncryptionAvailable()
 		&& !(process.platform === 'linux' && safeStorage.getSelectedStorageBackend() === 'basic_text');
-	access = new AccessController({ directory: profile, secrets: {
+	access = new AccessController({ application: 'desktop', directory: profile, secrets: {
 		get: async () => {
 			const saved = await vault.load(undefined);
 			if (saved.error) { throw new Error('Saved activation could not be read.'); }
@@ -528,7 +532,7 @@ async function initialize() {
 	desktopViewWriter = new StateWriter(value => viewStore.write(value), () => viewStore.read(), matchesDesktopView);
 	const bounds = currentGeometry().bounds;
 	mainWindow = new BrowserWindow({
-		...bounds, title: 'Charmlet', frame: false, transparent: true, backgroundColor: '#00000000',
+		...bounds, title: 'CharmBits', frame: false, transparent: true, backgroundColor: '#00000000',
 		resizable: false, thickFrame: false, alwaysOnTop: true, skipTaskbar: true, focusable: false, show: false,
 		webPreferences: { preload: join(root, 'preload.cjs'), ...securityPreferences },
 	});

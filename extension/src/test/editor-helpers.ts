@@ -50,7 +50,7 @@ export async function readyFrame(window: Page, excluded: ReadonlySet<Frame> = ne
 		return false;
 	}, { timeout: 30000 }).toBe(true);
 	if (!result) {
-		throw new Error('Charmlet did not create a ready webview.');
+		throw new Error('CharmBits did not create a ready webview.');
 	}
 	return result;
 }

@@ -1,32 +1,32 @@
-# Charmlet: Coding Charms
+# CharmBits: Coding Charms
 
-Start with 31 free charms, interactive fidgets and puzzles, local photo keepsakes, small wins, free Focus/Learn tools, a gentle garden and optional reminders. The current catalogue contains 261 designs; existing beta profiles retain their beta access with free replacements for three retired designs.
+All VS Code extension features are free: focus sessions, a garden, encouragement, small wins, photo keepsakes, imports and playful breaks. Start with 31 included charms; extra paid charms are optional. The current catalogue contains 261 designs; existing beta profiles retain their beta access with free replacements for three retired designs.
 The default Hanging layout saves headroom; Orbit layout reserves room for full loops.
 
-**Free starter / Pro candidate, version 0.14.0.** Charmlet lives in a dockable VS Code view, not over your code
+**CharmBits candidate, version 0.15.0.** CharmBits lives in a dockable VS Code view, not over your code
 or desktop. It uses supported APIs and does not modify your VS Code installation.
 It also works in Restricted Mode without asking you to trust workspace code.
 
-The email-only 30-day trial and optional Pro/individual purchases are implemented but not connected to live provider accounts. Pro is planned at **$7.49 launch / $17.49 regular, once**, across the current apps. Public activation keys and service addresses must be configured before those features open. [Setup and delivery details](https://github.com/gautham-nvidia/charmlet/blob/main/service/README.md).
+The free extension works without an account or an expiring app trial. Optional charm purchases are implemented but not connected to live provider accounts. Desktop retains its 30-day trial and Pro rules; **CharmBits Pro is planned at $7.49 launch / $17.49 regular, once**, with a full charm collection that also works in VS Code. Public activation keys and service addresses must be configured before paid charm access opens. [Setup and delivery details](https://github.com/gautham-nvidia/charmbits/blob/main/service/README.md).
 
-<img src="https://raw.githubusercontent.com/gautham-nvidia/charmlet/main/docs/store-assets/navigation.png" width="240" alt="Charmlet main view, motivation and direct navigation"> <img src="https://raw.githubusercontent.com/gautham-nvidia/charmlet/main/docs/store-assets/picker.png" width="240" alt="Search the included trial collection">
+<img src="https://raw.githubusercontent.com/gautham-nvidia/charmbits/main/docs/store-assets/navigation.png" width="240" alt="CharmBits main view, motivation and direct navigation"> <img src="https://raw.githubusercontent.com/gautham-nvidia/charmbits/main/docs/store-assets/picker.png" width="240" alt="Search your available charm collection">
 
 ## Try it
 
 Install a development VSIX through **Extensions: Install from VSIX...**, or follow the
-[source setup](https://github.com/gautham-nvidia/charmlet#readme).
+[source setup](https://github.com/gautham-nvidia/charmbits#readme).
 
-Charmlet has its own Activity Bar container titled **Charmlet**. You can move it to the right sidebar using VS Code's view controls.
+CharmBits has its own Activity Bar container titled **CharmBits**. You can move it to the right sidebar using VS Code's view controls.
 
-1. Open the Command Palette and run **Charmlet: Show Charm**.
-2. For a right-side dock, run **View: Move View**, select **Charmlet**, then **New Secondary Side Bar Entry**.
+1. Open the Command Palette and run **CharmBits: Show Charm**.
+2. For a right-side dock, run **View: Move View**, select **CharmBits**, then **New Secondary Side Bar Entry**.
 3. Click any charm for a brief wiggle, or use Space/Enter. Cali adds a head tilt, wink, double take or victory shimmy. Pull downward and release for a rebound and smaller settling bounces; Reduced Motion returns directly to rest. Pull straight upward toward the peg to retract, then use the restore arrow to bring it back.
 4. Click **Charms** to open the visual picker, search by name and filter installed collections. Choose **Settings → Appearance** for size, resting cord, visibility, motion and layout. The default 100% is 15% larger than earlier trials; adjust from 60% to 200% in 5% steps. Narrow views fit the charm to the available space.
 5. Switch to **Orbit layout** for a full loop around the fixed peg; Hanging layout keeps a compact top peg and pull room.
-6. Click **Focus** or run **Charmlet: Focus Session** for a focus/break timer with presets, custom minutes, pause/resume/stop and an optional intention.
+6. Click **Focus** or run **CharmBits: Focus Session** for a focus/break timer with presets, custom minutes, pause/resume/stop and an optional intention.
 7. Motivation is the fresh-state default, without a category heading. **Settings → Messages** offers Motivation, Facts + trivia, Facts or Trivia. Existing saved feed choices are preserved.
-8. Click **Garden**, then **Plant a seed**, or run **Charmlet: Open Garden**. Water once per local day and earn an original flower after eleven valid waterings. Optional water/move schedules live under **Settings → Reminders**.
-9. Run **Charmlet: Import Charm Pack** for a free downloaded `.charmlet.json`; remove imported packs with **Charmlet: Remove Charm Pack**.
+8. Click **Garden**, then **Plant a seed**, or run **CharmBits: Open Garden**. Water once per local day and earn an original flower after eleven valid waterings. Optional water/move schedules live under **Settings → Reminders**.
+9. Run **CharmBits: Import Charm Pack** for a downloaded `.charmlet.json`; remove imported packs with **CharmBits: Remove Charm Pack**.
 
 The trial includes 236 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **261 charms** in all. Open **Charms** to search the themed packs. Terminal is first, followed by Live 3D, Stress Busters, Music and Music Icons; no separate imports are needed. Music Icons includes all 34 artist studies, with Travis Scott, legends and twelve women. Existing imports keep their saved IDs and exact artwork without duplicate bundled figures.
 
@@ -84,7 +84,7 @@ The ten original SVGs are preserved, including the original Terminal:
 | Settings → Appearance or Messages | Change appearance or feed preferences; Escape closes the panel and returns focus |
 | Import / Remove Charm Pack | Add or remove validated static-PNG data packs |
 | Reset arrow | Restore default size/cord and reveal the selected charm; keep its selection and the motion preference |
-| Status bar Charmlet item | Toggle or reveal the charm view |
+| Status bar CharmBits item | Toggle or reveal the charm view |
 
 With the charm keyboard-focused: Enter/Space nudges, Left/Right swings, Up/Down adjusts the cord,
 and Escape hides. System reduced-motion preferences override the animation switch.
@@ -116,11 +116,16 @@ The Stress Ball and Squishy Star review charms squeeze when held with the pointe
 
 ## Free and local
 
-The complete trial collection and every functional control are free in this build. The final artwork
-lineup and any optional paid downloads remain undecided; the app's core tools remain free. They work
-offline without login, runtime AI, network APIs, telemetry, payments or audio. Optional imported packs
-contain validated static PNG data and do not add executable code. [Artwork provenance](https://github.com/gautham-nvidia/charmlet/blob/main/extension/ARTWORK.md)
+All extension features and the 31 starter charms are free. Other charms are optional purchases;
+Desktop Pro includes the full charm collection. Core tools work offline without login, runtime AI,
+telemetry or audio. Imported signed access may refresh with the configured service, as described in
+the privacy notice. Optional imported packs contain validated static PNG data and do not add executable code.
+[Artwork provenance](https://github.com/gautham-nvidia/charmbits/blob/main/extension/ARTWORK.md)
 records asset origins, while the project source/art license remains pending and separate from price.
+
+Existing installations keep the `gautham-nvidia.charmlet` extension identity and their saved settings,
+photos, imported packs and progress. The `.charmlet.json` pack format and command IDs remain compatible;
+the visible name is CharmBits.
 
 ## Current limits
 
@@ -136,14 +141,14 @@ records asset origins, while the project source/art license remains pending and 
 
 ## Project and feedback
 
-[Privacy and local data](PRIVACY.md) describes saved preferences, focus notes, imported packs and data removal. Charmlet does not send workspace code or progress to a server.
+[Privacy and local data](PRIVACY.md) describes saved preferences, focus notes, imported packs and data removal. CharmBits does not send workspace code or progress to a server.
 
-[Report an issue](https://github.com/gautham-nvidia/charmlet/issues) with your OS/editor version,
+[Report an issue](https://github.com/gautham-nvidia/charmbits/issues) with your OS/editor version,
 steps to reproduce and expected behavior. Avoid including private code or credentials in screenshots.
 
-[Project log](https://github.com/gautham-nvidia/charmlet/blob/main/PROJECT_LOG.md) records dated
+[Project log](https://github.com/gautham-nvidia/charmbits/blob/main/PROJECT_LOG.md) records dated
 decisions and validation; [CHANGELOG.md](CHANGELOG.md) records behavior changes.
 
-Independent personal project; no NVIDIA sponsorship or endorsement. Charmlet's own source/art
+Independent personal project; no NVIDIA sponsorship or endorsement. CharmBits' own source/art
 license is not yet selected; a public repository is not automatically a reuse license. Bundled
 dependencies retain their licenses in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

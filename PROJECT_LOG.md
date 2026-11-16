@@ -610,3 +610,11 @@ The approved website now has a single Auto/Light/Dark control and a dismissible,
 Local testing found and corrected a thin-silhouette attachment issue. The review inventory remains bounded at 300 records, with 280 prepared and 234 featured. [Phase 16 scope and checks](docs/phase-16-collections-and-offers.md) tracks validation, final packaging and remaining public-launch requirements.
 
 The owner's follow-up adds Roger Federer, Rafael Nadal and Michael Phelps, bringing Sports Icons to 17 and the catalogue to 261 designs. The three additions use a separate immutable source pack; the fourteen existing images are preserved. The owner also supplied **getcharmlet@gmail.com** as the official inbox, now used for website contact. This configures contact information without opening subscriber collection. The candidate remains local pending the public-artwork sharing decision.
+
+## 2026-11-15–16 — CharmBits and free VS Code features
+
+The owner approved public review of the artwork, then selected **CharmBits** and authorized the repository and website update. The repository is now `gautham-nvidia/charmbits`. Extension 0.15.0 presents all VS Code features as free, with 31 starter charms and optional paid charms; desktop 0.12.0 preserves its existing trial, Pro pricing and access. The visible rebrand retains installed IDs, saved data, cryptographic identities and immutable pack metadata.
+
+Local validation passed 102 app models, 13 access-service checks, 7 release checks, 23 artwork/Studio checks, 14 editor scenarios, 8 installed-VSIX scenarios, 13 desktop models and the extracted Windows archive. An actual 0.14→0.15 installation retained an owned profile's photo bytes, imported pack, settings, paused focus, garden progress, saved win and 235 available choices. Website checks passed with no console errors; a later visual pass corrected stale Sports Icons and Photo Studio copy.
+
+The prepared Marketplace workflow uses Trusted Publishing with pinned vsce4.1.1. The rebuilt VSIX's 324 runtime/art entries match the UI-tested package exactly. Current listing screenshots show the actual 31-charm starter. [Phase18 evidence and remaining owner decisions](docs/phase-18-charmbits.md) distinguishes tested review artifacts from publication and live-service readiness. No source/artwork licence, publisher ownership or successful paid launch is assumed.

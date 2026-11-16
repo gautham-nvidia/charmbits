@@ -197,6 +197,8 @@ body.vscode-high-contrast #charm:focus-visible { outline-width: 2px; }
 #primary-nav svg { flex-shrink: 0; }
 #primary-nav .nav-chevron { width: 12px; height: 12px; }
 .app-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 3px 10px; padding: 6px 12px 7px; border-top: 1px solid var(--vscode-widget-border, #88888820); color: var(--quiet); font-size: 9px; line-height: 1.4; }
+.app-footer button { min-width: 0; min-height: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+.app-footer button:disabled { text-decoration: none; cursor: default; }
 #app-version { margin-left: 5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 #tools-backdrop { position: absolute; inset: 0 0 var(--popup-bottom); z-index: 4; background: var(--vscode-editorWidget-background, #20202055); opacity: .35; }
 #app.has-popup #hanging { pointer-events: none; }

@@ -58,5 +58,5 @@ export function createGalleryServer({
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   const port = Number(process.env.PORT || 4173);
   const server = createGalleryServer({ designPreview: process.argv.includes('--design-preview') });
-  server.listen(port, '127.0.0.1', () => console.log(`Charmlet gallery: http://127.0.0.1:${port}`));
+  server.listen(port, '127.0.0.1', () => console.log(`CharmBits gallery: http://127.0.0.1:${port}`));
 }

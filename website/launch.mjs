@@ -23,9 +23,9 @@ export function validateLaunch(input) {
     if (desktop[platform] == null) continue;
     const url = publicUrl(desktop[platform]);
     const suffix = platform === 'windows' ? '\\.zip' : '\\.tar\\.gz';
-    const path = new RegExp(`^/gautham-nvidia/charmlet/releases/download/[a-zA-Z0-9._-]+/Charmlet-desktop-\\d+\\.\\d+\\.\\d+-${archivePlatform}-(?:x64|arm64)${suffix}$`);
+    const path = new RegExp(`^/gautham-nvidia/(?:charmbits|charmlet)/releases/download/[a-zA-Z0-9._-]+/(?:CharmBits|Charmlet)-desktop-\\d+\\.\\d+\\.\\d+-${archivePlatform}-(?:x64|arm64)${suffix}$`);
     if (url.hostname !== 'github.com' || url.search || !path.test(url.pathname)) {
-      throw new Error(`Use a published Charmlet ${platform} release archive.`);
+      throw new Error(`Use a published CharmBits ${platform} release archive.`);
     }
     result.desktop[platform] = url.href;
   }

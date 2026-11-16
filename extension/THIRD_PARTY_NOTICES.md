@@ -1,7 +1,7 @@
 # Third-party notices
 
 The browser bundle includes Matter.js and selected Lucide icons. These licenses apply to those
-dependencies, not to Charmlet's original source or artwork, whose license is not yet selected.
+dependencies, not to CharmBits' original source or artwork, whose license is not yet selected.
 
 ## Matter.js 0.20.0
 

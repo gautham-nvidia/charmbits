@@ -126,6 +126,14 @@ test('email links are single-use, expire, and optional offers require confirmed 
   const first = await app.verify();
   assert.equal(first.edition, 'items');
   assert.equal(first.trial.used, false);
+  const extension = await app.request('download/app-vscode', { session: first.session });
+  assert.equal(extension.status, 200, 'The free VS Code installer needs no Pro or trial grant.');
+  await extension.text();
+  const afterDownload = await (await app.request('library', { session: first.session })).json();
+  assert.equal(afterDownload.trial.used, false, 'Downloading the free extension must not consume the desktop trial.');
+  assert.equal(afterDownload.edition, 'items');
+  assert.equal((await app.request('download/paid', { session: first.session })).status, 403,
+    'Free extension access must not unlock optional paid charms.');
   assert.equal(app.subscriptions.length, 0);
   assert.equal(app.database().prepare('SELECT email FROM email_challenges').get().email, null);
   const replay = await app.request('email/verify', { method: 'POST', body: { token: app.emails[0].token } });
