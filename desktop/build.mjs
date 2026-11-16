@@ -1,7 +1,8 @@
 import { build } from '../extension/node_modules/esbuild/lib/main.js';
 import { copyFile, cp, mkdir, rm } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isWithheldArtworkFile } from '../release/artwork-policy.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = join(root, '..');
@@ -27,7 +28,9 @@ await Promise.all([
   build({ entryPoints: [join(root, 'src', 'overlay.ts')], bundle: true, platform: 'browser', format: 'iife', target: 'es2022', outfile: join(dist, 'overlay.js'), sourcemap: false }),
   build({ entryPoints: [join(root, 'src', 'renderer.ts')], plugins: [desktopLayout], bundle: true, platform: 'browser', format: 'iife', target: 'es2022', outfile: join(dist, 'renderer.js'), sourcemap: false }),
 ]);
-await cp(join(repo, 'extension', 'media'), join(dist, 'media'), { recursive: true });
+await cp(join(repo, 'extension', 'media'), join(dist, 'media'), {
+  recursive: true, filter: source => !isWithheldArtworkFile(basename(source)),
+});
 await copyFile(join(repo, 'extension', 'media', 'view.html'), join(dist, 'view.html'));
 await copyFile(join(repo, 'extension', 'media', 'view.css'), join(dist, 'view.css'));
 await copyFile(join(repo, 'extension', 'media', 'puzzle.css'), join(dist, 'puzzle.css'));
@@ -36,5 +39,7 @@ await copyFile(join(root, 'src', 'desktop.css'), join(dist, 'desktop.css'));
 await copyFile(join(repo, 'extension', 'THIRD_PARTY_NOTICES.md'), join(dist, 'THIRD_PARTY_NOTICES.md'));
 await copyFile(join(repo, 'extension', 'ARTWORK.md'), join(dist, 'ARTWORK.md'));
 await copyFile(join(repo, 'extension', 'PRIVACY.md'), join(dist, 'PRIVACY.md'));
+await copyFile(join(repo, 'extension', 'LICENSE'), join(dist, 'LICENSE'));
+await copyFile(join(repo, 'extension', 'ARTWORK-LICENSE.md'), join(dist, 'ARTWORK-LICENSE.md'));
 await copyFile(join(root, 'README.md'), join(dist, 'DESKTOP_BETA.md'));
 console.log('Built CharmBits desktop beta.');

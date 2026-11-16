@@ -1,6 +1,6 @@
 # CharmBits listing and launch copy
 
-Prepared for the **0.15.0 review candidate**. Store publication and paid services are not live. The release checker still requires approved source/artwork terms, publisher access and successful CI on the release commit.
+Prepared for the **0.15.1 review candidate**. Store publication and paid services are not live. The approved software and artwork terms are included, with the public selection limited to 210 designs. Publisher access and successful CI on the release commit remain required.
 
 ## Store fields
 
@@ -13,6 +13,7 @@ Prepared for the **0.15.0 review candidate**. Store publication and paid service
 | Keywords | charms, focus, productivity, garden, motivation, silicon, accessibility |
 | Support | https://github.com/gautham-nvidia/charmbits/issues |
 | Project | https://github.com/gautham-nvidia/charmbits |
+| Website and terms | https://charmbits.pages.dev/ and https://charmbits.pages.dev/terms.html |
 | Privacy | Packaged `PRIVACY.md`; repository copy at `extension/PRIVACY.md` |
 | Publisher | `gautham-nvidia`, subject to actual registry ownership verification |
 
@@ -41,11 +42,11 @@ The extension and all its features are free. Pick from 31 starter charms, import
 
 Use only captures of the actual reviewed version, in a disposable profile containing generated sample text. Show the version footer and original bundled artwork. Crop away unrelated editor panes and local filesystem paths rather than exposing a personal workspace.
 
-The app, starter-picker and garden captures in `docs/store-assets/` show the installed 0.15.0 candidate in an isolated profile. The picker shows the actual 31-charm starter, rather than the retained beta collection. Historical captures remain in the versioned review records. The existing 256-pixel store icon is `extension/media/marketplace-icon.png`. A promotional image may reuse reviewed captures after the owner approves the final art lineup.
+The app, starter-picker and garden captures in `docs/store-assets/` show the installed 0.15.1 candidate in an isolated profile. The picker shows the actual 31-charm starter. Historical captures remain in the versioned review records. The existing 256-pixel store icon is `extension/media/marketplace-icon.png`. Homepage concept previews are not part of the app's distributable artwork or store screenshots.
 
 <img src="store-assets/navigation.png" width="240" alt="Main navigation and learning card"> <img src="store-assets/picker.png" width="240" alt="Searchable charm picker">
 
-<img src="store-assets/garden.png" width="240" alt="Garden after the first watering, restored from the installed 0.15.0 VSIX in Restricted Mode">
+<img src="store-assets/garden.png" width="240" alt="Garden after the first watering, restored from the installed 0.15.1 VSIX in Restricted Mode">
 
 Use approved artwork in store materials. Do not claim NVIDIA sponsorship, imply that paid services are live, or advertise the unsigned desktop beta or website-only locket prototype as features delivered by the IDE listing.
 
@@ -56,7 +57,7 @@ The active candidate is on `feat/phase-10-california-mascots` in draft PR #30. T
 Before activating a broader launch:
 
 1. Verify publisher ownership, publication and the official store URL before replacing the website's null distribution links. Once configured, the homepage sends VS Code users directly to Marketplace without email signup. The app's More charms link uses the existing public gallery.
-2. Approve source licensing and bundled artwork terms. Keep earned flowers, personal photos, previous purchases and legacy data available through upgrades.
+2. Verify the packaged software/artwork terms and public image exclusions. Keep earned flowers, personal photos, previous purchases and legacy records available through upgrades; withheld built-in art uses a neutral placeholder.
 3. Deploy the approved gallery, installation help, privacy and support pages. Check actual public downloads and mobile navigation.
 4. Recheck installation from each live store and the declared supported editors. Report forks only after their real onboarding/runtime checks.
 5. Complete native desktop input/monitor checks, signing/notarization and installer delivery before promoting the desktop app.
@@ -77,7 +78,7 @@ The owner must sign in to [Marketplace publisher management](https://marketplace
 
 The visible listing name is **CharmBits: Coding Charms**. Keep the extension identity **`gautham-nvidia.charmlet`** so existing installations retain their settings and activations. A matching publisher name alone does not prove ownership; the authenticated Marketplace account must own it.
 
-Once source and artwork terms are approved, merge reviewed source to `main`, wait for CI at that exact commit, then use **Actions → Extension Release → Run workflow** with version `0.15.0` and destination `marketplace`. The default `artifact` destination only prepares a review download. The workflow validates the package, source state and terms before submitting the same VSIX. Open VSX is separate and still requires its own `OVSX_PAT` when selected.
+After publisher ownership and the Trusted Publishing policy are verified, merge reviewed source to `main`, wait for CI at that exact commit, then use **Actions → Extension Release → Run workflow** with version `0.15.1` and destination `marketplace`. The default `artifact` destination only prepares a review download. The workflow validates the package, source state and terms before submitting the same VSIX. Open VSX is separate and still requires its own `OVSX_PAT` when selected.
 
 As checked during preparation, the public extension lookup returned “Extension `gautham-nvidia.charmlet` not found,” GitHub had no repository Actions secrets, and the local publisher store was empty. Publisher ownership, the trusted policy and a live listing are still unverified. Do not set the website Marketplace link until the live listing installs successfully.
 

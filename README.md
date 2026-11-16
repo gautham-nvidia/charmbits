@@ -2,11 +2,11 @@
 
 **CharmBits: Coding Charms** is a free coding companion in a dockable VS Code view, with optional paid charms.
 
-**CharmBits candidate:** extension **0.15.0** makes all VS Code features free, without an account or expiring app trial. New profiles start with **31 fixed free charms**; extra paid charms are optional. Existing beta profiles retain their collection, with matching replacements for retired designs. The **261-design** catalogue remains bundled for offline use. The online catalogue offers 15 additional free claims and optional 49¢ / 99¢ / $1.99 extras. **Desktop** keeps its 30-day trial and **CharmBits Pro at $7.49 launch / $17.49 regular, once**. Pro's full charm collection also works in the free extension.
+**CharmBits candidate:** extension **0.15.1** makes all VS Code features free, without an account or expiring app trial. New profiles start with **31 fixed free charms**; extra paid charms are optional. The **210-design public selection** remains bundled for offline use. The online catalogue offers 15 additional free claims and optional 49¢ / 99¢ / $1.99 extras; 49¢ items require another paid item at checkout. **Desktop** keeps its 30-day trial and **CharmBits Pro at $7.49 launch / $17.49 regular, once**. Pro's current charm collection also works in the free extension.
 
 The rename preserves the extension identity, desktop storage/encryption identity, saved data and legacy `.charmlet.json` packs. User-facing names and download filenames say CharmBits; compatibility identifiers intentionally retain the earlier name.
 
-**Sports Icons** adds 17 athlete-inspired studies to Pro without a separate sports charge, including Federer, Nadal and Phelps. **US Tech Hubs & Skylines** adds 13 cities; San Francisco, Austin and Seattle replace Alpine Lake, Night Sky and Ringed Planet in the starter. Santa Clara Office and San Francisco Tower use generic names, and Cupertino Ring Campus depicts the current circular headquarters. Existing personal imports remain intact.
+**US Tech Hubs & Skylines** includes 13 cities. The public release excludes the 34 Music Icons and 17 Sports Icons studies pending their separate rights review. Historical source art and personal imports remain intact. Saved withheld choices and cords use a neutral placeholder; they are not erased. Redwood Grove and Bay Area / Silicon Valley replace the two artist starters, and Electric Guitar replaces the artist free download.
 
 Official contact: **getcharmlet@gmail.com**. Subscriber delivery still requires the configured email service.
 
@@ -18,15 +18,15 @@ The [current collections and offers guide](docs/phase-16-collections-and-offers.
 
 **Cali** keeps the approved grizzly face, seven outfits, saved wardrobe choice and four playful tap reactions. Four spinner designs turn under your pointer; Twisty Cube, Sliding Tiles and Lights Out have optional boards and saved progress. Every charm has a brief tap wiggle. The default 100% is 15% larger, and Appearance offers 60-200% sizing. Encouragement, pets, matched cords, small wins, local photos and the eighteen-flower garden carry forward. [Current verification and release gates](docs/phase-13-artists-website.md) distinguish this candidate from earlier checks.
 
-Open **Charms** to browse your available collection. The **Art review** compares **237 featured designs**, including the original Terminal and all eighteen flower illustrations. Flower previews do not unlock garden rewards or change watering progress. Existing imports, saved choices and previously shared pack files remain intact. Public distribution, likeness rights, licences and signing remain release decisions. Creating local photo charms inside the app is free.
+Open **Charms** to browse your available collection. The historical private **Art review** compares 237 featured designs; the public website and packages use the smaller release selection. Flower previews do not unlock garden rewards or change watering progress. Creating local photo charms inside the app is free. The approved proprietary [software licence](extension/LICENSE) and separate [artwork terms](extension/ARTWORK-LICENSE.md) define permitted use.
 
-**Desktop 0.12.0 candidate:** retains the starter, 30-day trial and purchased-access rules and starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
+**Desktop 0.12.1 candidate:** retains the starter, 30-day trial and purchased-access rules and starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
 
-The approved website shows Desktop and VS Code placement, focus, encouragement and celebrations before pricing, with the Terminal logo, a compact Auto/Light/Dark control, a dismissible offer-signup popup and About/Press pages. The [current service guide](service/README.md) recommends Cloudflare's free tiers, Brevo and Lemon Squeezy for the digital launch. Earlier [provider comparisons](docs/monetization-and-payments.md) remain background; Shopify is deferred until merchandise.
+The website is hosted at **https://charmbits.pages.dev/**, with the Terminal logo, a compact Auto/Light/Dark control, a dismissible offer-signup popup and About/Press pages. The [current service guide](service/README.md) uses Cloudflare, Brevo and Lemon Squeezy for the digital launch. Account setup and purchase/refund testing are required before email delivery or checkout opens. Earlier [provider comparisons](docs/monetization-and-payments.md) remain background; Shopify is deferred until merchandise.
 
 Holiday defaults follow **21 US celebration dates** and rotate Christmas designs through December. They are on for new profiles. An update preserves existing opt-outs and pins; use **Settings > Appearance > Follow holiday defaults** to enable and unpin in one click. Picking a charm pins it. Automatic choices use the local date and never replace the saved usual charm. [Phase 6 scope and verification](docs/phase-6-trial-catalogue.md) tracks the candidate's remaining checks.
 
-The accepted Phase 4 head passed all six Windows/Linux/macOS VS Code 1.90/1.140 jobs and both Windows/macOS desktop archive jobs. The automatic post-merge run then exposed an intermittent Linux menu-opening failure; its event capture and subsequent results are tracked in the [Phase 5 release record](docs/phase-5-release.md). Source/art licences, publisher accounts, verified editor forks, public hosting and native desktop/merchant setup remain release gates. See the [Phase 4 verification record](docs/phase-4-validation.md) and [privacy notice](extension/PRIVACY.md).
+Earlier platform results remain in the [Phase 4 verification record](docs/phase-4-validation.md) and [Phase 5 release record](docs/phase-5-release.md). The current candidate must pass its own checks. Marketplace publisher ownership, Trusted Publishing, verified editor forks and native desktop/merchant setup remain release work. Source/artwork terms have been selected and the public website is hosted.
 
 [Gallery and compact-feedback tracking #13](https://github.com/gautham-nvidia/charmbits/issues/13), the
 [dated validation record](docs/phase-3-gallery-validation.md), and the frozen [desktop platform summary](docs/phase-3-platforms.json)
@@ -124,8 +124,8 @@ downloaded host; otherwise it uses the installed VS Code, with `VSCODE_EXECUTABL
 See the [validation record](docs/phase-3-gallery-validation.md) for compact, gallery, import and message checks.
 
 The VSIX is written under `extension/` and ignored by Git. Install it using **Extensions: Install from
-VSIX...** for manual testing. Packaging uses `--skip-license` because the project's own license decision
-is still open, not because third-party licenses are waived. Required notices ship in the package.
+VSIX...** for manual testing. Both review and release packaging require the software licence.
+The software terms, artwork terms and third-party notices ship in the package.
 
 [CI](.github/workflows/ci.yml) runs six jobs across Windows, Ubuntu 24.04 and macOS 15 with VS Code
 **1.90.0 and 1.140.0**. All six passed the 0.3.2 baseline's 34-unit/UI/package/gallery path in hosted run [37697185841](https://github.com/gautham-nvidia/charmlet/actions/runs/37697185841).
@@ -212,13 +212,14 @@ git log --follow --date=short --format="%h %ad %s" -- PROJECT_LOG.md
 
 The owner has authorized the [Phase 4 companion work](docs/phase-4-plan.md) and parallel website/desktop
 development. Phase 5 is extension-store launch, Phase 6 the broader product launch, and Phase 7+ later
-integrations. Publisher ownership, source/art licensing, actual launch-target editor checks and public
-hosting/publication remain explicit gates in [Phase 5 #18](https://github.com/gautham-nvidia/charmlet/issues/18).
+integrations. Publisher ownership, actual launch-target editor checks and publication remain explicit
+gates in [Phase 5 #18](https://github.com/gautham-nvidia/charmlet/issues/18). Source/art terms and the public hostname are now configured.
 Each phase keeps its own branch and merges before the next.
 
 ## Ownership and licenses
 
 Personal repository under `gautham-nvidia`, **not** the NVIDIA organization or an endorsed product.
 No NVIDIA-branded assets are included. The core and bundled starter items are intended to remain free.
-Public visibility does not assign an open-source license: CharmBits' source/art license is pending.
+The proprietary [software licence](extension/LICENSE) allows free use of all VS Code features.
+First-party artwork has [separate terms](extension/ARTWORK-LICENSE.md). Public source visibility is not an open-source licence.
 [Third-party notices](extension/THIRD_PARTY_NOTICES.md) cover Matter.js and Lucide/Feather assets.

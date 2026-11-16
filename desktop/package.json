@@ -1,6 +1,7 @@
 {
   "name": "charmlet-desktop",
-  "version": "0.12.0",
+  "version": "0.12.1",
+  "license": "SEE LICENSE IN dist/LICENSE",
   "private": true,
   "description": "CharmBits desktop companion",
   "main": "dist/main.cjs",

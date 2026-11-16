@@ -1,5 +1,5 @@
 import { Pendulum, type Point } from '../extension/src/pendulum';
-import { getLayout } from '../extension/src/charm-state';
+import { clamp, getLayout } from '../extension/src/charm-state';
 import { DEFAULT_ATTACHMENT, type CharmAttachment } from '../extension/src/charm-attachment';
 import { isSoftCharm } from '../extension/src/charm-catalog';
 import { createLiveSmiley } from '../extension/src/live-smiley';
@@ -145,7 +145,12 @@ function resize() {
 	const cssScale = Number.parseFloat(getComputedStyle(stage).getPropertyValue('--demo-view-scale'));
 	const scaleLimit = Number.isFinite(cssScale) ? Math.max(.25, Math.min(viewScale, cssScale)) : viewScale;
 	scale = Math.max(0.01, Math.min(scaleLimit, width / layout.minimumWidth, height / layout.minimumHeight));
-	pendulum.resize(width / scale, height / scale, baseCord, demoSize, 'hanging', attachment, anchorFraction);
+	const logicalWidth = Math.max(layout.minimumWidth, width / scale);
+	const inset = layout.visualRadius + layout.edgePadding;
+	// A large charm near the desktop's right edge still needs room to swing right.
+	const swingRoom = Math.min(40, (logicalWidth - 2 * inset) / 2);
+	const anchorX = clamp(logicalWidth * anchorFraction, inset + swingRoom, logicalWidth - inset - swingRoom);
+	pendulum.resize(width / scale, height / scale, baseCord, demoSize, 'hanging', attachment, anchorX / logicalWidth);
 	cordMotion.reset(cordEndpoints().hook);
 	rig.style.width = `${pendulum.layout.width}px`;
 	rig.style.height = `${pendulum.layout.height}px`;

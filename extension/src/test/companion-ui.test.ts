@@ -9,6 +9,7 @@ import { applyCompanionAction, defaultCompanionState } from '../companion-core';
 import { DEFAULT_STATE } from '../charm-state';
 import { CHARMS, TRIAL_CHARMS } from '../charm-catalog';
 import betaCatalogue from '../beta-catalogue.json';
+import { starterSelection } from '../catalogue-access';
 import { learningCard } from '../learning-cards';
 import { MESSAGES } from '../messages';
 import { localDayKey, type GardenState } from '../garden-core';
@@ -21,6 +22,8 @@ import { command, readyFrame, reloadCharm } from './editor-helpers';
 // Pre-0.13 profiles had no edition marker. These fixtures exercise retained beta
 // artwork; the separate fresh-profile test exercises the real free starter.
 const LEGACY_BETA_STATE = { ...DEFAULT_STATE, editionVersion: undefined };
+const retainedBetaIds = new Set([...betaCatalogue, ...starterSelection()]);
+const retainedBetaCount = CHARMS.filter(charm => retainedBetaIds.has(charm.id)).length;
 
 interface OwnedEditor {
 	profile: string;
@@ -554,14 +557,23 @@ test('motivation has no category heading and reminder checkboxes remain compact'
 });
 
 test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigation A'} searches installed charms and exposes quiet reminders and build identity`, async ({}, testInfo) => {
+	const heldId = 'trial:artist-travis-scott';
 	const editor = await launchOwnedEditor('charmlet-navigation-', ({ preferencesPath, companionPath }) => {
-		writeFileSync(preferencesPath, `${JSON.stringify({ ...LEGACY_BETA_STATE, reducedMotion: true })}\n`);
+		writeFileSync(preferencesPath, `${JSON.stringify({ ...LEGACY_BETA_STATE, reducedMotion: true,
+			charmId: heldId, charmPinned: true, cordChoices: { [heldId]: 'silver-chain' } })}\n`);
 		const state = applyCompanionAction(defaultCompanionState(), { type: 'care-configure', kind: 'water', enabled: true, intervalMinutes: 15 }, Date.now() - 16 * 60000).state;
 		writeFileSync(companionPath, `${JSON.stringify(state)}\n`);
 	}, process.env.CHARMLET_TEST_PACKAGED === '1');
 	try {
 		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
+		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', heldId);
+		await expect(frame.locator('#charm-image')).toHaveAttribute('src', /keycap\.svg$/);
+		await frame.locator('#charm-image').evaluate(node => (node as HTMLImageElement).decode());
+		await expect(frame.locator('#stage')).toHaveAttribute('data-cord-style', 'silver-chain');
+		const savedReview = JSON.parse(readFileSync(editor.preferencesPath, 'utf8'));
+		expect(savedReview.charmId).toBe(heldId);
+		expect(savedReview.cordChoices[heldId]).toBe('silver-chain');
 		await expect(frame.locator('#companion-tools')).toBeHidden();
 		await expect(frame.locator('#care-cue')).toBeVisible();
 		await expect(frame.locator('#message-meta')).toBeHidden();
@@ -576,7 +588,7 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		await expect(frame.locator('#care-cue')).toBeHidden();
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-search')).toBeFocused();
-		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(betaCatalogue.length);
+		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(retainedBetaCount);
 		await expect(frame.locator('#charm-grid .charm-tile').nth(0)).toHaveAttribute('aria-label', 'Select Terminal');
 		await expect(frame.locator('#charm-grid .charm-tile').nth(1)).toHaveAttribute('aria-label', /^Select Cali /);
 		await frame.locator('#app').screenshot({ path: testInfo.outputPath('navigation-picker.png') });
@@ -584,19 +596,16 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(12);
 		await expect(frame.getByRole('button', { name: 'Select MIDI Keyboard', exact: true })).toBeVisible();
 		await expect(frame.getByRole('button', { name: 'Select Grand Piano', exact: true })).toBeVisible();
-		await frame.locator('#charm-groups').getByRole('button', { name: 'Music Icons', exact: true }).click();
-		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(34);
-		for (const artist of ['Travis Scott', 'Whitney Houston', 'Beyoncé', 'Prince']) {
-			await expect(frame.getByRole('button', { name: `Select ${artist} inspired`, exact: true })).toBeVisible();
-		}
-		for (const [artist, id] of [['Travis Scott', 'travis-scott'], ['Whitney Houston', 'whitney-houston'],
-			['Beyoncé', 'beyonce'], ['Prince', 'prince']]) {
-			await frame.getByRole('button', { name: `Select ${artist} inspired`, exact: true }).click();
-			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', `trial:artist-${id}`);
-			await expect(frame.locator('#charm-image')).toHaveAttribute('src', new RegExp(`artist-${id}`));
+		await expect(frame.locator('#charm-groups').getByRole('button', { name: 'Music Icons', exact: true })).toHaveCount(0);
+		await expect(frame.locator('#charm-groups').getByRole('button', { name: 'Sports Icons', exact: true })).toHaveCount(0);
+		for (const [name, id] of [['Grand Piano', 'grand-piano'], ['Electric Guitar', 'electric-guitar'],
+			['Violin', 'violin'], ['Drum Kit', 'drum-kit']]) {
+			await frame.getByRole('button', { name: `Select ${name}`, exact: true }).click();
+			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', `trial:new-${id}`);
+			await expect(frame.locator('#charm-image')).toHaveAttribute('src', new RegExp(`new-${id}`));
 			await frame.locator('#charm-image').evaluate(node => (node as HTMLImageElement).decode());
 			await expect.poll(() => frame.locator('#charm-image').evaluate(node => (node as HTMLImageElement).naturalWidth)).toBe(216);
-			await frame.locator('#app').screenshot({ path: testInfo.outputPath(`artist-${id}.png`) });
+			await frame.locator('#app').screenshot({ path: testInfo.outputPath(`music-${id}.png`) });
 			await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		}
 		await frame.locator('#charm-groups').getByRole('button', { name: 'All', exact: true }).click();
@@ -946,6 +955,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a ne
 		await reloadCharm(editor.window);
 		frame = await readyFrame(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cali');
+		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-starter-main.png') });
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(31);
 		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');
@@ -1708,7 +1718,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 			const version = JSON.parse(readFileSync(resolve('package.json'), 'utf8')).version;
 			await expect(frame.locator('#app-version')).toHaveText(`v${version}`);
 			await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
-			await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(betaCatalogue.length);
+			await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(retainedBetaCount);
 			await frame.locator('#picker-close').click();
 			await expect(frame.locator('#festive-enabled')).toBeChecked();
 			await expect(frame.locator('#charm-pinned')).not.toBeChecked();

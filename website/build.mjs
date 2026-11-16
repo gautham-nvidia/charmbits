@@ -1,10 +1,11 @@
 import { createRequire } from 'node:module';
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from '../extension/node_modules/esbuild/lib/main.js';
-import { validateDistribution } from './distribution.mjs';
+import { legacyPagesRedirect, validateDistribution } from './distribution.mjs';
+import { isWithheldArtworkFile } from '../release/artwork-policy.mjs';
 import { curateArtwork, validateCuration } from './art-curation.mjs';
 import { trialCollections } from './trial-collections.mjs';
 import { validateLaunch } from './launch.mjs';
@@ -15,7 +16,7 @@ import { securityHeaders } from './security-headers.mjs';
 const require = createRequire(import.meta.url);
 const { parseCharmPack } = require('../extension/out/charm-packs.js');
 const { FLOWERS } = require('../extension/out/garden-core.js');
-const { CHARMS, FIDGET_CHARMS, LIVE_CHARMS, ORIGINAL_CHARMS } = require('../extension/out/charm-catalog.js');
+const { CHARMS, FIDGET_CHARMS, LIVE_CHARMS, ORIGINAL_CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS } = require('../extension/out/charm-catalog.js');
 const { charmCollection, orderByCollection } = require('../extension/out/charm-collections.js');
 const { gardenArtwork, GARDEN_STAGE_FILES } = require('../extension/out/garden-catalog.js');
 const root = dirname(fileURLToPath(import.meta.url));
@@ -23,7 +24,15 @@ const repo = join(root, '..');
 const dist = join(root, 'dist');
 const privateReview = process.argv.includes('--review-downloads');
 const builtins = JSON.parse(await readFile(join(repo, 'extension', 'src', 'builtin-charms.json'), 'utf8'));
-const trial = JSON.parse(await readFile(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'));
+const trial = TRIAL_CHARMS;
+const withheldKeys = new Set(WITHHELD_CHARMS.map(charm => charm.artworkKey));
+const homepageSelection = JSON.parse(await readFile(join(root, 'homepage-previews.json'), 'utf8'));
+if (homepageSelection.length !== 2 || new Set(homepageSelection.map(item => item.slot)).size !== 2
+  || homepageSelection.some(item => !['sports', 'music'].includes(item.slot)
+    || !withheldKeys.has(item.key) || typeof item.label !== 'string')) {
+  throw new Error('The homepage needs exactly one selected sports preview and one music preview.');
+}
+const homepagePreviews = [];
 const trialByKey = new Map(trial.map(charm => [charm.artworkKey, charm]));
 const extras = JSON.parse(await readFile(join(root, 'extras.json'), 'utf8'));
 const collectionConfig = JSON.parse(await readFile(join(root, 'collections.json'), 'utf8'));
@@ -45,7 +54,7 @@ const expectedWorlds = {
   'solar-system': 0, gemstones: 0, zodiac: 0, sacred: 0, flowers: 0,
 };
 const worlds = collectionConfig.collections;
-const currentWorlds = trialCollections(worlds);
+const currentWorlds = trialCollections(worlds).filter(world => CHARMS.some(charm => charmCollection(charm) === world.name));
 const previews = collectionConfig.previews;
 if (!Array.isArray(worlds) || worlds.length !== Object.keys(expectedWorlds).length || !Array.isArray(previews) || previews.length !== 4) throw new Error('Unexpected collection worlds or art previews.');
 const worldIds = new Set();
@@ -84,7 +93,7 @@ for (const extra of extras) {
   validated.push({ extra, packPath });
 }
 await rm(dist, { recursive: true, force: true });
-for (const path of ['assets/default', 'assets/extras', 'assets/previews', 'assets/garden', 'assets/app-review', 'assets/fonts', 'packs', 'downloads', 'studio', 'api/studio']) {
+for (const path of ['assets/default', 'assets/extras', 'assets/previews', 'assets/home-previews', 'assets/garden', 'assets/app-review', 'assets/fonts', 'packs', 'downloads', 'studio', 'api/studio']) {
   await mkdir(join(dist, path), { recursive: true });
 }
 // Static hosting advertises no paid service. Do not copy local API credentials.
@@ -98,7 +107,7 @@ for (const name of ['manrope-variable.ttf', 'OFL.txt']) {
 {
   await mkdir(join(dist, 'assets/brand'), { recursive: true });
   for (const name of ['brand-lab.html', 'brand-lab.css', 'theme-control.css', 'design-theme.js', 'next.css', 'download.html', 'download.js', 'privacy.html',
-    'about.html', 'about-us.html', 'press.html', 'information.css', 'information.js', 'access-client.js',
+    'about.html', 'about-us.html', 'press.html', 'terms.html', 'information.css', 'information.js', 'access-client.js',
     'shop.html', 'shop.js', 'store.css', 'gallery-theme.css', '404.html']) {
     await copyFile(join(root, name), join(dist, name));
   }
@@ -149,7 +158,7 @@ for (const preview of previews) {
   await copyFile(join(root, 'assets', 'previews', preview.file), join(dist, 'assets', 'previews', preview.file));
 }
 for (const file of await readdir(join(root, 'assets/app-review'), { withFileTypes: true })) {
-  if (file.isFile() && /^[a-z0-9-]+\.png$/.test(file.name)) {
+  if (file.isFile() && /^[a-z0-9-]+\.png$/.test(file.name) && !isWithheldArtworkFile(file.name)) {
     await copyFile(join(root, 'assets/app-review', file.name), join(dist, 'assets/app-review', file.name));
   }
 }
@@ -204,6 +213,20 @@ if (review) {
       || selected.group !== item.group) throw new Error('Refresh the curated review packs before building.');
     if (!/^\.\/assets\/review\/[a-z0-9-]+\.png$/.test(item.image)
       || !/^\.\/assets\/review\/[a-z0-9-]+\.webp$/.test(item.preview)) throw new Error('Invalid review image path.');
+    if (withheldKeys.has(item.key) || isWithheldArtworkFile(item.image)) {
+      const homepage = homepageSelection.find(entry => entry.key === item.key);
+      if (homepage) {
+        const preview = `./assets/home-previews/${basename(item.preview)}`;
+        await copyFile(join(root, item.preview), join(dist, preview));
+        homepagePreviews.push({ id: item.key, name: item.name, slot: homepage.slot,
+          collectionLabel: homepage.label, preview, homepageOnly: true });
+      }
+      if (privateReview) {
+        await copyFile(join(root, item.image), join(dist, item.image));
+        await copyFile(join(root, item.preview), join(dist, item.preview));
+      }
+      continue;
+    }
     await copyFile(join(root, item.image), join(dist, item.image));
     await copyFile(join(root, item.preview), join(dist, item.preview));
     if (item.family === 'flowers' && item.original) {
@@ -263,12 +286,21 @@ const orderedCharms = orderByCollection(charms).map(charm => {
 const collections = currentWorlds.map(world => ({ ...world, charmIds: orderedCharms
   .filter(charm => charm.collectionId === world.id).map(charm => charm.id) }));
 if (!trial.length || charms.length !== ORIGINAL_CHARMS.length + trial.length + LIVE_CHARMS.length + FIDGET_CHARMS.length) throw new Error('The complete trial must appear in the gallery.');
+if (homepagePreviews.length !== homepageSelection.length) throw new Error('A selected homepage preview is missing.');
 await writeFile(join(dist, 'catalogue.json'), `${JSON.stringify({ version: manifest.version,
-  extensionDownload: privateReview ? './downloads/charmbits.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews,
+  extensionDownload: privateReview ? './downloads/charmbits.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews, homepagePreviews,
   sportsWishlist: collectionConfig.sportsWishlist }, null, 2)}\n`, 'utf8');
-console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included, ${review?.featured ?? 0} selected review designs.`);
+console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included; ${WITHHELD_CHARMS.length} studies excluded from downloads, ${homepagePreviews.length} homepage-only previews.`);
 const { publicData } = await buildCommerceCatalogue();
 await writeFile(join(dist, 'commerce-public.json'), `${JSON.stringify(publicData, null, 2)}\n`);
 await writeFile(join(dist, '_headers'), `/*\n${Object.entries(securityHeaders(publicData.apiOrigin)).map(([name, value]) => `  ${name}: ${value}`).join('\n')}\n`);
+for (const [source, target] of [['LICENSE', 'software-license.txt'], ['ARTWORK-LICENSE.md', 'artwork-license.txt']]) {
+  await copyFile(join(repo, 'extension', source), join(dist, target));
+}
+const redirect = legacyPagesRedirect(process.env.CF_PAGES_URL);
+if (redirect) {
+  await writeFile(join(dist, '_redirects'), redirect);
+  console.log('Old Pages project redirects to https://charmbits.pages.dev/.');
+}
 if (privateReview) console.log('PRIVATE OWNER PREVIEW: contains review packs and an installer. Do not deploy this output.');
 else console.log('Public build excludes installers and raw download packs. Delivery requires the verified-email service.');

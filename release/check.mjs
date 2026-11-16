@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isWithheldArtworkFile } from './artwork-policy.mjs';
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(join(repo, 'extension/package.json'));
@@ -33,7 +34,10 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
   }
   assert.deepEqual({ id: identity.Id, publisher: identity.Publisher, version: identity.Version },
     { id: manifest.name, publisher: manifest.publisher, version: manifest.version }, 'VSIX XML identity differs from source.');
-  for (const name of files.keys()) assert.match(name, permitted, `Unexpected packaged file: ${name}`);
+  for (const name of files.keys()) {
+    assert.match(name, permitted, `Unexpected packaged file: ${name}`);
+    assert.ok(!isWithheldArtworkFile(name), `Withheld review artwork is packaged: ${name}`);
+  }
   for (const name of requiredFiles) assert.ok(files.get(name)?.length, `Required package file is missing: ${name}`);
   assert.ok(files.get('extension/changelog.md').toString('utf8').includes(`## ${manifest.version} `), 'Changelog does not describe this version.');
   assert.ok(files.get('extension/readme.md').toString('utf8').includes(manifest.version), 'Listing README has a stale version.');
@@ -96,8 +100,11 @@ export async function checkRelease({ root = repo, target = 'artifact', expectedV
     }),
   ]);
   const built = new Map();
-  for (const name of ['PRIVACY.md', 'ARTWORK.md', 'THIRD_PARTY_NOTICES.md']) {
-    built.set(`extension/${name.toLowerCase()}`, await readFile(join(extension, name)));
+  for (const name of ['PRIVACY.md', 'ARTWORK.md', 'THIRD_PARTY_NOTICES.md', 'LICENSE', 'ARTWORK-LICENSE.md']) {
+    // vsce normalizes an extensionless LICENSE to LICENSE.txt in the VSIX.
+    const packagedName = name === 'LICENSE' && files.has('extension/license.txt')
+      ? 'extension/license.txt' : `extension/${name.toLowerCase()}`;
+    built.set(packagedName, await readFile(join(extension, name)));
   }
   for (const name of files.keys()) {
     if (name.startsWith('extension/dist/') || name.startsWith('extension/media/')) {

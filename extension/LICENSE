@@ -1,0 +1,60 @@
+CharmBits Software Licence
+Version 1.0 - 16 November 2026
+
+Copyright (c) 2026 Gautham Anebajagane.
+All rights reserved except for the permissions stated below.
+
+1. Scope
+
+These terms cover the maintainer's original CharmBits software and source code,
+including the VS Code extension, desktop application, website and access service.
+Artwork is covered separately by ARTWORK-LICENSE.md. Third-party components remain
+under their own licences, including the notices in THIRD_PARTY_NOTICES.md.
+
+2. Using CharmBits
+
+You may install and use the VS Code extension and all its software features at no
+charge, for personal, educational and internal business use. Optional paid artwork
+does not require buying access to the extension's software features.
+
+Desktop starter, trial and Pro access follow the terms and entitlements presented
+with that edition or purchase. A trial does not authorize an automatic charge.
+These terms do not introduce a subscription or change an existing purchase into
+one. You may make reasonable installation and backup copies for permitted use,
+including internal deployment of the unmodified free extension.
+
+3. Source and redistribution
+
+You may inspect the source and make local changes for study, testing or proposing
+a contribution to CharmBits. This does not grant a general right to distribute
+modified versions, resell the software, or use its source in another product.
+Public source access is not an open-source licence. Platform rights applicable
+to viewing or forking the repository, and rights provided by law, are unaffected.
+
+Public redistribution, commercial repackaging and use of CharmBits code in another
+product require separate written permission. Distribution through channels
+authorized by the maintainer, such as the VS Code Marketplace, is permitted.
+Do not remove applicable notices, misrepresent authorship or endorsement, or use
+access files to obtain paid content for which you have no entitlement.
+
+4. Your content and third-party rights
+
+You retain your rights in your photos, imported artwork and other personal data.
+You are responsible for having the permissions needed for content you import or
+share. These terms grant no rights in third-party trademarks, likenesses, artwork
+or other protected material. They do not restrict rights granted independently
+under a third-party component's licence.
+
+5. Warranty and liability
+
+To the extent permitted by applicable law, the software is provided "AS IS",
+without warranties of merchantability, fitness for a particular purpose or
+noninfringement. To that same extent, the maintainer is not liable for claims or
+damages arising from use of the software. Nothing here excludes liability that
+cannot legally be excluded or limits mandatory consumer rights.
+
+6. Contact
+
+Requests for additional permissions and support:
+Gautham Anebajagane - getcharmlet@gmail.com
+https://charmbits.pages.dev/

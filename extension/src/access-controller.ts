@@ -99,7 +99,7 @@ export class AccessController {
 		const vscode = this.options.application === 'vscode';
 		const charmDetail = pro ? 'Your full charm collection is unlocked.'
 			: trial ? `Extra charm preview until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
-				: this.record.betaLegacy ? 'Your existing beta collection is retained.'
+				: this.record.betaLegacy ? 'Your saved beta access and choices are retained.'
 					: expired ? 'Your charm preview has ended. Purchases, photos and progress remain.'
 						: owned ? 'Your purchased charms are available.'
 							: 'Starter charms are included; paid charms are optional.';
@@ -109,7 +109,7 @@ export class AccessController {
 			detail: vscode ? `All VS Code features are free. ${charmDetail}`
 				: pro ? 'All in-app charms. One permanent purchase for your current apps.'
 				: trial ? `Full access until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
-					: this.record.betaLegacy ? 'Your existing beta collection is retained.'
+					: this.record.betaLegacy ? 'Your saved beta access and choices are retained.'
 						: expired ? 'Your trial has ended. Free charms, purchases, photos and progress remain.'
 							: 'Choose a starter companion. Your photos, garden and imported packs stay yours.',
 			activationLabel: vscode ? 'Import charm access' : 'Activate access',

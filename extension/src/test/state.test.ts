@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { DEFAULT_STATE, getLayout, matchesSavedState, resetState, restoreState, type CharmState, type LayoutMode } from '../charm-state';
-import { buildCatalogue, CHARMS, FIDGET_CHARMS, LIVE_CHARMS, ORIGINAL_CHARMS, RETIRED_CHARMS, TRIAL_CHARMS } from '../charm-catalog';
+import { buildCatalogue, CHARMS, FIDGET_CHARMS, getCharm, LIVE_CHARMS, ORIGINAL_CHARMS, RETIRED_CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS } from '../charm-catalog';
 import { MESSAGES } from '../messages';
 import { MESSAGE_ROTATION_MS, MessageRotation } from '../message-rotation';
 import { Pendulum } from '../pendulum';
@@ -31,7 +31,7 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 	for (const group of new Set(CHARMS.map(charmCollection))) {
 		const count = CHARMS.filter(charm => starter.includes(charm.id) && charmCollection(charm) === group).length;
 		const exceptions: Record<string, number> = {
-			Terminal: 1, 'Nature & Places': 1, 'Space & Stars': 0, 'Sports Icons': 0, 'US Tech Hubs & Skylines': 3,
+			Terminal: 1, California: 3, 'Nature & Places': 1, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
 		};
 		assert.equal(count, exceptions[group] ?? 2, group);
 	}
@@ -223,8 +223,9 @@ test('every bundled selection survives saved-state restoration', () => {
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Zodiac').length, 12);
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Garden Flowers').length, 18);
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Music').length, 12);
-	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Music Icons').length, 34);
-	assert.deepEqual(new Set(TRIAL_CHARMS.filter(charm => charm.group === 'Sports Icons').map(charm => charm.artworkKey)),
+	assert.equal(TRIAL_CHARMS.some(charm => ['Music Icons', 'Sports Icons'].includes(charm.group)), false);
+	assert.equal(WITHHELD_CHARMS.filter(charm => charm.group === 'Music Icons').length, 34);
+	assert.deepEqual(new Set(WITHHELD_CHARMS.filter(charm => charm.group === 'Sports Icons').map(charm => charm.artworkKey)),
 		new Set(['lionel-messi', 'cristiano-ronaldo', 'ms-dhoni', 'sachin-tendulkar', 'michael-jordan',
 			'kobe-bryant', 'lebron-james', 'stephen-curry', 'tom-brady', 'patrick-mahomes',
 			'serena-williams', 'roger-federer', 'rafael-nadal', 'michael-phelps', 'usain-bolt', 'simone-biles',
@@ -232,7 +233,7 @@ test('every bundled selection survives saved-state restoration', () => {
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'US Tech Hubs & Skylines').length, 13);
 	assert.ok(TRIAL_CHARMS.every(charm => !/NVIDIA|Salesforce|Apple|Alpine Lake|Night Sky|Ringed Planet/.test(`${charm.name} ${charm.description}`)));
 	for (const artist of ['travis-scott', 'whitney-houston', 'beyonce', 'prince']) {
-		assert.ok(TRIAL_CHARMS.some(charm => charm.id === `trial:artist-${artist}`));
+		assert.ok(WITHHELD_CHARMS.some(charm => charm.id === `trial:artist-${artist}`));
 	}
 	assert.ok(TRIAL_CHARMS.every(charm => !charm.source && /^trial-[a-z0-9-]+\.png$/.test(charm.file)));
 	assert.equal(MESSAGES.length, 80);
@@ -242,6 +243,34 @@ test('every bundled selection survives saved-state restoration', () => {
 		const requested = { ...DEFAULT_STATE, charmId: charm.id, cordLength: 210, size: 80 };
 		assert.deepEqual(restoreState(JSON.parse(JSON.stringify(requested))), requested);
 	}
+});
+
+test('withheld review artwork keeps saved selections and every cord without exposing its image', () => {
+	const cordChoices = Object.fromEntries(WITHHELD_CHARMS.map(charm => [charm.id, 'silver-chain']));
+	for (const charm of WITHHELD_CHARMS) {
+		const saved = { ...DEFAULT_STATE, charmId: charm.id, charmPinned: true, size: 80, cordLength: 210, cordChoices };
+		const restored = restoreState(JSON.parse(JSON.stringify(saved)));
+		assert.deepEqual(restored, saved);
+		assert.deepEqual(restoreState(JSON.parse(JSON.stringify(restored))), restored);
+		const displayed = getCharm(restored.charmId);
+		assert.equal(displayed.id, charm.id);
+		assert.equal(displayed.file, ORIGINAL_CHARMS[0].file);
+		assert.match(displayed.name, /unavailable/);
+		assert.equal(CHARMS.some(item => item.id === charm.id), false);
+	}
+});
+
+test('a personally imported withheld image remains usable and inherits its saved choice and cord', () => {
+	const original = WITHHELD_CHARMS[0];
+	const imported = { ...original, id: 'pack:personal-review:keepsake', source: 'data:image/png;base64,fixture' };
+	const catalogue = buildCatalogue([imported]);
+	const restored = restoreState({ ...DEFAULT_STATE, charmId: original.id,
+		cordChoices: { [original.id]: 'ribbon' }, charmPinned: true }, catalogue);
+	assert.equal(restored.charmId, imported.id);
+	assert.equal(restored.cordChoices[imported.id], 'ribbon');
+	assert.equal(getCharm(restored.charmId, catalogue).source, imported.source);
+	assert.equal(catalogue.filter(charm => charm.artworkKey === original.artworkKey).length, 1);
+	assert.deepEqual(restoreState(JSON.parse(JSON.stringify(restored)), catalogue), restored);
 });
 
 test('retiring the early designs preserves the matching choice, pin and cord', () => {

@@ -1,9 +1,9 @@
 # CharmBits: Coding Charms
 
-All VS Code extension features are free: focus sessions, a garden, encouragement, small wins, photo keepsakes, imports and playful breaks. Start with 31 included charms; extra paid charms are optional. The current catalogue contains 261 designs; existing beta profiles retain their beta access with free replacements for three retired designs.
+All VS Code extension features are free: focus sessions, a garden, encouragement, small wins, photo keepsakes, imports and playful breaks. Start with 31 included charms; extra paid charms are optional. The public catalogue contains 210 designs. Existing beta access, saved choices, personal imports and progress are retained.
 The default Hanging layout saves headroom; Orbit layout reserves room for full loops.
 
-**CharmBits candidate, version 0.15.0.** CharmBits lives in a dockable VS Code view, not over your code
+**CharmBits candidate, version 0.15.1.** CharmBits lives in a dockable VS Code view, not over your code
 or desktop. It uses supported APIs and does not modify your VS Code installation.
 It also works in Restricted Mode without asking you to trust workspace code.
 
@@ -28,9 +28,17 @@ CharmBits has its own Activity Bar container titled **CharmBits**. You can move 
 8. Click **Garden**, then **Plant a seed**, or run **CharmBits: Open Garden**. Water once per local day and earn an original flower after eleven valid waterings. Optional water/move schedules live under **Settings → Reminders**.
 9. Run **CharmBits: Import Charm Pack** for a downloaded `.charmlet.json`; remove imported packs with **CharmBits: Remove Charm Pack**.
 
-The trial includes 236 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **261 charms** in all. Open **Charms** to search the themed packs. Terminal is first, followed by Live 3D, Stress Busters, Music and Music Icons; no separate imports are needed. Music Icons includes all 34 artist studies, with Travis Scott, legends and twelve women. Existing imports keep their saved IDs and exact artwork without duplicate bundled figures.
+The public selection includes 185 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **210 charms** in all. Open **Charms** to search the available themed packs. Terminal is first, followed by Live 3D, Stress Busters and Music. Existing personal imports keep their saved artwork.
 
-**Music** has twelve instruments and controllers. **Sports Icons** includes 17 athlete-inspired studies with Pro, including Dhoni, Tendulkar, Curry, Hamilton, Federer, Nadal and Phelps. **US Tech Hubs & Skylines** includes 13 cities from the Bay Area to Boston and New York. Public artwork and likeness review remains required.
+**Music** has twelve instruments and controllers. **US Tech Hubs & Skylines** includes 13 cities from the Bay Area to Boston and New York. Music Icons and Sports Icons remain review material and are excluded from public packages. A saved selection of unavailable review artwork uses a neutral placeholder while retaining its ID and cord; personally imported artwork remains available.
+
+The starter stays at 31 charms, with Redwood Grove and Bay Area / Silicon Valley replacing its two artist studies. The 15 optional free downloads include Electric Guitar in place of the earlier artist study.
+
+## Terms
+
+The extension's software features are free under the proprietary [software licence](LICENSE).
+First-party artwork has [separate terms](ARTWORK-LICENSE.md); third-party notices remain applicable.
+Read the current [website terms](https://charmbits.pages.dev/terms.html) and [privacy information](PRIVACY.md).
 
 **California** includes Palace of Fine Arts, Painted Ladies, Pebble Beach, Coastal Cypress, San Francisco Tower, Granite Dome, Santa Clara Office and the current circular Cupertino Ring Campus. **Celebrations** adds Diwali Diyas and Halloween Lantern. Saved Alpine Lake, Night Sky and Ringed Planet selections move to the free San Francisco, Austin and Seattle skylines, preserving pins and cord choices. Existing personal imports remain usable.
 

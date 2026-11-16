@@ -1,5 +1,11 @@
 # CharmBits artwork
 
+**Current public selection, 0.15.1:** 210 designs, with separate software and artwork terms.
+Music Icons (34) and Sports Icons (17) remain review material and are excluded from public
+packages and the downloadable catalogue. Two selected homepage-only concept previews
+are described in the latest entry below. The dated records preserve the earlier
+authoring and review history; their inclusion counts are not the current release selection.
+
 The 0.6.0 trial bundles ten original SVG charms and 134 rendered PNG designs for offline use. Original-source records appear below; the final dated entry documents the generated trial collection. Inclusion in the trial does not approve the public-release lineup or grant a reuse licence.
 
 | Charm | Asset | Origin / authoring record |
@@ -19,7 +25,9 @@ The four images were loaded in real Windows VS Code 1.90.0 and 1.138.0 views and
 
 ## License status
 
-The project's source/art license is still pending. This provenance record does not grant a separate reuse license or imply company endorsement. Third-party code and icon notices remain in `THIRD_PARTY_NOTICES.md`; no new third-party artwork or dependency was introduced for this collection.
+The approved software terms are in `LICENSE`, and the separate artwork terms are in
+`ARTWORK-LICENSE.md`. This provenance record grants no additional rights or company
+endorsement. Third-party code and icon notices remain in `THIRD_PARTY_NOTICES.md`.
 
 ## 2026-10-06 - Expanded bundled collection and gallery extras
 
@@ -128,3 +136,29 @@ On 2026-11-13 the owner approved sharing the completed candidate, including the 
 Thirteen new miniature skylines depict the Bay Area/Silicon Valley, San Francisco, San Diego, Austin, Raleigh-Durham, Dallas, Miami, Seattle, Boston, New York, Chicago, Atlanta and Denver. The Cupertino design now depicts the current circular campus with its green courtyard; it replaces the older Infinite Loop interpretation described above. Santa Clara Office and San Francisco Tower use generic names. The illustrations omit company names and logos, and are not verified architectural models. Prompts, revisions and hashes are recorded in `website/art-collection-refresh.json` and `website/art-review.json`; original images and receipts remain in ignored authoring storage.
 
 Alpine Lake, Night Sky and Ringed Planet retire from the current catalogue. Their built-in selections migrate to the free San Francisco, Austin and Seattle skylines without losing pins or cord choices. Existing personal imports remain intact. The 261-design candidate contains 236 static designs, Terminal, fifteen live companions and nine fidget/puzzle tools; garden rewards remain separate from flower-art previews.
+
+## Public release selection, 0.15.1 (2026-11-16)
+
+The owner accepted the recommended proprietary software and separate artwork terms,
+with unresolved recognizable-person collections deferred. The public catalogue now
+contains 185 rendered designs, Terminal, fifteen live companions and nine fidgets.
+The source images and prior review packs have not been deleted or regenerated.
+
+The 31 starter choices now include Redwood Grove and Bay Area / Silicon Valley in
+place of two artist studies; Electric Guitar replaces the artist free download,
+keeping 15 optional free claims. Existing personal packs remain usable. A saved
+withheld built-in choice retains its ID and cord while displaying a neutral
+placeholder. The frozen beta entitlement list is unchanged.
+
+Public packaging excludes the withheld PNGs, website thumbnails and artist review
+screenshots. `--review-downloads` remains an explicitly private authoring preview.
+This selection and the new terms do not establish rights in any third-party
+likeness, trademark or work, or claim exclusive copyright in generated material.
+
+Later on November 16, the owner explicitly requested one athlete figure and one
+musician figure on the homepage, using two of the existing studies selected in
+`website/homepage-previews.json`. Only their existing WebP previews are copied to the
+separate homepage preview directory; they do not enter the app catalogue,
+commerce products, raw PNG downloads or press kit. `website/homepage-previews.json`
+records this display selection. This changes the homepage presentation permission,
+not the recorded status of third-party likeness or commercial-use rights.

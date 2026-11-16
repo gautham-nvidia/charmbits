@@ -10,7 +10,6 @@ if (flags.some(flag => flag !== '--release')) throw new Error('Only --release is
 // Keep the installed extension identity while giving the download its current public name.
 const result = spawnSync(process.execPath, [
   join(root, 'node_modules/@vscode/vsce/vsce'), 'package', '--no-dependencies',
-  ...(flags.includes('--release') ? [] : ['--skip-license']),
   '--out', join(root, `charmbits-${manifest.version}.vsix`),
 ], { cwd: root, stdio: 'inherit' });
 if (result.error) throw result.error;

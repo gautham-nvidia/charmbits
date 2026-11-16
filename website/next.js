@@ -72,22 +72,33 @@ function setupPlayground(data) {
 }
 
 function setupShelf(data) {
-  const patterns = [/Acoustic Guitar/i, /Goldendoodle/i, /Granite Dome/i, /MS Dhoni inspired/i,
-    /San Francisco Skyline/i, /Saxophone/i, /Giant Panda/i, /Painted Ladies/i];
+  const patterns = [/Acoustic Guitar/i, /Goldendoodle/i, /Granite Dome/i, 'sports',
+    /San Francisco Skyline/i, 'music', /Giant Panda/i, /Painted Ladies/i];
   const shelf = document.querySelector('#collection-shelf');
   for (const pattern of patterns) {
-    const charm = data.charms.find(item => pattern.test(item.name));
-    if (!charm) throw new Error(`A featured collection artwork is missing: ${pattern.source}`);
-    const item = element('a', 'shelf-item');
-    item.href = `./charms.html?collection=${encodeURIComponent(charm.collectionId)}`;
-    item.setAttribute('aria-label', `Explore ${charm.collectionLabel}, featuring ${charm.name}`);
+    const preview = typeof pattern === 'string';
+    const charm = preview ? data.homepagePreviews.find(item => item.slot === pattern)
+      : data.charms.find(item => pattern.test(item.name));
+    if (!charm) throw new Error(`A featured collection artwork is missing: ${preview ? pattern : pattern.source}`);
+    const item = element(preview ? 'figure' : 'a', 'shelf-item');
+    if (preview) {
+      item.dataset.homePreview = charm.slot;
+      item.setAttribute('aria-label', `${charm.name}, homepage preview`);
+    } else {
+      item.href = `./charms.html?collection=${encodeURIComponent(charm.collectionId)}`;
+      item.setAttribute('aria-label', `Explore ${charm.collectionLabel}, featuring ${charm.name}`);
+    }
     const image = element('img');
     image.src = charm.preview;
     image.alt = '';
     image.width = 216;
     image.height = 252;
     image.loading = 'lazy';
-    item.append(image, element('strong', '', charm.name), element('small', '', charm.collectionLabel));
+    item.append(image);
+    const caption = preview ? element('figcaption') : item;
+    caption.append(element('strong', '', charm.name),
+      element('small', '', preview ? `${charm.collectionLabel} · Preview only` : charm.collectionLabel));
+    if (preview) item.append(caption);
     shelf.append(item);
   }
 }

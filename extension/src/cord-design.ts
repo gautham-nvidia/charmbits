@@ -1,4 +1,4 @@
-import { isSoftCharm, RETIRED_CHARMS, type CharmDefinition } from './charm-catalog';
+import { isSoftCharm, RETIRED_CHARMS, WITHHELD_CHARMS, type CharmDefinition } from './charm-catalog';
 
 export const CORD_STYLES = {
 	thread: 'Simple thread',
@@ -26,7 +26,8 @@ export function restoreCordChoices(value: unknown, charms: readonly CharmDefinit
 	if (!value || typeof value !== 'object' || Array.isArray(value)) { return {}; }
 	const raw = value as Record<string, unknown>;
 	const entries: Array<[string, CordStyle]> = [];
-	for (const charm of charms) {
+	const retained = WITHHELD_CHARMS.filter(saved => !charms.some(charm => charm.id === saved.id || charm.artworkKey === saved.artworkKey));
+	for (const charm of [...charms, ...retained]) {
 		if (entries.length >= 512) { break; }
 		const artworkId = charm.artworkKey ? `trial:${charm.artworkKey}` : charm.id;
 		const retired = Object.entries(RETIRED_CHARMS).filter(([, current]) => current === artworkId).map(([id]) => id);

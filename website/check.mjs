@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
@@ -7,6 +7,7 @@ import { validateDistribution } from './distribution.mjs';
 import { validateLaunch } from './launch.mjs';
 import { validateAudience } from './audience.mjs';
 import { securityHeaders } from './security-headers.mjs';
+import { isWithheldArtworkFile } from '../release/artwork-policy.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repo = join(root, '..');
@@ -19,10 +20,17 @@ const output = join(repo, 'extension/test-results', `website-check-${manifest.ve
 await mkdir(output, { recursive: true });
 const base = process.env.CHARMLET_GALLERY_URL || 'http://127.0.0.1:4173/';
 const gallery = new URL('charms.html', base).href;
-const counts = { coding: 1, live: 15, stress: 18, music: 12, 'music-icons': 34, 'sports-icons': 17,
+const counts = { coding: 1, live: 15, stress: 18, music: 12,
   california: 12, 'us-cities': 13, animals: 13, silicon: 15, parks: 6, space: 13, zodiac: 12, gemstones: 8, culture: 25,
   sports: 5, seasonal: 24, flowers: 18 };
-assert.equal(data.charms.length, 261);
+assert.equal(data.charms.length, 210);
+assert.deepEqual(data.homepagePreviews.map(item => item.id).sort(),
+  ['artist-michael-jackson', 'athlete-stephen-curry']);
+const homepageImages = new Set(data.homepagePreviews.map(item => item.preview.replace(/^\.\//, '')));
+assert.ok([...homepageImages].every(path => /^assets\/home-previews\/[a-z0-9-]+\.webp$/.test(path)));
+assert.equal((await readdir(join(root, 'dist'), { recursive: true })).some(file =>
+  isWithheldArtworkFile(file) && !homepageImages.has(file.replaceAll('\\', '/'))), false,
+  'Only the two selected homepage WebP previews may accompany the public catalogue.');
 assert.equal(data.version, manifest.version);
 assert.deepEqual(Object.fromEntries(data.collections.map(item => [item.id, item.charmIds.length])), counts);
 const marketplace = `https://marketplace.visualstudio.com/items?itemName=${manifest.publisher}.${manifest.name}`;
@@ -67,6 +75,9 @@ page.on('console', message => {
 });
 const overflow = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 const publicCommerce = JSON.parse(await readFile(join(root, 'dist/commerce-public.json'), 'utf8'));
+assert.equal(publicCommerce.starterCount, 31);
+assert.equal(publicCommerce.freeDownloadCount, 15);
+assert.equal(publicCommerce.products.some(product => ['Music Icons', 'Sports Icons'].includes(product.collection)), false);
 const artwork = JSON.parse(await readFile(join(root, 'art-review.json'), 'utf8'));
 // These checks remain isolated after real provider addresses are configured.
 await page.route('**/commerce-public.json', route => route.fulfill({
@@ -100,6 +111,46 @@ async function chooseTheme(mode) {
     await page.locator('[data-theme-toggle]').click();
   }
   await expect(page.locator('html')).toHaveAttribute('data-theme-mode', mode);
+}
+async function checkCaliSwing() {
+  const charm = page.locator('#demo-charm'), stage = page.locator('#demo-stage');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const direction of [-1, 1]) {
+    await page.locator('#demo-reset').click();
+    await charm.scrollIntoViewIfNeeded();
+    await expect(charm).toBeInViewport();
+    const box = await charm.boundingBox(), area = await stage.boundingBox();
+    const x = box.x + box.width / 2, y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + direction * Math.min(100, area.width * .15), y, { steps: 8 });
+    await expect(stage).toHaveAttribute('data-dragging', 'true');
+    await expect.poll(async () => {
+      const moved = await charm.boundingBox();
+      return direction * (moved.x + moved.width / 2 - x);
+    }, { message: `Cali must follow a ${direction < 0 ? 'left' : 'right'} pull` })
+      .toBeGreaterThan(Math.min(25, area.width * .035));
+    await page.mouse.up();
+  }
+  await page.locator('#demo-reset').click();
+  await charm.scrollIntoViewIfNeeded();
+  await expect(charm).toBeInViewport();
+  const box = await charm.boundingBox(), restX = box.x + box.width / 2;
+  // Keep the charm visible: scrolling to the lower controls can suspend the demo.
+  await charm.press('Enter');
+  const travel = await page.evaluate(() => new Promise(resolve => {
+    const samples = [], start = performance.now();
+    function sample(time) {
+      const box = document.getElementById('demo-charm').getBoundingClientRect();
+      samples.push(box.x + box.width / 2);
+      if (time - start < 2200) requestAnimationFrame(sample);
+      else resolve({ min: Math.min(...samples), max: Math.max(...samples) });
+    }
+    requestAnimationFrame(sample);
+  }));
+  assert.ok(travel.min < restX - 1 && travel.max > restX + .5,
+    `The swing must cross its resting point: ${JSON.stringify({ restX, ...travel })}`);
+  await page.locator('#demo-reset').click();
 }
 try {
   console.log('Checking the approved homepage, placement, reactions, email gate and garden.');
@@ -136,6 +187,15 @@ try {
   await expect(page.locator('#demo-name')).toHaveText('Cali');
   await expect(page.locator('#live-smiley')).toHaveAttribute('data-art-ready', /^cali:/);
   await expect(page.locator('.shelf-item')).toHaveCount(8);
+  await expect(page.locator('[data-home-preview]')).toHaveCount(2);
+  await expect(page.locator('[data-home-preview="sports"]')).toContainText('Stephen Curry inspired');
+  await expect(page.locator('[data-home-preview="music"]')).toContainText('Michael Jackson inspired');
+  await expect(page.locator('[data-home-preview] a')).toHaveCount(0);
+  for (const item of data.homepagePreviews) {
+    assert.equal(data.charms.some(charm => charm.id === item.id), false);
+    assert.equal(publicCommerce.products.some(product => product.sku === `trial:${item.id}`), false);
+    assert.equal((await page.request.get(new URL(item.preview, base).href)).status(), 200);
+  }
   assert.equal(await page.locator('a[href="./studio/"]').count(), 0);
   for (const name of ['Sunny', 'Nimbus', 'Byte', 'Cali']) {
     await page.getByRole('button', { name: `Try ${name}`, exact: true }).click();
@@ -144,8 +204,10 @@ try {
   }
   await page.getByRole('button', { name: 'VS Code', exact: true }).click();
   await expect(page.locator('#playground')).toHaveAttribute('data-workspace', 'vscode');
+  await checkCaliSwing();
   await page.getByRole('button', { name: 'Desktop', exact: true }).click();
   await expect(page.locator('#playground')).toHaveAttribute('data-workspace', 'desktop');
+  await checkCaliSwing();
   await page.getByRole('button', { name: '✦ Cheer', exact: true }).click();
   await expect(page.locator('#demo-charm .win-sparkles[data-kind="confetti"] i')).toHaveCount(28);
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -173,7 +235,7 @@ try {
 
   console.log('Checking collection filters, search, preview focus and protected download boundaries.');
   await page.goto(gallery, { waitUntil: 'networkidle' });
-  await expect(page.locator('.charm-card')).toHaveCount(261);
+  await expect(page.locator('.charm-card')).toHaveCount(210);
   await expect(page.locator('.charm-card').nth(0)).toHaveAttribute('data-charm-id', 'terminal');
   await expect(page.locator('.charm-card').nth(1)).toHaveAttribute('data-charm-id', 'live:cali');
   for (const collection of data.collections) {
@@ -181,25 +243,25 @@ try {
     await expect(page.locator('.charm-card')).toHaveCount(counts[collection.id]);
     await expect(page.locator('#collection-story')).toContainText(collection.name);
   }
-  await page.locator('[data-group="music-icons"]').click();
-  await page.locator('#search').fill('beyonce');
+  await page.locator('[data-group="music"]').click();
+  await page.locator('#search').fill('electric');
   await expect(page.locator('.charm-card')).toHaveCount(1);
-  await expect(page.locator('.charm-card h3')).toHaveText('Beyoncé inspired');
+  await expect(page.locator('.charm-card h3')).toHaveText('Electric Guitar');
   await page.reload({ waitUntil: 'networkidle' });
-  await expect(page.locator('#search')).toHaveValue('beyonce');
+  await expect(page.locator('#search')).toHaveValue('electric');
   await expect(page.locator('.charm-card')).toHaveCount(1);
   await page.locator('#search').fill('no-matching-artwork');
   await expect(page.locator('#empty-state')).toBeVisible();
   await page.locator('#reset-filters').click();
   await expect(page.locator('#search')).toBeFocused();
-  await expect(page.locator('.charm-card')).toHaveCount(261);
-  const artistButton = page.locator('.charm-card[data-charm-id="artist-travis-scott"] .card-art');
-  await artistButton.click();
+  await expect(page.locator('.charm-card')).toHaveCount(210);
+  const musicButton = page.locator('.charm-card[data-charm-id="new-electric-guitar"] .card-art');
+  await musicButton.click();
   await expect(page.locator('#preview-dialog')).toBeVisible();
   const scrollBeforeClose = await page.evaluate(() => scrollY);
   await expect(page.locator('#optional-pack')).toBeHidden();
   await page.keyboard.press('Escape');
-  await expect(artistButton).toBeFocused();
+  await expect(musicButton).toBeFocused();
   assert.ok(Math.abs(await page.evaluate(() => scrollY) - scrollBeforeClose) < 2);
   const oldPacks = ['music-icons-review', 'music-icons-legends-review', 'music-icons-current-review',
     'sports-icons-pro-preview-1', 'sports-icons-pro-preview-2'];
@@ -207,6 +269,14 @@ try {
     const response = await page.request.get(new URL(`packs/review/${id}.charmlet.json`, base).href);
     assert.equal(response.status(), 404);
   }
+  for (const key of ['artist-travis-scott', 'athlete-roger-federer']) {
+    const item = artwork.items.find(item => item.key === key);
+    assert.ok(item);
+    for (const path of [item.image, item.preview]) {
+      assert.equal((await page.request.get(new URL(path, base).href)).status(), 404);
+    }
+  }
+  assert.equal((await page.request.get(new URL('assets/app-review/trial-artist-travis-scott-0120.png', base).href)).status(), 404);
   const oldExtras = JSON.parse(await readFile(join(root, 'extras.json'), 'utf8'));
   for (const item of oldExtras) {
     const response = await page.request.get(new URL(`packs/${item.id}.charmlet.json`, base).href);
@@ -298,10 +368,10 @@ try {
   await page.screenshot({ path: join(output, 'gallery-desktop.png') });
 
   console.log('Checking information pages, shop, disabled service and mobile layouts.');
-  for (const key of ['athlete-roger-federer', 'athlete-rafael-nadal', 'athlete-michael-phelps']) {
+  for (const key of ['new-us-san-francisco-skyline', 'new-us-austin-skyline', 'new-us-seattle-skyline']) {
     const item = artwork.items.find(item => item.key === key);
     const charm = publicCommerce.products.find(charm => charm.sku === `trial:${key}`);
-    assert.ok(item && charm, `Missing new sports artwork: ${key}`);
+    assert.ok(item && charm, `Missing public skyline artwork: ${key}`);
     const difference = await page.evaluate(async urls => {
       const masks = [];
       for (const url of urls) {
@@ -321,10 +391,10 @@ try {
     }, [new URL(item.preview, base).href, new URL(charm.preview, base).href]);
     assert.ok(difference < .01, `${key}: website preview must match the native silhouette`);
   }
-  for (const path of ['about.html', 'about-us.html', 'press.html', 'privacy.html', 'shop.html', 'download.html']) {
+  for (const path of ['about.html', 'about-us.html', 'press.html', 'privacy.html', 'terms.html', 'shop.html', 'download.html']) {
     assert.equal((await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' })).status(), 200);
     await expect(page.locator('h1')).toBeVisible();
-    if (['about-us.html', 'press.html', 'privacy.html'].includes(path)) {
+    if (['about-us.html', 'press.html', 'privacy.html', 'terms.html'].includes(path)) {
       await expect(page.locator('[data-site-contact] a')).toHaveAttribute('href', 'mailto:getcharmlet@gmail.com');
       await expect(page.locator('[data-site-contact]')).toHaveText('getcharmlet@gmail.com');
     }
@@ -332,12 +402,11 @@ try {
   }
   await expect(page.locator('#portal-signup button[type="submit"]')).toBeDisabled();
   await page.goto(new URL('shop.html', base).href, { waitUntil: 'networkidle' });
-  await page.locator('#store-collection').selectOption('Sports Icons');
-  await expect(page.locator('.store-card')).toHaveCount(17);
-  await expect(page.locator('.store-price')).toHaveText(Array(17).fill('Included with CharmBits Pro'));
-  await expect(page.locator('.store-card button')).toHaveCount(0);
+  await expect(page.locator('#store-collection option[value="Sports Icons"], #store-collection option[value="Music Icons"]')).toHaveCount(0);
+  await page.locator('#store-collection').selectOption('Music');
+  await expect(page.locator('.store-card')).toHaveCount(12);
   await page.locator('#store-price').selectOption('0');
-  await expect(page.locator('.store-card')).toHaveCount(0);
+  await expect(page.locator('.store-card')).toHaveCount(4);
   await page.locator('#store-price').selectOption('');
   await expect(page.locator('#choose-pro')).toBeEnabled();
   await page.locator('#choose-pro').click();
@@ -355,18 +424,19 @@ try {
     if (width === 320) await page.screenshot({ path: join(output, 'offers-mobile.png') });
     await offers.getByRole('button', { name: /Maybe later/ }).click();
     await expect(page.locator('#open-offers')).toBeFocused();
+    await checkCaliSwing();
     await decodeImages(); await revealPage();
     assert.equal(await overflow(), false, `Homepage overflow at ${width}`);
     if (width === 390) await page.screenshot({ path: join(output, 'home-mobile.png'), fullPage: true });
-    await page.goto(`${gallery}?collection=music-icons`, { waitUntil: 'networkidle' });
-    await expect(page.locator('.charm-card')).toHaveCount(34);
+    await page.goto(`${gallery}?collection=music`, { waitUntil: 'networkidle' });
+    await expect(page.locator('.charm-card')).toHaveCount(12);
     await decodeImages();
     assert.equal(await overflow(), false, `Gallery overflow at ${width}`);
-    await preview('artist-whitney-houston');
+    await preview('new-electric-guitar');
     assert.equal(await overflow(), false, `Preview overflow at ${width}`);
     await page.locator('#preview-close').click();
     if (width === 390) await page.screenshot({ path: join(output, 'gallery-mobile.png') });
-    for (const path of ['about.html', 'about-us.html', 'press.html', 'privacy.html', 'shop.html', 'download.html']) {
+    for (const path of ['about.html', 'about-us.html', 'press.html', 'privacy.html', 'terms.html', 'shop.html', 'download.html']) {
       await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' });
       assert.equal(await overflow(), false, `Overflow: ${path} at ${width}`);
     }
@@ -514,8 +584,9 @@ try {
   await page.locator('#email-download').click();
   await expect(page).toHaveURL(marketplace);
   assert.deepEqual(errors, []);
-  const result = { version: manifest.version, charms: 261, artists: 34, athletes: 17, skylines: 13, collections: 18,
-    desktop: true, mobileWidths: [390, 320, 768], liveCompanions: 15, puzzleBoards: 3,
+  const result = { version: manifest.version, charms: 210, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
+    homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: 16,
+    desktop: true, mobileWidths: [390, 320, 768], caliBidirectionalSwing: true, liveCompanions: 15, puzzleBoards: 3,
     publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,
     popupDismissal: true, compactAutoTheme: true, marketplaceDirectInstall: true, consoleErrors: errors };

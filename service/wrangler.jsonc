@@ -7,7 +7,7 @@
   "vars": {
     "WEB_ORIGIN": "",
     "MAIL_FROM": "",
-    "MAIL_FROM_NAME": "Charmlet",
+    "MAIL_FROM_NAME": "CharmBits",
     "SIGNING_KEY_ID": "launch-1",
     "TEST_MODE": "true",
     "CHECKOUT_ENABLED": "false"

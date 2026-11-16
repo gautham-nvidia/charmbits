@@ -2,7 +2,7 @@
 
 CharmBits Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
 
-The **0.12.0 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Pro charm access also works in the free VS Code extension; provider setup is still required. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+The **0.12.1 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Pro charm access also works in the free VS Code extension; provider setup is still required. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
 
 The public app and archive names are now CharmBits. The internal app name remains `Charmlet` to preserve the existing profile, single-instance lock and macOS encrypted-access keychain entry. The bundle ID, saved filenames and pack/activation formats also stay stable.
 
@@ -12,9 +12,9 @@ Drag **Move** to place the charm, or focus that button and use the arrow keys (S
 
 Under **Tools > Settings**, **Background**, **Keep toolbar visible** and **Keep messages visible** are separate saved preferences, all off by default. The tray's **Open Controls** and **Reset Window Position** remain available.
 
-The trial shares the extension's **261 offline charms**: 236 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters**, **Music** and **Music Icons**. Nimbus has sunrise, rain and lightning reactions; Byte has a metal body and animated binary/code display. Music includes twelve instruments and controllers; Music Icons adds 34 artist studies. Previously imported packs retain their selections and exact artwork without duplicate bundled tiles.
+The trial shares the extension's **210 public offline charms**: 185 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Nimbus has sunrise, rain and lightning reactions; Byte has a metal body and animated binary/code display. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
 
-**Sports Icons** adds 17 athlete-inspired studies included with Pro, without a separate sports charge, including Federer, Nadal and Phelps. **US Tech Hubs & Skylines** adds 13 cities. Three retired starter choices migrate to San Francisco, Austin and Seattle; generic office names and the circular Cupertino Ring Campus carry forward saved IDs. Existing personal imports remain usable. Public artwork and likeness review remains required.
+**US Tech Hubs & Skylines** includes 13 cities. Music Icons and Sports Icons are held for separate rights review and excluded from the public package. Saved withheld selections retain their IDs and cords with a neutral placeholder; personal imports remain usable. The starter and free downloads use generic replacements while keeping their counts. The [software licence](../extension/LICENSE) and [artwork terms](../extension/ARTWORK-LICENSE.md) are included in the desktop build.
 
 **Live 3D** also includes Cali, Sunny and eleven California companions. **Stress Busters** brings four spinners, Bubble Pop, Worry Stone and three puzzles together with the smiley balls and squishies. Giant Panda, seven dog breeds including Goldendoodle and Husky, and two cats remain under **Pets & Wildlife**. The eighteen-flower garden, imports, photos, saved cords and pins carry forward. Final public lineup and pricing remain undecided.
 
@@ -40,7 +40,7 @@ npm.cmd --prefix desktop run test
 npm.cmd --prefix desktop run package
 ```
 
-The Windows 0.12.0 packaging target is an unsigned folder under `desktop/release/0.12.0/CharmBits-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. The earlier [playful charms verification log](../docs/phase-11-playful-charms.md) describes its own candidate. Signing, notarization, update service, store listing and public distribution remain release work.
+The Windows 0.12.1 packaging target is an unsigned folder under `desktop/release/0.12.1/CharmBits-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. The earlier [playful charms verification log](../docs/phase-11-playful-charms.md) describes its own candidate. Signing, notarization, update service, store listing and public distribution remain release work.
 
 For a portable download, archive and test the extracted application.
 
@@ -101,4 +101,4 @@ The Windows archive job also checks real OS input on its isolated desktop. It ha
 - Monitor disconnect/reconnect, negative-coordinate displays and mixed-DPI movement.
 - OS suspend/lock and macOS Spaces behavior; running focus pauses and never auto-resumes.
 - macOS package/run evidence from the hosted workflow.
-- Owner decisions for source/art license, signing, notarization and distribution.
+- Signing, notarization and distribution decisions. Source and public artwork terms are now included.

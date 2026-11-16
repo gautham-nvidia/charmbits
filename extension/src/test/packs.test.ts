@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { CHARMS, TRIAL_CHARMS, buildCatalogue } from '../charm-catalog';
+import { CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS, buildCatalogue } from '../charm-catalog';
 import {
 	installPack, loadPacks, MAX_PACK_BYTES, MAX_PNG_BYTES, packCharms, parseCharmPack, removePack,
 } from '../charm-packs';
@@ -97,21 +97,22 @@ test('cord attachment stays on a slanted silhouette when the downward inset cros
 	assert.equal(pixels[(y * width + x) * 4 + 3], 255);
 });
 
-test('artist and sports packs preserve imported selection and free ownership without duplicate bundled figures', async () => {
+test('withheld artist and sports packs preserve personal imports and ownership', async () => {
 	const packs = await Promise.all(['music-icons-review', 'music-icons-legends-review', 'music-icons-current-review',
 		'sports-icons-pro-preview-1', 'sports-icons-pro-preview-2', 'sports-icons-pro-preview-3']
 		.map(async id => parseCharmPack(await readFile(join(__dirname, '../../../website/packs/review', `${id}.charmlet.json`)))));
 	const imported = packCharms(packs);
 	const catalogue = buildCatalogue(imported);
 	assert.equal(imported.length, 51);
-	assert.equal(catalogue.length, CHARMS.length);
+	assert.equal(catalogue.length, CHARMS.length + imported.length);
 	for (const charm of imported) {
 		assert.ok(accessibleCatalogue(catalogue, {}).some(item => item.id === charm.id),
 			'An existing personal import must remain usable without Pro.');
-		const bundled = TRIAL_CHARMS.find(item => item.artworkKey === charm.artworkKey)!;
-		assert.ok(bundled, charm.name);
-		assert.equal(charm.artworkHash, bundled.artworkHash, `Keep the approved PNG bytes for ${charm.name}.`);
-		assert.equal(catalogue.some(item => item.id === bundled.id), false);
+		const original = WITHHELD_CHARMS.find(item => item.artworkKey === charm.artworkKey)!;
+		assert.ok(original, charm.name);
+		assert.equal(charm.artworkHash, original.artworkHash, `Keep the imported PNG bytes for ${charm.name}.`);
+		assert.equal(catalogue.some(item => item.id === original.id), false);
+		assert.equal(catalogue.filter(item => item.artworkKey === charm.artworkKey).length, 1);
 		const restored = restoreState({ charmId: charm.id, charmPinned: true,
 			cordChoices: { [charm.id]: 'ribbon' } }, catalogue);
 		assert.equal(restored.charmId, charm.id);

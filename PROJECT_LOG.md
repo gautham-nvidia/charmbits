@@ -618,3 +618,23 @@ The owner approved public review of the artwork, then selected **CharmBits** and
 Local validation passed 102 app models, 13 access-service checks, 7 release checks, 23 artwork/Studio checks, 14 editor scenarios, 8 installed-VSIX scenarios, 13 desktop models and the extracted Windows archive. An actual 0.14→0.15 installation retained an owned profile's photo bytes, imported pack, settings, paused focus, garden progress, saved win and 235 available choices. Website checks passed with no console errors; a later visual pass corrected stale Sports Icons and Photo Studio copy.
 
 The prepared Marketplace workflow uses Trusted Publishing with pinned vsce4.1.1. The rebuilt VSIX's 324 runtime/art entries match the UI-tested package exactly. Current listing screenshots show the actual 31-charm starter. [Phase18 evidence and remaining owner decisions](docs/phase-18-charmbits.md) distinguishes tested review artifacts from publication and live-service readiness. No source/artwork licence, publisher ownership or successful paid launch is assumed.
+
+## 2026-11-16 — Release terms, new address and the homepage
+
+The owner approved proprietary software terms and separate artwork terms for the
+0.15.1 / desktop 0.12.1 candidate. The public app catalogue contains 210 designs,
+with 31 starter charms and 15 optional free downloads. The 51 artist and athlete
+studies are excluded from app packages; saved selections and cord choices retain
+their identity with a neutral placeholder. Existing imports and user progress
+remain compatible.
+
+The owner requested Stephen Curry and Michael Jackson as two homepage concept
+previews. Those WebPs are kept outside the downloadable catalogue, paid products
+and press kit. The website's large Cali now has room to move on both sides;
+browser checks exercise left/right dragging and the return swing across desktop,
+sidebar and mobile layouts.
+
+App links use `https://charmbits.pages.dev/`. The old Cloudflare project's build
+generates a permanent redirect to the new hostname. [Phase19 validation](docs/phase-19-licensing-and-site.md)
+records the scope, data compatibility, local checks and remaining publisher and
+provider requirements. Deployment and hosted results are recorded after observation.

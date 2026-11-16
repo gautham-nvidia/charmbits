@@ -14,11 +14,11 @@ The frontend is a static site; the service runs on Cloudflare Workers with D1 fo
 | Pro | $7.49 launch / $17.49 regular, once, across the current apps |
 | Individual extras | $0.49 / $0.99 / $1.99; 49¢ items must check out with another paid item |
 | Trial expiry | Free and purchased content, local photos and progress remain |
-| Early beta | Existing local beta profiles retain the frozen 234-design beta collection; not future additions |
+| Early beta | The frozen 234-ID entitlement record is retained; only available public art is bundled. Withheld saved choices/cords and personal imports remain |
 
-Starter IDs and prices come from `extension/src/starter-selection.json` and `catalogue-access.ts`. Pro price comes from `website/commerce.json`. The server derives checkout amounts from its own generated catalogue. Artist studies are marked unavailable for individual sale; their rights and the bundled-artwork terms still need review before public commercialization.
+Starter IDs and prices come from `extension/src/starter-selection.json` and `catalogue-access.ts`. Pro price comes from `website/commerce.json`. The server derives checkout amounts from its own generated catalogue. Music Icons and Sports Icons are excluded from the public catalogue pending their separate rights review. Software and public artwork terms are included in the release.
 
-The **shared renderer and current artwork remain bundled in the apps** so live companions work offline. The new edition limits which items a fresh profile can select. Downloaded image packs are data-only files; live companions and fidgets are unlocked with a signed access file. This is not a claim that previously public beta artwork is a secret or that an open-source app cannot be modified.
+The shared renderer and **210 public designs** remain bundled for offline use. The edition limits which items a fresh profile can select. Downloaded image packs are data-only files; live companions and fidgets are unlocked with a signed access file. The proprietary licence does not make previously public review artwork secret or provide a technical DRM guarantee.
 
 ## What is already checked
 
@@ -30,7 +30,7 @@ The Worker bundles with Wrangler and the schema has been applied to the local D1
 
 Use your own browser for login, recovery details and merchant verification. Do not put passwords or API keys into chat.
 
-1. Create a Cloudflare Pages project for the website, a Workers subdomain and a Turnstile widget for the exact website hostname. Start on the free tiers; R2 activation may require a billing method and usage beyond allowances can cost money.
+1. The website is **https://charmbits.pages.dev/**. Create a Workers subdomain and a managed Turnstile widget for `charmbits.pages.dev`. Start on the free tiers; R2 activation may require a billing method and usage beyond allowances can cost money.
 2. Create a Brevo account using the current official inbox, **getcharmlet@gmail.com**, and verify an authenticated-domain sender for transactional delivery. Create a separate list for **confirmed, optional offers**. Free-plan sending limits apply to all email, not just campaigns.
 3. Create a Lemon Squeezy store when ready for payment testing. Confirm your business country is supported and complete merchant approval. Use USD and create **two fixed-price, one-time variants**: CharmBits Pro and a digital-items basket. Do not enable a subscription, quantity changes or pay-what-you-want. Hosted coupon entry is enabled for Pro; individual-item checkout keeps it off.
 4. Configure the payment webhook for `/v1/webhooks/lemon`, with `order_created` and `order_refunded`, and keep its signing secret private.
@@ -49,7 +49,7 @@ The popup is disabled until the service, Turnstile and Brevo offers list are con
 
 Create the offer code and amount in Lemon Squeezy when ready. Restrict it to the Pro variant, choose an expiry and redemption limit, then test a discounted purchase and refund before mailing it to confirmed Brevo subscribers. The website does not invent codes or promise a particular discount. The signed webhook checks the original cart subtotal and a bounded provider discount; a browser-supplied lower price cannot grant access.
 
-Sports Icons are included with Pro and cannot be purchased individually or claimed as free extras, even if their public-release flag later changes. Artwork and likeness review remains separate from this access rule.
+Sports Icons and Music Icons are held outside the public catalogue. Their prior review access rules do not authorize release, sale or public promotion.
 
 ## 2. Prepare Cloudflare and public app configuration
 

@@ -1,5 +1,6 @@
 import builtinCharms from './builtin-charms.json';
 import trialCharms from './trial-charms.json';
+import artworkPolicy from './artwork-policy.json';
 import { CALIFORNIA_COMPANIONS } from './california-companions';
 import { artToStage } from './live-art-core';
 import { orderByCollection } from './charm-collections';
@@ -33,7 +34,9 @@ export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
 	'trial:extra-night-sky': 'trial:new-us-austin-skyline',
 	'trial:new-ringed-planet': 'trial:new-us-seattle-skyline',
 });
-export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => !Object.hasOwn(RETIRED_CHARMS, charm.id));
+export const WITHHELD_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => artworkPolicy.withheldGroups.includes(charm.group));
+export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => !Object.hasOwn(RETIRED_CHARMS, charm.id)
+	&& !artworkPolicy.withheldGroups.includes(charm.group));
 export const LIVE_CHARMS: readonly CharmDefinition[] = [{
 	id: 'live:cali', name: 'Cali - Live Mascot', file: 'live-cali.png', group: 'Live Companions', accent: '#dcaa65',
 	description: 'A California grizzly with a coder wardrobe, a new outfit each day and a relaxed Friday look. Live glances, waves and thumbs-up; click for encouragement. Focus prompts and celebrations are optional.',
@@ -111,9 +114,15 @@ export function getCharm(id: unknown, charms: readonly CharmDefinition[] = CHARM
 	if (direct) { return direct; }
 	const replacement = typeof id === 'string' && Object.hasOwn(RETIRED_CHARMS, id) ? RETIRED_CHARMS[id] : id;
 	const artworkKey = typeof replacement === 'string' && replacement.startsWith('trial:') ? replacement.slice(6) : undefined;
-	return charms.find(charm => charm.id === replacement)
-		?? (artworkKey ? charms.find(charm => charm.artworkKey === artworkKey) : undefined)
-		?? CHARMS[0];
+	const available = charms.find(charm => charm.id === replacement)
+		?? (artworkKey ? charms.find(charm => charm.artworkKey === artworkKey) : undefined);
+	if (available) { return available; }
+	// Keep a saved review choice restorable without distributing its image.
+	if (WITHHELD_CHARMS.some(charm => charm.id === id)) {
+		return { ...ORIGINAL_CHARMS[0], id: id as string, name: 'Saved artwork (unavailable)',
+			description: 'This artwork is not included in this release. Your saved choice and cord are kept; choose another charm to switch.' };
+	}
+	return CHARMS[0];
 }
 
 const SOFT_CHARM_KEYS = new Set([

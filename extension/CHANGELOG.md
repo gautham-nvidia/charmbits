@@ -3,6 +3,14 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
+## 0.15.1 - 2026-11-16
+
+- Use the new CharmBits website address and add the approved proprietary software and separate artwork terms.
+- Publish 210 designs with 31 starter charms and 15 optional free downloads. Music Icons and Sports Icons remain excluded from app packages; two selected homepage concept previews are displayed separately.
+- Retain saved review selections and cords with a neutral placeholder, and keep personal imports, photos, purchases, focus and garden data intact.
+- Keep the extension identity and desktop trial/Pro model unchanged.
+- Give the website demo room to swing in both directions, including its desktop, sidebar and mobile layouts.
+
 ## 0.15.0 - Unreleased (CharmBits)
 
 - Renamed the app and its public website to CharmBits, keeping the Terminal logo and artwork.

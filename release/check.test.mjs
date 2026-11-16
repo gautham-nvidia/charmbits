@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { publicationBlockers, requirePublicationReady, validateCandidate } from './check.mjs';
+import { legacyPagesRedirect } from '../website/distribution.mjs';
 
 function fixture() {
   const manifest = { name: 'charmlet', displayName: 'CharmBits: Coding Charms', publisher: 'gautham-nvidia', version: '0.5.0', pricing: 'Free',
@@ -94,4 +95,28 @@ test('trusted publishing requires the GitHub OIDC context and retains source and
   assert.equal(publicationBlockers({ ...data, target: 'both', environment }).length, 1);
   assert.throws(() => requirePublicationReady({ ...data, target: 'marketplace',
     environment: { VSCE_PAT: 'fixture-only', CHARMLET_RELEASE_AUTH: 'unknown' } }), /Choose pat or oidc/);
+});
+
+test('withheld artwork cannot enter a VSIX even through an archived revision', () => {
+  for (const name of ['trial-artist-travis-scott-r1-p4.png', 'trial-athlete-lionel-messi-r2.png', 'artist-old-preview.png']) {
+    const data = fixture();
+    data.files.set(`extension/media/${name}`, Buffer.from('review-only'));
+    assert.throws(() => validateCandidate(data), /Withheld review artwork/);
+  }
+  const data = fixture();
+  data.built.set('extension/license', Buffer.from('Approved source terms'));
+  data.files.set('extension/license', Buffer.from('Stale terms'));
+  assert.throws(() => validateCandidate(data), /VSIX differs from built file/);
+});
+
+test('the shared website build redirects only the old Pages project', () => {
+  const expected = '/* https://charmbits.pages.dev/:splat 301\n';
+  for (const url of ['https://charmlet.pages.dev', 'https://abc123.charmlet.pages.dev']) {
+    assert.equal(legacyPagesRedirect(url), expected);
+  }
+  for (const url of [undefined, 'https://charmbits.pages.dev', 'https://abc123.charmbits.pages.dev',
+    'https://notcharmlet.pages.dev', 'https://charmlet.pages.dev.example.test']) {
+    assert.equal(legacyPagesRedirect(url), '');
+  }
+  assert.throws(() => legacyPagesRedirect('https://user@charmlet.pages.dev'));
 });

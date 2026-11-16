@@ -9,6 +9,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { isWithheldArtworkFile } from '../../release/artwork-policy.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const repo = join(root, '..');
@@ -25,8 +26,11 @@ if (nativeInput && (process.platform !== 'win32' || process.env.GITHUB_ACTIONS !
   throw new Error('Native pointer checks require the isolated Windows CI desktop.');
 }
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-const trial = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'));
+const trial = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'))
+  .filter(charm => !isWithheldArtworkFile(charm.file));
 const beta = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'beta-catalogue.json'), 'utf8'));
+const starter = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'starter-selection.json'), 'utf8')).starter;
+const retainedIds = new Set([...beta, ...starter]);
 const bundleRoot = process.env.CHARMLET_DESKTOP_BUNDLE_ROOT
   ? resolve(process.env.CHARMLET_DESKTOP_BUNDLE_ROOT) : join(root, 'release', manifest.version);
 const mode = packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : 'packaged' : 'dev';
@@ -90,6 +94,17 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       const startup = await diagnostic(application);
       assert.equal(startup.measuredWindowState.alwaysOnTop, true, 'Every fresh desktop launch must be topmost.');
       assert.equal(await application.evaluate(({ app }) => app.getName()), 'Charmlet', 'The profile and safe-storage identity stays compatible.');
+      const publicAssets = await application.evaluate(({ app }) => {
+        const fs = process.getBuiltinModule('fs'), path = process.getBuiltinModule('path');
+        const dist = path.join(app.getAppPath(), 'dist');
+        return { media: fs.readdirSync(path.join(dist, 'media')),
+          terms: Object.fromEntries(['LICENSE', 'ARTWORK-LICENSE.md'].map(name =>
+            [name, fs.readFileSync(path.join(dist, name), 'utf8')])) };
+      });
+      assert.equal(publicAssets.media.some(isWithheldArtworkFile), false, 'Desktop packages must exclude withheld images.');
+      for (const [name, contents] of Object.entries(publicAssets.terms)) {
+        assert.equal(contents, readFileSync(join(repo, 'extension', name), 'utf8'), `Packaged ${name} must match the source.`);
+      }
       if (process.platform === 'darwin') {
         const menu = await application.evaluate(({ Menu }) => {
           const applicationMenu = Menu.getApplicationMenu().items[0];
@@ -394,8 +409,9 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.deepEqual(savedDisplay, { background: true, toolbarPinned: true, messagesPinned: true });
 
   const gardenBeforeTrial = JSON.parse(readFileSync(companionPath, 'utf8')).garden;
-  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(beta.filter(id => id.startsWith('trial:')).length);
+  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(trial.filter(charm => retainedIds.has(charm.id)).length);
   await expect(window.locator('#charm-select option[value^="trial:athlete-"]')).toHaveCount(0);
+  await expect(window.locator('#charm-select option[value^="trial:artist-"]')).toHaveCount(0);
   for (const key of ['starter-drishti', 'new-smiley-happy', 'new-drishti-guardian',
     'new-us-san-francisco-skyline', 'new-cupertino-loop', 'new-earth']) {
     const entry = trial.find(charm => charm.artworkKey === key);

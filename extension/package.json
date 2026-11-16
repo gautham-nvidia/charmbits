@@ -2,7 +2,8 @@
   "name": "charmlet",
   "displayName": "CharmBits: Coding Charms",
   "description": "A free coding companion with focus, a daily garden, photo keepsakes and playful breaks. Optional paid charms.",
-  "version": "0.15.0",
+  "version": "0.15.1",
+  "license": "SEE LICENSE IN LICENSE",
   "pricing": "Free",
   "icon": "media/marketplace-icon.png",
   "galleryBanner": {
@@ -17,7 +18,7 @@
     "type": "git",
     "url": "https://github.com/gautham-nvidia/charmbits.git"
   },
-  "homepage": "https://github.com/gautham-nvidia/charmbits#readme",
+  "homepage": "https://charmbits.pages.dev/",
   "bugs": {
     "url": "https://github.com/gautham-nvidia/charmbits/issues"
   },
