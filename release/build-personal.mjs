@@ -20,7 +20,7 @@ const stagedExtension = join(output, 'extension'), stagedDesktop = join(output, 
 await Promise.all([mkdir(stagedExtension), mkdir(stagedDesktop)]);
 const personalNotes = `# CharmBits Personal
 
-Private owner edition: all included features and all 278 current designs are
+Private owner edition: all included features and all 292 current designs are
 unlocked, including the 51 owner-review studies. No trial, payment, activation
 file or billing connection is required. Nimbus remains an optional weather
 connection. Keep these builds private; public desktop pricing is separate.
@@ -99,7 +99,7 @@ async function artifact(file) {
   return { file, bytes: (await stat(file)).size, sha256: hash.digest('hex') };
 }
 const record = {
-  edition: 'personal', publicDistribution: false, designs: 278,
+  edition: 'personal', publicDistribution: false, designs: 292,
   editorVersion: extensionManifest.version, desktopVersion: desktopManifest.version,
   vsix: await artifact(vsix), desktop: await artifact(archive), application,
   verification: ['extracted desktop archive smoke', 'installed VSIX full personal catalogue and approved motion'],

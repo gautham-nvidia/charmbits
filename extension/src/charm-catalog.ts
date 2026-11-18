@@ -41,6 +41,7 @@ export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
 	'trial:extra-alpine-lake': 'trial:new-us-san-francisco-skyline',
 	'trial:extra-night-sky': 'trial:new-us-austin-skyline',
 	'trial:new-ringed-planet': 'trial:new-us-seattle-skyline',
+	'trial:new-robot-assistant': 'live:robot',
 });
 export const WITHHELD_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => artworkPolicy.withheldGroups.includes(charm.group));
 export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => !Object.hasOwn(RETIRED_CHARMS, charm.id)

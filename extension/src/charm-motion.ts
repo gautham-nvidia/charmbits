@@ -1,14 +1,19 @@
 import type { EffectKind } from './charm-motion-view';
 import registeredArtwork from './trial-charms.json';
+import petArtwork from './pet-motion.json';
 import { isSoftCharm } from './charm-catalog';
 
 interface MotionArtwork { id: string; artworkKey?: string; artworkHash?: string; bloom?: unknown; }
 
-export const PET_BLINK_FILES: Readonly<Record<string, string>> = {
-	'new-shiba-inu': 'motion-shiba-blink.png',
-	'new-maine-coon': 'motion-maine-coon-blink.png',
-	'new-lop-rabbit': 'motion-lop-rabbit-blink.png',
-};
+export interface PetMotionProfile {
+	eyes: readonly (readonly number[])[];
+	blink?: string;
+	accent?: { x: number; y: number; w: number; h: number };
+	gesture?: string;
+}
+const pets: Readonly<Record<string, PetMotionProfile>> = petArtwork;
+export const PET_BLINK_FILES: Readonly<Record<string, string>> = Object.fromEntries(
+	Object.entries(pets).flatMap(([key, pet]) => pet.blink ? [[key, pet.blink]] : []));
 
 const effects: Readonly<Record<string, EffectKind>> = {
 	'new-emerald': 'gem',
@@ -31,10 +36,14 @@ export function motionKind(charm: MotionArtwork): EffectKind | undefined {
 	if (charm.id.startsWith('pack:') && !registeredArtwork.some(item =>
 		item.artworkKey === charm.artworkKey && item.artworkHash === charm.artworkHash)) { return 'sway'; }
 	const key = charm.artworkKey ?? charm.id.replace(/^trial:/, '');
-	return effects[key] ?? 'sway';
+	return effects[key] ?? (Object.hasOwn(pets, key) ? 'pet' : 'sway');
 }
 
 export function blinkFile(charm: MotionArtwork): string | undefined {
-	if (!motionKind(charm)?.startsWith('pet-')) { return undefined; }
-	return PET_BLINK_FILES[charm.artworkKey ?? charm.id.replace(/^trial:/, '')];
+	return petMotionProfile(charm)?.blink;
+}
+
+export function petMotionProfile(charm: MotionArtwork): PetMotionProfile | undefined {
+	if (!motionKind(charm)?.startsWith('pet')) { return undefined; }
+	return pets[charm.artworkKey ?? charm.id.replace(/^trial:/, '')];
 }

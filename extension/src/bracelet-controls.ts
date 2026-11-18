@@ -1,4 +1,4 @@
-import type { BraceletState } from './bracelet-core';
+import { BRACELET_STYLES, isBraceletStyle, type BraceletState } from './bracelet-core';
 import type { CharmDefinition } from './charm-catalog';
 
 interface Options {
@@ -10,6 +10,16 @@ interface Options {
 export function createBraceletControls(container: HTMLElement, options: Options) {
 	container.setAttribute('role', 'group');
 	container.setAttribute('aria-label', 'Bracelet charms');
+	const styleRow = document.createElement('div'), styleLabel = document.createElement('label');
+	styleRow.className = 'bracelet-style-choice';
+	const style = document.createElement('select');
+	style.id = 'bracelet-style'; style.name = 'bracelet-style';
+	styleLabel.htmlFor = style.id; styleLabel.textContent = 'Bracelet design';
+	style.append(...Object.entries(BRACELET_STYLES).map(([id, label]) => new Option(label, id)));
+	style.addEventListener('change', () => {
+		if (isBraceletStyle(style.value)) { options.change({ ...options.state(), style: style.value }); }
+	});
+	styleRow.append(styleLabel, style); container.append(styleRow);
 	const rows = Array.from({ length: 3 }, (_, index) => {
 		const row = document.createElement('div'), label = document.createElement('label');
 		row.className = 'bracelet-choice';
@@ -29,7 +39,7 @@ export function createBraceletControls(container: HTMLElement, options: Options)
 			const charms = [...current.charms];
 			[charms[index], charms[target]] = [charms[target], charms[index]];
 			const selected = current.selected === index ? target : current.selected === target ? index : current.selected;
-			options.change({ charms, selected });
+			options.change({ ...current, charms, selected });
 		};
 		const left = button('←', 'Move left', () => move(-1));
 		const right = button('→', 'Move right', () => move(1));
@@ -37,11 +47,11 @@ export function createBraceletControls(container: HTMLElement, options: Options)
 			const current = options.state();
 			if (current.charms.length <= 2) { return; }
 			const charms = current.charms.filter((_, position) => position !== index);
-			options.change({ charms, selected: Math.min(charms.length - 1, current.selected - (index < current.selected ? 1 : 0)) });
+			options.change({ ...current, charms, selected: Math.min(charms.length - 1, current.selected - (index < current.selected ? 1 : 0)) });
 		});
 		select.addEventListener('change', () => {
 			const charms = [...options.state().charms]; charms[index] = select.value;
-			options.change({ charms, selected: index });
+			options.change({ ...options.state(), charms, selected: index });
 		});
 		row.append(label, select, left, right, remove); container.append(row);
 		return { row, select, left, right, remove };
@@ -52,7 +62,7 @@ export function createBraceletControls(container: HTMLElement, options: Options)
 		const current = options.state();
 		if (current.charms.length >= 3) { return; }
 		const next = options.catalogue().find(charm => !current.charms.includes(charm.id));
-		if (next) { options.change({ charms: [...current.charms, next.id], selected: current.charms.length }); }
+		if (next) { options.change({ ...current, charms: [...current.charms, next.id], selected: current.charms.length }); }
 	});
 	const hint = document.createElement('p');
 	hint.className = 'companion-hint';
@@ -62,6 +72,7 @@ export function createBraceletControls(container: HTMLElement, options: Options)
 	return {
 		render() {
 			const state = options.state(), catalogue = options.catalogue();
+			style.value = state.style;
 			const key = catalogue.map(charm => `${charm.id}:${charm.name}`).join('\n');
 			if (key !== catalogueKey) {
 				catalogueKey = key;

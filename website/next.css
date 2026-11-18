@@ -5,6 +5,8 @@
 @import url("./information.css");
 :root { --display: Bricolage, Manrope, sans-serif; --mono: Consolas, monospace; --card: #efefe5; --ink: var(--fg); --white: var(--bg); --copper: #8f7557; --muted: #5b6358; --note: #e5e9d9; --stage: #e6ecd8; --orange: #a4502f; }
 :root[data-theme="dark"] { --card: #213328; --muted: #b8c5b7; --note: #273b2d; --stage: #25372b; --orange: #f2ac83; --copper: #c9ab78; }
+#demo-bracelet-design { width: min(320px, 100%); margin: 14px auto 0; text-align: left; }
+#demo-bracelet-design select { min-height: 44px; color: var(--fg); background: var(--card); border-color: var(--line); }
 html { scroll-behavior: smooth; scroll-padding-top: 115px; }
 .concept-page { line-height: 1.6; overflow-x: clip; }
 .concept-page main { width: 100%; max-width: none; margin: 0; }

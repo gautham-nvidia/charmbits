@@ -43,18 +43,24 @@ and accepted `main` checks are complete.
 
 ## Local compatibility checks
 
-The actual CLIs, installed product files and disposable profiles were checked on **2026-11-17**:
+The actual CLIs, installed product files and disposable profiles were checked on **2026-11-18**:
 
 | Installed host | Version found | Verification |
 |---|---|---|
-| Microsoft VS Code | 1.146.0 | All 15 development and nine public installed-VSIX scenarios passed. The private VSIX also passed its full catalogue, motion and reload check. |
-| Cursor | 3.26.16; VS Code base 1.128.0 | The 0.16 VSIX installed and its commands registered. The fresh profile presents Log In / Sign Up; functional verification remains blocked by onboarding. |
-| Devin | 3.14.30819; VS Code base 1.141.2 | The 0.16 VSIX installed and registered its view. After the theme step, the fresh profile requires an account; functional verification remains pending. |
+| Microsoft VS Code | 1.146.0 | All 15 development and nine public installed-VSIX scenarios passed. The private VSIX passed its 292-design catalogue, motion and reload check. |
+| VSCodium | 1.143.17232 | All nine public installed-VSIX scenarios passed, including free access, pet reactions, bracelet styles, both pull directions and reload. |
+| Cursor | 3.26.16 | The current 0.16 VSIX installed and its bundled code matched the candidate. This launch did not expose an automation connection; full runtime verification remains pending. |
+| Devin | 3.14.30819; VS Code base 1.141.2 | The current 0.16 VSIX installed and its bundled code matched the candidate. The fresh profile reached the account screen after theme selection; full runtime verification remains pending. |
 
 These observations supersede the earlier registry-only version lookup. No account
 was used, owner profiles were not reused, and no login boundary was bypassed.
 Installation alone does not establish full Cursor or Devin support. Finish their
 functional checks in an authorized, signed-in profile before advertising that claim.
+
+A real 0.15-to-0.16 upgrade in an owned VS Code profile preserved preferences,
+the local photo and imported pack bytes, idempotent reimport, a paused focus
+session, garden progress and a saved win. This rehearsal used synthetic data;
+native paid-secret migration needs configured signing keys and was not exercised.
 
 The test harness supports a vendor executable and CLI while keeping installations,
 settings and imported data inside disposable profiles. The CLI path is explicit

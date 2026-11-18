@@ -12,7 +12,7 @@ interface Pose {
 	x: number; y: number; angle: number; width: number; height: number; cordStyle: CordStyle;
 }
 
-/** Keep the approved frontal bloom while its curved stalk follows the same body transform. */
+/** A straight stalk disappears behind the frontal bloom and meets its green base. */
 export function createFlowerStemBridge(svg: SVGElement, thread: SVGPathElement) {
 	const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 	group.dataset.part = 'flower-stem-bridge';
@@ -51,9 +51,12 @@ export function createFlowerStemBridge(svg: SVGElement, thread: SVGPathElement) 
 			if (!base) { return; }
 			const root = flower.attachment ?? DEFAULT_ATTACHMENT;
 			const point = (x: number, y: number) => `${(x - .5) * pose.width} ${(y - .5) * pose.height}`;
-			const path = `M ${point(root.x, root.y)} C ${point(.5, .075)} ${point(.02, .04)} ${point(.01, .20)} `
-				+ `C ${point(-.035, .32)} ${point(-.02, .78)} ${point(.20, .96)} `
-				+ `C ${point(.35, 1.10)} ${point(base.x, base.y + .13)} ${point(base.x, base.y)}`;
+			// The flower image occludes this short bridge. Avoid a visible loop around
+			// the petals; the small green neck below them supplies the attachment.
+			const neckY = Math.min(.99, base.y + .035);
+			const path = `M ${point(root.x, root.y)} `
+				+ `C ${point(root.x, .22)} ${point(base.x, neckY - .08)} ${point(base.x, neckY)} `
+				+ `L ${point(base.x, base.y)}`;
 			calyx.style.display = flower.stemCalyx ? '' : 'none';
 			if (flower.stemCalyx) {
 				calyx.setAttribute('d', `M ${point(base.x, base.y + .012)} `

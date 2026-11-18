@@ -264,6 +264,6 @@ export async function artworkJobs(repo) {
     job.hangingRotation = 0;
     job.removeTopLoop = job.id === 'poppy' ? 64 : job.id === 'wild-rose' ? 43 : 0;
   }
-  if (merged.size > 300) throw new Error('The artwork inventory exceeds its bounded limit.');
+  if (merged.size > 315) throw new Error('The artwork inventory exceeds its bounded limit.');
   return [...merged.values()];
 }

@@ -85,6 +85,81 @@
       "id": "great-wall", "name": "Great Wall", "group": "World Wonders", "accent": "#a49b79", "revision": 2,
       "description": "A winding stone wall following a rugged green mountain ridge.",
       "subject": "A small isolated three-dimensional Great Wall of China landscape charm, fully contained in the central 60 percent of the canvas: one weathered stone watchtower and a short crenellated wall winding in an elegant S curve across two small rugged mountain ridges. Include the complete naturally irregular rocky underside, restrained dark olive foliage and realistic stonework. It must be a self-contained scenic object with generous clear space on EVERY side. The ENTIRE background must be perfectly flat PURE RGB(0,255,0), #00FF00, including the four corners and beneath the object. Absolutely no white or pale background, sky, coloured outline, floor, cast shadow, rectangular picture, pedestal, text, people, flags or logos."
+    },
+    {
+      "id": "eiffel-tower", "name": "Eiffel Tower", "group": "World Wonders", "accent": "#ad957b",
+      "description": "Paris in daylight, with delicate iron latticework and four graceful arches.",
+      "subject": "The complete Eiffel Tower in Paris in warm natural daylight, seen from a slightly elevated three-quarter angle. Accurate elegant tapered proportions, four splayed iron legs and recognizable curved lower arches, two observation platforms, delicate warm bronze-grey latticework and the full narrow antenna. A tiny irregular patch of pale stone paving and restrained dark olive shrubs under the four feet. A beautifully detailed, dimensional miniature architectural illustration with no nighttime lighting display. Keep all four feet and the top within generous margins. One isolated scenic object, no sky, postcard panel, backing disk, pedestal, people, lettering, logos or hanging hardware."
+    },
+    {
+      "id": "colosseum", "name": "Colosseum", "group": "World Wonders", "accent": "#c1a17b",
+      "description": "Rome's weathered amphitheatre, with warm stone arches and an open arena.",
+      "subject": "The Roman Colosseum as one compact dimensional architectural illustration, seen from an elevated three-quarter angle. Correct elliptical amphitheatre shape, recognizable partly broken outer wall with three tiers of repeated stone arches, ochre travertine textures and a visible open central arena. A small irregular ground footprint, softly sunlit warm stone and dark arch interiors. Preserve architectural detail while making a clear silhouette at small size. Complete self-contained object with generous margins on every side, no sky panel, square base, pedestal, hanging loop, people, text or logos."
+    },
+    {
+      "id": "big-ben", "name": "Big Ben", "group": "World Wonders", "accent": "#b6a077",
+      "description": "London's Elizabeth Tower, with its familiar clock faces and Gothic spire.",
+      "subject": "London's Elizabeth Tower, commonly called Big Ben, as a complete upright dimensional architectural miniature. Accurate warm limestone Gothic clock tower, two readable ivory clock faces with dark hands and hour marks but no invented lettering, intricate upper stonework and dark slate pyramidal spire with a fine gold tip. A very small fragment of matching Parliament stonework at the foot, restrained enough that the tower dominates. Natural overcast daylight, fine realistic stone texture, full tower visible with wide clear margins. No flag, people, sky rectangle, souvenir disk, pedestal, hanging hardware, captions or logos."
+    },
+    {
+      "id": "santorini", "name": "Santorini", "group": "World Wonders", "accent": "#83a9c8",
+      "description": "Whitewashed Cycladic homes and blue domes above the Aegean.",
+      "subject": "A small self-contained Santorini hillside village landscape in Greece: three whitewashed Cycladic houses with curved walls, one beautiful cobalt-blue church dome with a small discreet cross, narrow pale stone steps and a trace of deep turquoise water at the base. Bright but gentle Mediterranean daylight, realistic plaster textures and crisp shaded recesses. Build an irregular natural cliff silhouette underneath rather than a square diorama platform. Entire scenic object comfortably inside the central two-thirds of the canvas, no rectangular sky, distant panorama, people, brand signs, words, souvenir backing, frame or hanging loop."
+    },
+    {
+      "id": "neuschwanstein", "name": "Neuschwanstein Castle", "group": "World Wonders", "accent": "#aab5b5",
+      "description": "A Bavarian hilltop castle with ivory towers and blue-grey roofs.",
+      "subject": "Neuschwanstein Castle in Bavaria as a small recognizable three-quarter architectural landscape: ivory limestone Romanesque walls, clustered tall cylindrical towers with blue-grey pointed roofs, the long main hall and its red brick gatehouse, resting on a compact irregular wooded rocky hill. Fine realistic stone, restrained dark forest-green conifers, soft clear daytime light and believable dimensional depth. Keep the entire castle, every roof tip and the natural rocky underside inside generous margins. No branded fantasy castle, flags, fog or sky rectangle, souvenir plaque, square plinth, hanging hardware, people or text."
+    },
+    {
+      "id": "statue-of-liberty", "name": "Statue of Liberty", "group": "World Wonders", "accent": "#7ca798",
+      "description": "New York's copper-green figure, with raised torch and a seven-ray crown.",
+      "subject": "The complete Statue of Liberty in New York as a beautifully detailed dimensional miniature, natural oxidized copper green with realistic patina. Correct robed female figure, raised right arm holding a small golden torch, seven-ray crown, left arm holding a tablet with no readable text, full draped body and feet on its recognizable short stone pedestal. The actual statue pedestal is part of the monument; do not add a second souvenir stand or disk. Slight three-quarter frontal view, gentle daylight, clear complete silhouette with wide margins. No people, skyline panel, flag, label, extra torch, hanging loop or logos."
+    },
+    {
+      "id": "niagara-falls", "name": "Niagara Falls", "group": "World Wonders", "accent": "#79adb7",
+      "description": "A broad horseshoe of falling water between Canada and the United States.",
+      "subject": "A compact isolated three-dimensional Niagara Horseshoe Falls landscape, viewed slightly from above. A recognizable broad curved horseshoe rim of turquoise river pouring in many fine white cascades into a deep blue pool, with subtle translucent mist kept close to the base and small dark rocky olive-green banks. Include a naturally irregular rocky underside and the whole curved waterfall. Realistic moving-water textures, fresh daylight and miniature landscape clarity. All parts fit comfortably within generous green margins. No wide panorama, rectangular photograph, sky, base disk, souvenir plinth, boats, visitors, flags or lettering."
+    },
+    {
+      "id": "angkor-wat", "name": "Angkor Wat", "group": "World Wonders", "accent": "#a4977b", "revision": 2,
+      "description": "Cambodia's lotus-shaped temple towers and weathered sandstone galleries.",
+      "subject": "A small isolated Angkor Wat temple scene in Cambodia, entirely within the central60percent of the canvas. Recognizable five lotus-bud sandstone towers with the central tower highest, stepped galleries and a short causeway beside a small reflecting pool. Fine grey-brown stone carvings, restrained dark olive shrubs and a complete organically shaped rocky underside. Render the stone in gentle warm light but DO NOT LIGHT OR SHADE THE BACKGROUND. Every background pixel must be EXACTLY PURE RGB(0,255,0), #00FF00, from all four corners to underneath the object. A perfectly uniform chroma key field, not a photographed green studio wall. No gradient, shading, shadow, desaturated green, vignette, floor, reflected colour, sky, plaque, platform, people, lettering, flags or hanging hardware. Preserve very generous pure-green margins on every side."
+    },
+    {
+      "id": "petra", "name": "Petra", "group": "World Wonders", "accent": "#c88e75",
+      "description": "Jordan's rose-stone Treasury, carved into a warm sandstone cliff.",
+      "subject": "The Treasury facade at Petra in Jordan carved into one compact irregular rose-red sandstone cliff fragment. A clearly recognizable two-storey classical facade with six lower columns, triangular pediment and central upper circular tholos, fine weathered stone details and dark recessed doorway. Warm terracotta, salmon and ochre strata, soft grazing daylight and real depth around the carved columns. A natural cliff silhouette with a complete irregular lower edge, generous clear margins. No square stone slab, frame, souvenir disk, pedestal, people, camels, desert panorama, signs, inscriptions or hanging loop."
+    },
+    {
+      "id": "kyoto-torii", "name": "Kyoto Torii Gates", "group": "World Wonders", "accent": "#c3704f",
+      "description": "A quiet path through vermilion torii gates, inspired by Kyoto.",
+      "subject": "A small dimensional scene inspired by Kyoto's Fushimi Inari shrine paths: three elegant vermilion torii gates receding gently along a short pale stone stairway, accurate curved upper crossbeams and black lower post bases, one small dark olive maple sprig and a compact naturally irregular mossy rock footprint. No written inscriptions on the gates. Slight elevated three-quarter view, soft dappled daylight, natural materials and warm quiet atmosphere. Entire scene fully isolated with generous margins, no backdrop rectangle, forest panorama, platform, souvenir backing, people, lantern text, logos or hanging hardware."
+    },
+    {
+      "id": "bryce-canyon", "name": "Bryce Canyon", "group": "National Parks", "accent": "#ce946b",
+      "description": "Warm orange hoodoos and pale limestone spires from Utah's high plateau.",
+      "subject": "A compact photographic-style dimensional landscape inspired by Bryce Canyon National Park in Utah. A small amphitheatre of recognizable tall orange and peach sandstone hoodoo spires, pale cream capstones, fine layered erosion and one tiny dark evergreen on a rim. Natural irregular rocky underside, warm low morning light, clear sculptural silhouettes, believable geological textures. One self-contained isolated landscape object inside the central sixty percent of the image. No people, trails with signs, postcard rectangle, sky panel, cut stone block, souvenir base, hanging hardware or words."
+    },
+    {
+      "id": "grand-teton", "name": "Grand Teton", "group": "National Parks", "accent": "#92a4b8", "revision": 2,
+      "description": "Jagged Wyoming peaks above a still lake and a quiet line of pines.",
+      "subject": "A small isolated three-dimensional Grand Teton National Park landscape from Wyoming, fully contained in the central60percent of the canvas. The distinctive steep jagged Teton granite skyline with the main Grand Teton summit and lower adjacent peaks, narrow snow gullies, a little dark-blue glacial lake and a few tiny dark conifers. Complete organically irregular rocky underside. Detailed mountain stone and quiet cool daylight ON THE SUBJECT ONLY. Every background pixel must be EXACTLY PURE RGB(0,255,0), #00FF00, including all four corners and beneath the rocky underside. Perfectly flat uniform chroma green, no darker green, studio light gradient, vignette, cast shadow, floor, sky, coloured frame, photograph rectangle, pedestal, people, signs, words or hanging hardware. Very wide uninterrupted pure-green margins on every side."
+    },
+    {
+      "id": "glacier-national-park", "name": "Glacier National Park", "group": "National Parks", "accent": "#7eafa7",
+      "description": "Montana's rugged alpine peaks and jewel-clear turquoise water.",
+      "subject": "A compact dimensional landscape inspired by Glacier National Park in Montana: a broad rugged stratified grey mountain wall with small remaining snowfields, a bright clear turquoise alpine lake and a few tiny dark conifers along an irregular rocky shore. Subtle reddish pebbles visible through shallow foreground water, crisp natural mountain textures and gentle clear daylight. The complete scenic object has an organic rocky underside and wide empty margins on every side. No rectangular panorama, enclosing sky panel, souvenir disk, flat plinth, people, signs, words or hanging hardware."
+    },
+    {
+      "id": "acadia", "name": "Acadia", "group": "National Parks", "accent": "#829fa5",
+      "description": "Maine's pink granite shore, evergreen trees and Atlantic surf.",
+      "subject": "A compact isolated Acadia National Park landscape from Maine: rounded rose-pink granite coastal rocks with layered cracks, three small dark evergreen spruce trees on the upper shore, deep navy Atlantic water with delicate white surf curling around the lowest rocks. A natural irregular rocky underside, cool clear morning light and realistic coastal stone and sea textures. One self-contained scenic charm with generous margins, not a postcard or full seascape. No lighthouse, people, boats, signs, sky rectangle, frame, souvenir base, words or hanging loop."
+    },
+    {
+      "id": "joshua-tree", "name": "Joshua Tree", "group": "National Parks", "accent": "#b9a477",
+      "description": "A branching Joshua tree beside rounded desert boulders.",
+      "subject": "A compact dimensional Joshua Tree National Park landscape in California. One unmistakable mature Joshua tree with shaggy branching trunk and small spiky dark olive leaf clusters, a pair of rounded warm granite desert boulders and a little sandy irregular ground beneath. Natural tree anatomy, dry desert textures, gentle golden daylight and a readable asymmetrical silhouette. Entire tree including every leaf tip and the rocky underside sits well inside generous margins. No cactus substitution, sky rectangle, distant panorama, pot, platform, people, animals, signs, text or hanging hardware."
     }
   ]
 }

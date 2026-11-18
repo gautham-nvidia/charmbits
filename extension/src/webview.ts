@@ -26,7 +26,7 @@ import type { AccessSnapshot } from './access-controller';
 import { createWeatherView } from './weather-view';
 import { createBloomView } from './bloom-view';
 import { MaterialMotion } from './charm-motion-view';
-import { blinkFile, motionKind } from './charm-motion';
+import { blinkFile, motionKind, petMotionProfile } from './charm-motion';
 import { createFlowerStemBridge } from './flower-stem-view';
 import { BraceletView } from './bracelet-view';
 import { createBraceletControls } from './bracelet-controls';
@@ -214,7 +214,7 @@ function isBracelet() { return state.arrangement === 'bracelet'; }
 function seedBracelet() {
 	if (state.bracelet.charms.length >= 2) { return; }
 	const candidates = [state.charmId, 'trial:new-shiba-inu', 'trial:flower-red-rose', 'live:cali', ...charms.map(item => item.id)];
-	state.bracelet = { charms: [...new Set(candidates)].filter(id => charms.some(item => item.id === id)).slice(0, 3), selected: 0 };
+	state.bracelet = { ...state.bracelet, charms: [...new Set(candidates)].filter(id => charms.some(item => item.id === id)).slice(0, 3), selected: 0 };
 }
 
 function selectBraceletSlot(index: number) {
@@ -337,7 +337,7 @@ function applyCharm() {
 	const attachment = selected.attachment ?? DEFAULT_ATTACHMENT;
 	const pose = blinkFile(selected);
 	void materialMotion.select(source, motionKind(selected), {
-		hook: attachment, blink: pose ? new URL(pose, mediaRoot).toString() : undefined,
+		hook: attachment, blink: pose ? new URL(pose, mediaRoot).toString() : undefined, pet: petMotionProfile(selected),
 	}).catch(error => console.warn('Charm motion could not load; the original artwork remains visible.', error));
 	charmImage.style.transformOrigin = `${attachment.x * 100}% ${attachment.y * 100}%`;
 	charm.setAttribute('aria-label', `${fidgetAction(selected.id) ?? (soft ? 'Squeeze' : 'Nudge')} ${selected.name.toLowerCase()} charm`);
@@ -671,13 +671,16 @@ function setKeyboardHeld(held: boolean) {
 	scheduleMessages();
 }
 
-function cancelDrag() {
+function releaseHold() {
 	tapWiggle.stop();
-	materialMotion.cancelReaction();
 	braceletView?.reset();
 	setKeyboardHeld(false);
-	const cancelled = finishDrag();
-	if (!cancelled) { return; }
+	return finishDrag();
+}
+
+function cancelDrag() {
+	materialMotion.cancelReaction();
+	if (!releaseHold()) { return; }
 	pendulum.setLength(state.cordLength);
 	pendulum.settle();
 	stop();
@@ -686,7 +689,9 @@ function cancelDrag() {
 }
 
 export function resize() {
-	cancelDrag();
+	// Layout changes release input without cancelling a completed pat, including
+	// a ResizeObserver callback between the next pat's keydown and keyup.
+	releaseHold();
 	updateOverlays();
 	const { width, height } = stage.getBoundingClientRect();
 	const attachment = isBracelet() ? DEFAULT_ATTACHMENT : activeCharm.attachment;

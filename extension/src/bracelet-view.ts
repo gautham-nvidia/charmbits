@@ -9,7 +9,8 @@ import { createFlowerStemBridge } from './flower-stem-view';
 import { createLiveSmiley } from './live-smiley';
 import { createFidgetView } from './fidget-view';
 import { MaterialMotion } from './charm-motion-view';
-import { blinkFile, motionKind } from './charm-motion';
+import { blinkFile, motionKind, petMotionProfile } from './charm-motion';
+import type { BraceletStyle } from './bracelet-core';
 
 interface Options {
 	image(charm: CharmDefinition): string;
@@ -33,12 +34,22 @@ function svgElement<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Re
 	return element;
 }
 let instance = 0;
+const BAND_COLOURS: Record<BraceletStyle, { base: string; light: string }> = {
+	silver: { base: '#53646a', light: '#e6eeee' },
+	gold: { base: '#916b35', light: '#f5dda1' },
+	'rose-gold': { base: '#996b62', light: '#f6cfc0' },
+	woven: { base: '#8b795e', light: '#e8dcc2' },
+	pearl: { base: '#aa987d', light: '#fff9ee' },
+};
 
 /** A bounded, optional bracelet; each pendant retains its own physics and reaction controller. */
 export class BraceletView {
 	private readonly engine = Engine.create({ enableSleeping: true });
 	private readonly slots: Slot[] = [];
 	private readonly main = svgElement('svg', { class: 'bracelet-wire', 'aria-hidden': 'true' });
+	private readonly band = svgElement('g', { 'data-part': 'bracelet-band' });
+	private bandWidth = 0;
+	private bandKey = '';
 	private readonly prefix = `bracelet-${++instance}`;
 	private items: readonly CharmDefinition[] = [];
 	private active = false;
@@ -49,6 +60,7 @@ export class BraceletView {
 	private quietFrames = 0;
 	private frames = 0;
 	private geometry = '';
+	private layoutPending = true;
 	private grip?: Constraint;
 	private held?: { slot: Slot; id: number; x: number; y: number; moved: number };
 	constructor(readonly stage: HTMLElement, private readonly options: Options) {
@@ -60,7 +72,7 @@ export class BraceletView {
 		const width = Math.min(380, area.width), height = Math.min(310, area.height - area.anchorY);
 		const left = clamp(area.anchorX - width / 2, 0, area.width - width);
 		const next = `${width}:${height}:${left}:${area.anchorY}`;
-		if (next === this.geometry) { return; }
+		if (next === this.geometry && !this.layoutPending) { return; }
 		this.geometry = next;
 		Object.assign(this.stage.style, { width: `${width}px`, height: `${height}px`, left: `${left}px`, top: `${area.anchorY}px` });
 		this.layout();
@@ -85,7 +97,7 @@ export class BraceletView {
 			const source = this.options.image(item), pose = blinkFile(item);
 			if (slot.image.src !== source) { slot.image.src = source; }
 			void slot.material.select(source, motionKind(item), {
-				hook: item.attachment, blink: pose ? this.options.asset(pose) : undefined,
+				hook: item.attachment, blink: pose ? this.options.asset(pose) : undefined, pet: petMotionProfile(item),
 			}).catch(error => console.warn('Bracelet motion could not load; original artwork remains visible.', error));
 		});
 		this.layout(); this.sync();
@@ -219,21 +231,51 @@ export class BraceletView {
 		Body.applyForce(slot.body, slot.body.position, { x: direction * .0007, y: -.0006 });
 		Sleeping.set(slot.body, false); this.start();
 	}
-	private layout() {
-		if (!this.stage.clientWidth) { return; }
-		this.releaseHold(); this.stop(); Composite.clear(this.engine.world, false);
-		const width = this.stage.clientWidth, height = this.stage.clientHeight;
-		this.main.replaceChildren(); this.main.setAttribute('viewBox', `0 0 ${width} ${height}`);
-		const steps = Math.max(2, Math.floor((width - 28) / 7));
-		for (let index = 0; index <= steps; index++) {
-			const t = index / steps, x = 14 + (width - 28) * t, y = 12 + 130 * t * (1 - t);
-			const angle = Math.atan2(130 * (1 - 2 * t), width - 28) * 180 / Math.PI;
-			for (const [stroke, strokeWidth, lift] of [['#53646a', '2.4', 0], ['#dce7e6', '.8', -.5]] as const) {
-				this.main.append(svgElement('ellipse', { cx: String(x), cy: String(y + lift),
-					rx: index % 2 ? '3.1' : '4.8', ry: index % 2 ? '2.3' : '2.8',
-					transform: `rotate(${angle} ${x} ${y})`, fill: 'none', stroke, 'stroke-width': strokeWidth }));
+	private paintBand() {
+		const width = this.bandWidth, style = this.options.state().bracelet.style;
+		const key = `${width}:${style}`;
+		if (!width || key === this.bandKey) { return; }
+		this.bandKey = key; this.band.replaceChildren(); this.stage.dataset.style = style;
+		const { base, light } = BAND_COLOURS[style];
+		const curve = `M 14 12 Q ${width / 2} 77 ${width - 14} 12`;
+		this.band.append(svgElement('path', { d: curve, fill: 'none', stroke: base,
+			'stroke-width': style === 'woven' ? '5' : '1', 'stroke-linecap': 'round' }));
+		if (style === 'woven') {
+			this.band.append(svgElement('path', { d: curve, fill: 'none', stroke: light,
+				'stroke-width': '2.5', 'stroke-dasharray': '2 3', 'stroke-linecap': 'round' }));
+		} else {
+			const gradient = svgElement('radialGradient', { id: `${this.prefix}-pearl-shade`, cx: '28%', cy: '22%', r: '75%' });
+			for (const [offset, colour] of [['0%', '#fffefa'], ['40%', '#f4ede0'], ['78%', '#d4c6af'], ['100%', '#aa987d']]) {
+				gradient.append(svgElement('stop', { offset, 'stop-color': colour }));
+			}
+			const defs = svgElement('defs'); defs.append(gradient); this.band.append(defs);
+			const steps = Math.max(2, Math.floor((width - 28) / 7));
+			for (let index = 0; index <= steps; index++) {
+				const t = index / steps, x = 14 + (width - 28) * t, y = 12 + 130 * t * (1 - t);
+				const angle = Math.atan2(130 * (1 - 2 * t), width - 28) * 180 / Math.PI;
+				if (style === 'pearl') {
+					this.band.append(svgElement('circle', { cx: String(x), cy: String(y), r: '3.5',
+						fill: `url(#${gradient.id})`, stroke: '#aa987d', 'stroke-width': '.35' }));
+				} else {
+					for (const [stroke, strokeWidth, lift] of [[base, '2.4', 0], [light, '.8', -.5]] as const) {
+						this.band.append(svgElement('ellipse', { cx: String(x), cy: String(y + lift),
+							rx: index % 2 ? '3.1' : '4.8', ry: index % 2 ? '2.3' : '2.8',
+							transform: `rotate(${angle} ${x} ${y})`, fill: 'none', stroke, 'stroke-width': strokeWidth }));
+					}
+				}
 			}
 		}
+		for (const hanger of this.main.querySelectorAll('[data-hanger]')) { hanger.setAttribute('stroke', base); }
+	}
+	private layout() {
+		// Restore can arrive while the stage is hidden. Retry its layout once it
+		// becomes visible even if the host reports the same viewport dimensions.
+		if (!this.stage.clientWidth) { this.layoutPending = true; return; }
+		this.layoutPending = false;
+		this.releaseHold(); this.stop(); Composite.clear(this.engine.world, false);
+		const width = this.stage.clientWidth, height = this.stage.clientHeight;
+		this.main.replaceChildren(this.band); this.main.setAttribute('viewBox', `0 0 ${width} ${height}`);
+		this.bandWidth = width; this.paintBand();
 		this.slots.forEach((slot, index) => {
 			if (index >= this.items.length) { slot.body = undefined; return; }
 			slot.size = Math.min(84, (width - 44) / (this.items.length + .65), (height - 90) * .62);
@@ -254,7 +296,8 @@ export class BraceletView {
 			slot.button.style.width = `${slot.size}px`; slot.button.style.height = `${h}px`;
 			slot.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 			this.main.append(svgElement('ellipse', { cx: String(x), cy: String(slot.anchor.y), rx: '4', ry: '5.5',
-				fill: 'var(--vscode-editor-background, #f8f7f1)', stroke: '#6c8279', 'stroke-width': '1.25' }));
+				'data-hanger': String(index), fill: 'var(--vscode-editor-background, #f8f7f1)',
+				stroke: BAND_COLOURS[this.options.state().bracelet.style].base, 'stroke-width': '1.25' }));
 		});
 		this.render(); this.sync();
 	}
@@ -283,6 +326,7 @@ export class BraceletView {
 	}
 	private render() {
 		const state = this.options.state();
+		this.paintBand();
 		this.slots.forEach((slot, index) => {
 			if (!slot.body || !slot.tether) { return; }
 			const { position, angle } = slot.body, width = slot.size, height = width * 7 / 6;

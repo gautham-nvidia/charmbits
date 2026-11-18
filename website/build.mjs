@@ -207,7 +207,7 @@ const review = await readFile(join(root, 'art-review.json'), 'utf8').then(JSON.p
   throw error;
 });
 if (review) {
-  if (review.status !== 'review-only' || !Array.isArray(review.items) || review.items.length > 300
+  if (review.status !== 'review-only' || !Array.isArray(review.items) || review.items.length > 315
     || new Set(review.items.map(item => item.key)).size !== review.items.length) throw new Error('Invalid bounded art review.');
   validateCuration(curation, review.items);
   await mkdir(join(dist, 'assets/review'), { recursive: true });

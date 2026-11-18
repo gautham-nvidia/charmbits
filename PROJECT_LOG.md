@@ -674,3 +674,38 @@ all three bracelet slots moving left and right. All nine public installed-VSIX
 checks passed in a serial run. Cursor 3.26.16 and Devin 3.14.30819 accepted the VSIX;
 fresh-profile account screens prevented full functional checks. Their current
 versions and the precise verification limits are recorded in editor distribution.
+
+## 2026-11-18 — Complete pets, regional collections and bracelet designs
+
+The 0.16 candidate now contains 241 public designs and 20 collections. All 23
+pets have a calm tap reaction. Front-facing flowers use a straight leafy stem;
+thirteen cord materials and five independently saved bracelet styles provide
+matching choices. Fifteen new place miniatures join Europe, Americas, Asia and
+National Parks, reusing existing designs and retiring the duplicate static robot.
+Photo-keepsake copy is warmer, and ownership/non-affiliation notices explicitly
+state that credit or inspiration does not grant likeness, trademark or music rights.
+
+An actual stage resize exposed a pet reaction being cancelled by input cleanup.
+Separating input release from reaction cancellation fixed both resize timing
+cases. The regression now changes the observed element's geometry rather than
+dispatching a window event that did not exercise ResizeObserver.
+
+Local checks passed 115 app units, 13 desktop units, 47 release/service checks,
+15 source editor scenarios, nine installed public VSIX scenarios in VS Code and
+nine in VSCodium. A real 0.15-to-0.16 upgrade preserved synthetic preferences,
+photo/import bytes, focus, garden progress and a saved win. The website suite
+passed the current collection, five bracelet styles, motion, mobile layouts and
+Reduced Motion. Current store screenshots were refreshed and visually reviewed.
+
+The public Windows package and extracted archive passed. The new personal
+Windows archive and installed VSIX passed with all 292 designs unlocked.
+Forwarded physical mouse movement interrupted one simulated desktop drag;
+the geometry check now uses an independent touch pointer, matching the existing
+single-charm check. The separate native OS input checks remain unfiltered.
+
+Cursor and Devin accepted the exact current VSIX. Cursor did not expose its
+automation connection; Devin reached an account screen. Their full functional
+verification remains pending. Desktop and service audits report zero findings,
+while picomatch 4.0.7 remains the latest published version and the extension's
+dependency audit still fails. No exemption or forced downgrade was added.
+Hosted checks and deployment are recorded only after their results are observed.

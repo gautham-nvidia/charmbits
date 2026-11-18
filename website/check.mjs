@@ -21,9 +21,10 @@ await mkdir(output, { recursive: true });
 const base = process.env.CHARMLET_GALLERY_URL || 'http://127.0.0.1:4173/';
 const gallery = new URL('charms.html', base).href;
 const counts = { coding: 1, live: 15, stress: 18, music: 12,
-  california: 12, 'us-cities': 13, animals: 23, silicon: 15, parks: 10, trees: 2, space: 13, zodiac: 12, gemstones: 8, culture: 26,
+  california: 10, 'us-cities': 13, animals: 23, silicon: 14, parks: 13, europe: 5, americas: 3, asia: 6,
+  trees: 2, space: 13, zodiac: 12, gemstones: 8, culture: 26,
   sports: 5, seasonal: 24, flowers: 18 };
-assert.equal(data.charms.length, 227);
+assert.equal(data.charms.length, 241);
 assert.deepEqual(data.homepagePreviews.map(item => item.id).sort(),
   ['artist-michael-jackson', 'athlete-stephen-curry']);
 const homepageImages = new Set(data.homepagePreviews.map(item => item.preview.replace(/^\.\//, '')));
@@ -294,7 +295,7 @@ try {
 
   console.log('Checking collection filters, search, preview focus and protected download boundaries.');
   await page.goto(gallery, { waitUntil: 'networkidle' });
-  await expect(page.locator('.charm-card')).toHaveCount(227);
+  await expect(page.locator('.charm-card')).toHaveCount(241);
   await expect(page.locator('.charm-card').nth(0)).toHaveAttribute('data-charm-id', 'terminal');
   await expect(page.locator('.charm-card').nth(1)).toHaveAttribute('data-charm-id', 'live:cali');
   for (const collection of data.collections) {
@@ -313,7 +314,7 @@ try {
   await expect(page.locator('#empty-state')).toBeVisible();
   await page.locator('#reset-filters').click();
   await expect(page.locator('#search')).toBeFocused();
-  await expect(page.locator('.charm-card')).toHaveCount(227);
+  await expect(page.locator('.charm-card')).toHaveCount(241);
   const musicButton = page.locator('.charm-card[data-charm-id="new-electric-guitar"] .card-art');
   await musicButton.click();
   await expect(page.locator('#preview-dialog')).toBeVisible();
@@ -643,8 +644,8 @@ try {
   await page.locator('#email-download').click();
   await expect(page).toHaveURL(marketplace);
   assert.deepEqual(errors, []);
-  const result = { version: manifest.version, charms: 227, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
-    homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: 17,
+  const result = { version: manifest.version, charms: 241, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
+    homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: data.collections.length,
     desktop: true, mobileWidths: [390, 320, 768], caliBidirectionalSwing: true, liveCompanions: 15, puzzleBoards: 3,
     publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,

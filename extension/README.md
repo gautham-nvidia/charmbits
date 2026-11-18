@@ -1,13 +1,13 @@
 # CharmBits: Coding Charms
 
-A little company while you code. Choose from **227 free charms**, tap a pet for a quiet response, or hang two or three favourites on a bracelet.
+A little company while you code. Choose from **241 free charms**, tap a pet for a quiet response, or hang two or three favourites on a bracelet.
 
 All released charms and extension features are free in VS Code and compatible extension hosts. There is no account, activation, payment or trial timer. Your settings, personal imports and progress carry forward when you update.
 
 | Try | What you can do |
 |---|---|
 | Calm movement | Pull charms left or right, tap for a small response, and let them settle |
-| Charm bracelet | Hang two or three charms; swap, reorder or remove them independently |
+| Charm bracelet | Hang two or three charms on silver, gold, rose gold, woven linen or pearls |
 | Pets and flowers | Pat a pet or tap a front-facing bloom attached to a leafy stem |
 | Live companions | Spend a moment with Cali, Nimbus, Sunny or Robot Assistant |
 | Focus and garden | Set a focus timer, record small wins and grow a flower |
@@ -34,7 +34,7 @@ CharmBits has its own Activity Bar container titled **CharmBits**. You can move 
 
 1. Open the Command Palette and run **CharmBits: Show Charm**.
 2. For a right-side dock, run **View: Move View**, select **CharmBits**, then **New Secondary Side Bar Entry**.
-3. Tap a charm, or use Space/Enter, for its response. Shiba Inu, Maine Coon and Lop Rabbit blink and give a small tail or ear response. Pull left or right and release to swing and settle. Reduced Motion returns directly to rest.
+3. Tap a charm, or use Space/Enter, for its response. All 23 pets have a quiet blink or breath; sleeping pets stay sleepy. Pull left or right and release to swing and settle. Reduced Motion returns directly to rest.
 4. Click **Charms** to open the visual picker, search by name and filter installed collections. Choose **Settings → Appearance** for size, resting cord, visibility, motion and layout. The default 100% is 15% larger than earlier trials; adjust from 60% to 200% in 5% steps. Narrow views fit the charm to the available space.
 5. Choose **Appearance → Arrangement → Charm bracelet** for two or three charms. Select each slot's charm, use the arrow buttons to reorder, or remove a slot. Tap or pull each charm independently. Switch back to **Single charm** at any time; Hanging and Orbit layouts remain available there.
 6. Click **Focus** or run **CharmBits: Focus Session** for a focus/break timer with presets, custom minutes, pause/resume/stop and an optional intention.
@@ -42,7 +42,7 @@ CharmBits has its own Activity Bar container titled **CharmBits**. You can move 
 8. Click **Garden**, then **Plant a seed**, or run **CharmBits: Open Garden**. Water once per local day and earn an original flower after eleven valid waterings. Optional water/move schedules live under **Settings → Reminders**.
 9. Run **CharmBits: Import Charm Pack** for a downloaded `.charmlet.json`; remove imported packs with **CharmBits: Remove Charm Pack**.
 
-The public selection includes 202 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **227 charms** in all. Open **Charms** to search and filter the collection. Terminal is first, followed by Live 3D, Stress Busters and Music. Existing personal imports keep their saved artwork.
+The public selection includes 216 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **241 charms** in all. Open **Charms** to search and filter the collection. Terminal is first, followed by Live 3D, Stress Busters and Music. Existing personal imports keep their saved artwork.
 
 **Music** has twelve instruments and controllers. **US Tech Hubs & Skylines** includes 13 cities from the Bay Area to Boston and New York. Music Icons and Sports Icons remain review material and are excluded from public packages. A saved selection of unavailable review artwork uses a neutral placeholder while retaining its ID and cord; personally imported artwork remains available.
 
@@ -54,15 +54,15 @@ The extension's software features are free under the proprietary [software licen
 First-party artwork has [separate terms](ARTWORK-LICENSE.md); third-party notices remain applicable.
 Read the current [website terms](https://charmbits.pages.dev/terms.html) and [privacy information](PRIVACY.md).
 
-**California** includes Palace of Fine Arts, Painted Ladies, Pebble Beach, Coastal Cypress, San Francisco Tower, Granite Dome, Santa Clara Office and the current circular Cupertino Ring Campus. **Celebrations** adds Diwali Diyas and Halloween Lantern. Saved Alpine Lake, Night Sky and Ringed Planet selections move to the free San Francisco, Austin and Seattle skylines, preserving pins and cord choices. Existing personal imports remain usable.
+**California** includes Palace of Fine Arts, Painted Ladies, Pebble Beach, Coastal Cypress, San Francisco Tower, Santa Clara Office and the current circular Cupertino Ring Campus. **Celebrations** adds Diwali Diyas and Halloween Lantern. Saved Alpine Lake, Night Sky and Ringed Planet selections move to the free San Francisco, Austin and Seattle skylines, preserving pins and cord choices. Existing personal imports remain usable.
 
 **Pets & Wildlife** includes Giant Panda, Golden Retriever, Labrador, German Shepherd, Husky, Corgi, Beagle and Goldendoodle, plus Silver Tabby and Tuxedo Cat.
 
-The expanded collection adds Shiba Inu, French Bulldog, Dachshund, Pomeranian, Maine Coon, Ragdoll, Siamese, Lop Rabbit, Hamster and Cockatiel. **Nature & Places** adds national parks, landscapes and world wonders; bonsai and other trees have their own **Plants & Trees** collection. City Auto belongs to Culture & Traditions. All released designs are included free in the editor; desktop has its separate starter, trial and purchase rules.
+The expanded collection adds Shiba Inu, French Bulldog, Dachshund, Pomeranian, Maine Coon, Ragdoll, Siamese, Lop Rabbit, Hamster and Cockatiel. Explore **Europe**, **Americas**, **Asia** and **National Parks**, including the Eiffel Tower, Colosseum, Angkor Wat, Bryce Canyon, Grand Teton, Glacier, Acadia and Joshua Tree. Existing place designs keep their identities in the appropriate collection. Bonsai and other trees have their own **Plants & Trees** collection; City Auto belongs to Culture & Traditions. All released designs are free in the editor.
 
 Grow red, pink, white and yellow roses, jasmine and lily alongside the original twelve garden flowers. Each seed still blooms after eleven daily waterings. Existing plants and collected flowers are preserved, and seeds choose flowers you have not collected before returning to familiar varieties.
 
-Flowers keep their front-facing artwork, with a curved leafy stem joining underneath the bloom. Shaded leaves flutter gently and petals move a little when tapped. Selected gemstones, metal, candle, tree and lake charms have quiet material effects. Reduced Motion keeps these effects still, and hiding the charm pauses them.
+Flowers keep their front-facing artwork, with a straight leafy stem tucked behind the bloom and joined at its green base. Shaded leaves flutter gently and petals move a little when tapped. Choose from thirteen cords, including natural linen, slate silk, rose gold and pearls. Bracelet material is saved separately from each charm's cord. Selected gemstones, metal, candle, tree and lake charms have quiet material effects. Reduced Motion keeps these effects still, and hiding the charm pauses them.
 
 The nine early designs have retired from the picker. Saved choices, pins and cord materials move to the matching newer artwork. The garden now shows natural soil, terracotta and foliage; earned flowers use the current rendered artwork while keeping their saved IDs, dates and bloom counts.
 

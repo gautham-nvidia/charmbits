@@ -34,7 +34,8 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 	for (const group of new Set(CHARMS.map(charmCollection))) {
 		const count = CHARMS.filter(charm => starter.includes(charm.id) && charmCollection(charm) === group).length;
 		const exceptions: Record<string, number> = {
-			Terminal: 1, California: 3, 'Nature & Places': 1, 'Plants & Trees': 0, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
+			Terminal: 1, California: 1, 'National Parks': 3, Europe: 0, Americas: 0, Asia: 0,
+			'Plants & Trees': 0, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
 		};
 		assert.equal(count, exceptions[group] ?? 2, group);
 	}
@@ -128,7 +129,7 @@ test('missing or invalid saved values restore a usable charm', () => {
 test('hide and motion preferences survive a reload without trusting unknown fields', () => {
 	assert.deepEqual(restoreState({ cordLength: 180, hidden: true, reducedMotion: true, extra: 'ignored' }), {
 		version: 1, editionVersion: 1, charmId: 'terminal', layoutMode: 'hanging', showMessages: true, rotateMessages: true, messageIndex: 0,
-		arrangement: 'single', bracelet: { charms: [], selected: 0 },
+		arrangement: 'single', bracelet: { charms: [], selected: 0, style: 'silver' },
 		cordLength: 180, size: 100, hidden: true, reducedMotion: true,
 		festiveEnabled: true, charmPinned: false, cordChoices: {}, caliOutfit: 'daily', puzzles: DEFAULT_STATE.puzzles,
 	});
@@ -283,7 +284,7 @@ test('legacy and unknown charm selections retain the other preferences', () => {
 
 test('bracelet slots survive storage, missing packs and position reset without changing the single default', () => {
 	assert.equal(restoreState(undefined).arrangement, 'single');
-	const bracelet = { charms: ['live:cali', 'trial:flower-red-rose', 'pack:missing:keepsake'], selected: 2 };
+	const bracelet = { charms: ['live:cali', 'trial:flower-red-rose', 'pack:missing:keepsake'], selected: 2, style: 'rose-gold' };
 	const saved = restoreState({ ...DEFAULT_STATE, arrangement: 'bracelet', bracelet, reducedMotion: true });
 	const serialized = JSON.parse(JSON.stringify(saved));
 	assert.equal(matchesSavedState(saved, serialized), true);
@@ -296,7 +297,21 @@ test('bracelet slots survive storage, missing packs and position reset without c
 	assert.equal(damaged.bracelet.charms.length, 3);
 	assert.equal(damaged.bracelet.selected, 2);
 	assert.equal(damaged.bracelet.charms.includes('pack:missing:keepsake'), false);
+	assert.equal(damaged.bracelet.style, 'silver');
+	assert.equal(restoreState({ bracelet: { style: '__proto__' } }).bracelet.style, 'silver');
+	serialized.bracelet = { ...bracelet, style: 'gold' };
+	assert.equal(matchesSavedState(saved, serialized), false);
 	assert.deepEqual(saved.bracelet, bracelet);
+});
+
+test('the former static robot restores the live assistant and preserves its cord and bracelet position', () => {
+	const old = 'trial:new-robot-assistant';
+	const state = restoreState({ charmId: old, cordChoices: { [old]: 'silk' },
+		bracelet: { charms: ['terminal', old, 'pack:missing:family'], selected: 1, style: 'pearl' } });
+	assert.equal(state.charmId, 'live:robot');
+	assert.equal(state.cordChoices['live:robot'], 'silk');
+	assert.deepEqual(state.bracelet, { charms: ['terminal', 'live:robot', 'pack:missing:family'], selected: 1, style: 'pearl' });
+	assert.equal(CHARMS.filter(charm => charm.name.startsWith('Robot Assistant')).length, 1);
 });
 
 test('every bundled selection survives saved-state restoration', () => {

@@ -63,13 +63,15 @@ export function restoreState(value: unknown, charms: readonly CharmDefinition[] 
 	}
 	const candidate = value as Record<string, unknown>;
 	const selected = getCharm(candidate.charmId, charms);
+	const bracelet = restoreBracelet(candidate.bracelet);
 	return {
 		version: 1,
 		editionVersion: 1,
 		charmId: selected.id,
 		layoutMode: candidate.layoutMode === 'orbit' ? 'orbit' : 'hanging',
 		arrangement: candidate.arrangement === 'bracelet' ? 'bracelet' : 'single',
-		bracelet: restoreBracelet(candidate.bracelet),
+		bracelet: { ...bracelet, charms: bracelet.charms.map(id => Object.hasOwn(RETIRED_CHARMS, id)
+			? getCharm(id, charms).id : id) },
 		showMessages: typeof candidate.showMessages === 'boolean' ? candidate.showMessages : DEFAULT_STATE.showMessages,
 		rotateMessages: typeof candidate.rotateMessages === 'boolean' ? candidate.rotateMessages : DEFAULT_STATE.rotateMessages,
 		messageIndex: typeof candidate.messageIndex === 'number' && Number.isInteger(candidate.messageIndex)

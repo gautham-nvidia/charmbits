@@ -85,13 +85,14 @@ async function tracePointerInput(window: Page): Promise<Frame[]> {
 			const messages: Record<string, unknown>[] = [];
 			globalThis.window.addEventListener('message', event => {
 				const message = event.data;
-				if (message && ['saved', 'save-error', 'state'].includes(message.type)) {
-					messages.push({ type: message.type, revision: message.revision, time: performance.now() });
+				if (message && ['saved', 'save-error', 'state', 'catalogue', 'visibility', 'companion'].includes(message.type)) {
+					messages.push({ type: message.type, revision: message.revision, visible: message.visible, time: performance.now() });
 					document.documentElement.dataset.saveTrace = JSON.stringify(messages.slice(-40));
 				}
 			});
 			for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel',
-				'gotpointercapture', 'lostpointercapture', 'mousedown', 'mouseup', 'click', 'focus', 'blur', 'focusin', 'focusout', 'keydown', 'keyup']) {
+				'gotpointercapture', 'lostpointercapture', 'mousedown', 'mouseup', 'click', 'focus', 'blur', 'focusin', 'focusout', 'keydown', 'keyup',
+				'resize', 'visibilitychange']) {
 				globalThis.window.addEventListener(type, event => {
 					const pointer = event as PointerEvent;
 					const target = event.target instanceof Element ? event.target : undefined;
@@ -102,6 +103,14 @@ async function tracePointerInput(window: Page): Promise<Frame[]> {
 						focused: document.hasFocus(), time: performance.now() });
 					document.documentElement.dataset.pointerTrace = JSON.stringify(events.slice(-40));
 				}, true);
+			}
+			const stage = document.getElementById('stage');
+			if (stage) {
+				new ResizeObserver(() => {
+					const bounds = stage.getBoundingClientRect();
+					events.push({ type: 'stage-resize', width: bounds.width, height: bounds.height, time: performance.now() });
+					document.documentElement.dataset.pointerTrace = JSON.stringify(events.slice(-40));
+				}).observe(stage);
 			}
 		});
 	}
@@ -1085,12 +1094,14 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 		await expect(frame.locator('#charm')).toHaveAttribute('data-material-rendered', 'true');
 		const pet = frame.locator('#charm canvas[data-progress]');
 		const still = await pet.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL());
+		const traceFrames = await tracePointerInput(editor.window);
 		await focusCharmForKeyboard(editor, frame);
 		await editor.window.keyboard.press('Space');
 		await expect(frame.locator('#charm')).toHaveAttribute('data-tap-motion', 'playing');
 		try {
 			await expect.poll(async () => Number(await pet.getAttribute('data-progress'))).toBeGreaterThan(.15);
 		} catch (error) {
+			await savePointerTrace(editor, traceFrames, testInfo.outputPath('pet-input-trace.json'));
 			writeFileSync(testInfo.outputPath('pet-reaction-state.json'), JSON.stringify(await frame.evaluate(() => ({
 				stage: { ...document.getElementById('stage')!.dataset },
 				charm: { ...document.getElementById('charm')!.dataset },
@@ -1100,6 +1111,18 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 			throw error;
 		}
 		const progress = Number(await pet.getAttribute('data-progress'));
+		// Use a real layout change: the app listens to ResizeObserver, not a
+		// synthetic window resize event. The released pet should finish its pat.
+		const dimensions = await frame.evaluate(async () => {
+			const stage = document.getElementById('stage')!;
+			const height = stage.getBoundingClientRect().height, previous = stage.style.height;
+			stage.style.height = `${height - 1}px`;
+			await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame);
+			return { height, next: stage.getBoundingClientRect().height, previous };
+		});
+		expect(dimensions.height - dimensions.next).toBeCloseTo(1, 1);
+		expect(Number(await pet.getAttribute('data-progress'))).toBeGreaterThanOrEqual(progress);
+		await frame.evaluate(height => { document.getElementById('stage')!.style.height = height; }, dimensions.previous);
 		await editor.window.keyboard.press('Space');
 		expect(Number(await pet.getAttribute('data-progress'))).toBeGreaterThanOrEqual(progress);
 		await expect(pet).toHaveAttribute('data-motion', 'still');
@@ -1147,6 +1170,10 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 		await frame.locator('#bracelet-choice-0').selectOption(shiba);
 		await frame.locator('#bracelet-choice-1').selectOption(rose);
 		await frame.locator('#bracelet-choice-2').selectOption('live:cali');
+		for (const style of ['silver', 'gold', 'woven', 'pearl', 'rose-gold']) {
+			await frame.locator('#bracelet-style').selectOption(style);
+			await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-style', style);
+		}
 		await frame.locator('#settings-close').click();
 		await expect(frame.locator('#hanging')).toBeHidden();
 		const slots = frame.locator('#bracelet-stage .bracelet-charm:not([hidden])');
@@ -1173,10 +1200,16 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-frames', paused!);
 		await expect.poll(() => JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).bracelet.charms)
 			.toEqual([shiba, 'live:cali']);
+		await expect.poll(() => JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).bracelet.style).toBe('rose-gold');
 		frame = await reloadCharm(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-arrangement', 'bracelet');
 		await expect(frame.locator('#bracelet-stage .bracelet-charm:not([hidden])')).toHaveCount(2);
 		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-running', 'false');
+		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-style', 'rose-gold');
+		for (const slot of await frame.locator('#bracelet-stage .bracelet-charm:not([hidden])').all()) {
+			await expect(slot).toBeVisible();
+			await expect(slot).toHaveAttribute('data-x', /^-?\d+\.\d+$/);
+		}
 		await appearance();
 		await frame.locator('#arrangement').selectOption('single');
 		await frame.locator('#settings-close').click();

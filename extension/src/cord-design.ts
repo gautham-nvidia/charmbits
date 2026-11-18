@@ -6,10 +6,14 @@ export const CORD_STYLES = {
 	braid: 'Braided cord',
 	leather: 'Leather cord',
 	ribbon: 'Satin ribbon',
+	linen: 'Natural linen',
+	silk: 'Slate silk',
 	stem: 'Leafy stem',
 	'silver-chain': 'Silver chain',
 	'gold-chain': 'Gold chain',
 	'ball-chain': 'Ball chain',
+	'rose-gold-chain': 'Rose gold chain',
+	pearls: 'Pearl strand',
 } as const;
 export type CordStyle = keyof typeof CORD_STYLES;
 export type CordChoices = Readonly<Record<string, CordStyle>>;
@@ -73,8 +77,12 @@ export function cordForCharm(charm: CharmDefinition, choices: CordChoices = {}):
 		case 'Zodiac':
 			return 'silver-chain';
 		case 'Animals':
+			return 'linen';
+		case 'World Wonders':
+			return 'silver-chain';
 		case 'Trees & Forests':
 		case 'National Parks':
+			return 'linen';
 		case 'Sports':
 			return 'leather';
 		default:

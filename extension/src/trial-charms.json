@@ -1129,20 +1129,6 @@
     }
   },
   {
-    "id": "trial:new-robot-assistant",
-    "name": "Robot Assistant",
-    "file": "trial-new-robot-assistant-r1-p2.png",
-    "description": "Robot Assistant, included in the complete trial collection.",
-    "accent": "#93b8c8",
-    "group": "AI",
-    "artworkKey": "new-robot-assistant",
-    "artworkHash": "e6396660dde3a8bb8ebef7a113b5da876816d05a252f2d37c39eb0f682a219aa",
-    "attachment": {
-      "x": 0.5,
-      "y": 0.05952380952380952
-    }
-  },
-  {
     "id": "trial:new-pumpkin-patch",
     "name": "Pumpkin Patch",
     "file": "trial-new-pumpkin-patch-r1-p2.png",
@@ -3828,6 +3814,216 @@
     "attachment": {
       "x": 0.5023148148148148,
       "y": 0.17063492063492064
+    }
+  },
+  {
+    "id": "trial:new-eiffel-tower",
+    "name": "Eiffel Tower",
+    "file": "trial-new-eiffel-tower-r1-p3.png",
+    "description": "Paris in daylight, with delicate iron latticework and four graceful arches.",
+    "accent": "#ad957b",
+    "group": "World Wonders",
+    "artworkKey": "new-eiffel-tower",
+    "artworkHash": "dc336ad8ec9c79774488d11281dfd5248b97b1e20933d3eb220a99aeab204aba",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-colosseum",
+    "name": "Colosseum",
+    "file": "trial-new-colosseum-r1-p3.png",
+    "description": "Rome's weathered amphitheatre, with warm stone arches and an open arena.",
+    "accent": "#c1a17b",
+    "group": "World Wonders",
+    "artworkKey": "new-colosseum",
+    "artworkHash": "939f8eab2e0f1043063ecef48e2c9484d22f6b226ad18bc3b46811053c1c503e",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-big-ben",
+    "name": "Big Ben",
+    "file": "trial-new-big-ben-r1-p3.png",
+    "description": "London's Elizabeth Tower, with its familiar clock faces and Gothic spire.",
+    "accent": "#b6a077",
+    "group": "World Wonders",
+    "artworkKey": "new-big-ben",
+    "artworkHash": "0c55f1316a657fe8da9db888b722db4022721bd5de5e626d02993dff4d83a40a",
+    "attachment": {
+      "x": 0.47453703703703703,
+      "y": 0.06944444444444445
+    }
+  },
+  {
+    "id": "trial:new-santorini",
+    "name": "Santorini",
+    "file": "trial-new-santorini-r1-p3.png",
+    "description": "Whitewashed Cycladic homes and blue domes above the Aegean.",
+    "accent": "#83a9c8",
+    "group": "World Wonders",
+    "artworkKey": "new-santorini",
+    "artworkHash": "e69c5a0a60c73ecf9f8b5f70380be3cc2ea544291fbc6ee3b4c8bb7c15bb92c8",
+    "attachment": {
+      "x": 0.4976851851851852,
+      "y": 0.17857142857142858
+    }
+  },
+  {
+    "id": "trial:new-neuschwanstein",
+    "name": "Neuschwanstein Castle",
+    "file": "trial-new-neuschwanstein-r1-p3.png",
+    "description": "A Bavarian hilltop castle with ivory towers and blue-grey roofs.",
+    "accent": "#aab5b5",
+    "group": "World Wonders",
+    "artworkKey": "new-neuschwanstein",
+    "artworkHash": "f8f27dccbfdc365755e73196854810ff0d40e891bdecebb40aa5add6b9ee1d0b",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.3055555555555556
+    }
+  },
+  {
+    "id": "trial:new-statue-of-liberty",
+    "name": "Statue of Liberty",
+    "file": "trial-new-statue-of-liberty-r1-p3.png",
+    "description": "New York's copper-green figure, with raised torch and a seven-ray crown.",
+    "accent": "#7ca798",
+    "group": "World Wonders",
+    "artworkKey": "new-statue-of-liberty",
+    "artworkHash": "e4ad0cc8d77ea9622a52e324f5f1fc96f1b9694be5aee1ce6ed10c62528fd3ee",
+    "attachment": {
+      "x": 0.5023148148148148,
+      "y": 0.23412698412698413
+    }
+  },
+  {
+    "id": "trial:new-niagara-falls",
+    "name": "Niagara Falls",
+    "file": "trial-new-niagara-falls-r1-p3.png",
+    "description": "A broad horseshoe of falling water between Canada and the United States.",
+    "accent": "#79adb7",
+    "group": "World Wonders",
+    "artworkKey": "new-niagara-falls",
+    "artworkHash": "34fc2788e6d009b371822617191fdf9005d39d044293479a6dc42b32ba6f2ca7",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-angkor-wat",
+    "name": "Angkor Wat",
+    "file": "trial-new-angkor-wat-r2-p3.png",
+    "description": "Cambodia's lotus-shaped temple towers and weathered sandstone galleries.",
+    "accent": "#a4977b",
+    "group": "World Wonders",
+    "artworkKey": "new-angkor-wat",
+    "artworkHash": "c14bc746554f8890e848bef9d0d229796446bb9f2f77475750db76ef72421f87",
+    "attachment": {
+      "x": 0.5069444444444444,
+      "y": 0.0992063492063492
+    }
+  },
+  {
+    "id": "trial:new-petra",
+    "name": "Petra",
+    "file": "trial-new-petra-r1-p3.png",
+    "description": "Jordan's rose-stone Treasury, carved into a warm sandstone cliff.",
+    "accent": "#c88e75",
+    "group": "World Wonders",
+    "artworkKey": "new-petra",
+    "artworkHash": "d7a7d0b8033257279848b8085c9e0d4e292390312617a7f299f00cb8bb2e3cdf",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.06349206349206349
+    }
+  },
+  {
+    "id": "trial:new-kyoto-torii",
+    "name": "Kyoto Torii Gates",
+    "file": "trial-new-kyoto-torii-r1-p3.png",
+    "description": "A quiet path through vermilion torii gates, inspired by Kyoto.",
+    "accent": "#c3704f",
+    "group": "World Wonders",
+    "artworkKey": "new-kyoto-torii",
+    "artworkHash": "e93388de120f07005934edb0554bcb4e084cf32aa04c282cafd7558815a9d851",
+    "attachment": {
+      "x": 0.5023148148148148,
+      "y": 0.08333333333333333
+    }
+  },
+  {
+    "id": "trial:new-bryce-canyon",
+    "name": "Bryce Canyon",
+    "file": "trial-new-bryce-canyon-r1-p3.png",
+    "description": "Warm orange hoodoos and pale limestone spires from Utah's high plateau.",
+    "accent": "#ce946b",
+    "group": "National Parks",
+    "artworkKey": "new-bryce-canyon",
+    "artworkHash": "744c944aa52e6c2b37841b07115f436acf65f52e45082943f06b0a2e882fee20",
+    "attachment": {
+      "x": 0.5347222222222222,
+      "y": 0.12698412698412698
+    }
+  },
+  {
+    "id": "trial:new-grand-teton",
+    "name": "Grand Teton",
+    "file": "trial-new-grand-teton-r2-p3.png",
+    "description": "Jagged Wyoming peaks above a still lake and a quiet line of pines.",
+    "accent": "#92a4b8",
+    "group": "National Parks",
+    "artworkKey": "new-grand-teton",
+    "artworkHash": "cd3eb7b560a07d888baae3421f8db32b164581344d74c8ccf5e05834347dca78",
+    "attachment": {
+      "x": 0.5023148148148148,
+      "y": 0.10317460317460317
+    }
+  },
+  {
+    "id": "trial:new-glacier-national-park",
+    "name": "Glacier National Park",
+    "file": "trial-new-glacier-national-park-r1-p3.png",
+    "description": "Montana's rugged alpine peaks and jewel-clear turquoise water.",
+    "accent": "#7eafa7",
+    "group": "National Parks",
+    "artworkKey": "new-glacier-national-park",
+    "artworkHash": "d56595cc93a613974fe67000d74845248943c67ae2290c622c6dd7ee6bcd84ee",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.06349206349206349
+    }
+  },
+  {
+    "id": "trial:new-acadia",
+    "name": "Acadia",
+    "file": "trial-new-acadia-r1-p3.png",
+    "description": "Maine's pink granite shore, evergreen trees and Atlantic surf.",
+    "accent": "#829fa5",
+    "group": "National Parks",
+    "artworkKey": "new-acadia",
+    "artworkHash": "d22e92cca38ca4fec4c0394d3a2bf63df76faca25c4b651d3f393bc994056b9a",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.15079365079365079
+    }
+  },
+  {
+    "id": "trial:new-joshua-tree",
+    "name": "Joshua Tree",
+    "file": "trial-new-joshua-tree-r1-p3.png",
+    "description": "A branching Joshua tree beside rounded desert boulders.",
+    "accent": "#b9a477",
+    "group": "National Parks",
+    "artworkKey": "new-joshua-tree",
+    "artworkHash": "495d939dc111f5a07bf823b78d5ff1d6784216df8c6a638616868d7e0f72de59",
+    "attachment": {
+      "x": 0.4976851851851852,
+      "y": 0.13095238095238096
     }
   }
 ]

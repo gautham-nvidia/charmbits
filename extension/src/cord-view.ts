@@ -8,10 +8,14 @@ const profiles: Record<CordStyle, { base: string; light: string; width: number; 
 	braid: { base: '#85272c', light: '#f2b789', width: 4, dash: '2 3' },
 	leather: { base: '#503927', light: '#bd8f5d', width: 3.8, dash: '1 7' },
 	ribbon: { base: '#9e4a6d', light: '#f5c5d6', width: 5 },
+	linen: { base: '#8b795e', light: '#e8dcc2', width: 2.7, dash: '1 2.5' },
+	silk: { base: '#657b91', light: '#d1e0ec', width: 2.5 },
 	stem: { base: '#2e673e', light: '#9abf7a', width: 2.7 },
 	'silver-chain': { base: '#4e5c66', light: '#e5eef3', width: 1 },
 	'gold-chain': { base: '#7d5623', light: '#f5d985', width: 1 },
 	'ball-chain': { base: '#52636a', light: '#deeceb', width: .9 },
+	'rose-gold-chain': { base: '#95665c', light: '#f6c8b7', width: .9 },
+	pearls: { base: '#a59882', light: '#fff8e9', width: .7 },
 };
 
 export function createCordView(svg: SVGElement, thread: SVGPathElement) {
@@ -99,7 +103,7 @@ export function createCordView(svg: SVGElement, thread: SVGPathElement) {
 			previous = key;
 			svg.dataset.style = style;
 			const profile = profiles[style];
-			const metal = style.endsWith('chain');
+			const metal = style.endsWith('chain'), pearls = style === 'pearls';
 			for (const node of [shadow, thread, highlight]) { node.setAttribute('d', curve); }
 			shadow.setAttribute('stroke', '#101c2460');
 			shadow.setAttribute('stroke-width', String(profile.width + 1.2));
@@ -108,11 +112,11 @@ export function createCordView(svg: SVGElement, thread: SVGPathElement) {
 			highlight.setAttribute('stroke', profile.light);
 			highlight.setAttribute('stroke-width', String(metal ? .45 : style === 'ribbon' ? 2.6 : profile.width * .38));
 			highlight.setAttribute('stroke-dasharray', profile.dash ?? 'none');
-			const geometry = metal ? chainLinks(anchor, hook, style === 'ball-chain', bend) : '';
+			const geometry = metal || pearls ? chainLinks(anchor, hook, style === 'ball-chain' || pearls, bend) : '';
 			links.setAttribute('d', geometry);
 			links.setAttribute('stroke', profile.base);
-			links.setAttribute('stroke-width', '1.8');
-			links.setAttribute('fill', style === 'ball-chain' ? profile.light : 'none');
+			links.setAttribute('stroke-width', pearls ? '2.2' : '1.8');
+			links.setAttribute('fill', style === 'ball-chain' || pearls ? profile.light : 'none');
 			shine.setAttribute('d', geometry);
 			shine.setAttribute('stroke', profile.light);
 			shine.setAttribute('stroke-width', '.7');

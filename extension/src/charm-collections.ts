@@ -3,7 +3,7 @@ import type { CharmDefinition } from './charm-catalog';
 export const COLLECTION_ORDER: readonly string[] = [
 	'Terminal', 'Live 3D', 'Stress Busters', 'Music', 'Music Icons', 'Sports Icons',
 	'California', 'US Tech Hubs & Skylines', 'Pets & Wildlife',
-	'Tech & Lab', 'Nature & Places', 'Plants & Trees', 'Space & Stars', 'Zodiac', 'Gemstones',
+	'Tech & Lab', 'National Parks', 'Europe', 'Americas', 'Asia', 'Plants & Trees', 'Space & Stars', 'Zodiac', 'Gemstones',
 	'Culture & Traditions', 'Sports', 'Celebrations', 'Flowers', 'Grown by you',
 ];
 const GROUP_COLLECTIONS: Readonly<Record<string, string>> = {
@@ -14,7 +14,7 @@ const GROUP_COLLECTIONS: Readonly<Record<string, string>> = {
 	'Compute & Silicon': 'Tech & Lab',
 	'Test Bench': 'Tech & Lab',
 	Cities: 'Culture & Traditions',
-	'National Parks': 'Nature & Places',
+	'National Parks': 'National Parks',
 	'World Wonders': 'Nature & Places',
 	'Trees & Forests': 'Plants & Trees',
 	'Solar System': 'Space & Stars',
@@ -31,12 +31,22 @@ const CALIFORNIA_ARTWORK = new Set([
 	'new-palace-fine-arts', 'new-coastal-cypress', 'new-salesforce-tower', 'new-cupertino-loop',
 ]);
 type CollectionCharm = Pick<CharmDefinition, 'id' | 'group' | 'artworkKey'>;
+const PLACE_COLLECTIONS: Readonly<Record<string, string>> = {
+	'extra-granite-dome': 'National Parks', 'extra-redwood-grove': 'National Parks',
+	'new-eiffel-tower': 'Europe', 'new-colosseum': 'Europe', 'new-big-ben': 'Europe',
+	'new-santorini': 'Europe', 'new-neuschwanstein': 'Europe',
+	'new-machu-picchu': 'Americas', 'new-statue-of-liberty': 'Americas', 'new-niagara-falls': 'Americas',
+	'new-mount-fuji': 'Asia', 'new-taj-mahal': 'Asia', 'new-great-wall': 'Asia',
+	'new-angkor-wat': 'Asia', 'new-petra': 'Asia', 'new-kyoto-torii': 'Asia',
+};
 
 /** Keep saved IDs and imported metadata intact while presenting coherent themed packs. */
 export function charmCollection(charm: CollectionCharm): string {
 	if (charm.id === 'terminal') { return 'Terminal'; }
 	if (charm.id.startsWith('live:')) { return 'Live 3D'; }
-	if (CALIFORNIA_ARTWORK.has(charm.artworkKey ?? charm.id.replace(/^trial:/, ''))) { return 'California'; }
+	const key = charm.artworkKey ?? charm.id.replace(/^trial:/, '');
+	if (Object.hasOwn(PLACE_COLLECTIONS, key)) { return PLACE_COLLECTIONS[key]; }
+	if (CALIFORNIA_ARTWORK.has(key)) { return 'California'; }
 	return Object.hasOwn(GROUP_COLLECTIONS, charm.group) ? GROUP_COLLECTIONS[charm.group] : charm.group;
 }
 

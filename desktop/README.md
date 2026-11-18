@@ -1,6 +1,6 @@
 # CharmBits desktop developer beta
 
-The 0.13 candidate shares the editor's quiet charm effects, front-facing flower attachments and optional bracelet. In **Appearance → Arrangement**, choose two or three charms, then tap or pull them independently. Reduced Motion stops the decorative effects. Public desktop access still follows the starter, trial and purchase rules below.
+The 0.13 candidate shares the editor's quiet charm effects, front-facing flowers on straight leafy stems and optional bracelet. In **Appearance → Arrangement**, choose two or three charms on silver, gold, rose gold, woven linen or pearls, then tap or pull them independently. Reduced Motion stops the decorative effects. Public desktop access still follows the starter, trial and purchase rules below.
 
 CharmBits Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
 
@@ -14,7 +14,7 @@ Drag **Move** to place the charm, or focus that button and use the arrow keys (S
 
 Under **Tools > Settings**, **Background**, **Keep toolbar visible** and **Keep messages visible** are separate saved preferences, all off by default. The tray's **Open Controls** and **Reset Window Position** remain available.
 
-The trial shares the extension's **227 public offline charms**: 202 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Robot Assistant has the preferred ivory body, expressive eyes and thinking, cheering and encouraging gestures. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
+The trial shares the extension's **241 public offline charms**: 216 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Robot Assistant has the preferred ivory body, expressive eyes and thinking, cheering and encouraging gestures. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
 
 Nimbus can optionally follow current US airport weather. Choose Nimbus, then **Tools > Settings > Appearance > Nimbus weather**, select a station and save with weather enabled. The National Weather Service supplies observations without an account or key. Checks run every ten minutes while the app is visible, with observation times and stale/offline labels. With weather off, Nimbus keeps its playful sunrise, rain and lightning reactions.
 
@@ -30,7 +30,7 @@ With Cali selected, **Appearance > Cali's outfit** offers automatic daily change
 
 Select **Twisty Cube**, **Sliding Tiles** or **Lights Out** and open **Tools > Play** for the larger board. The cube has six working faces, tiles slide into the gap and light switches flip their neighbours. Shuffle, undo and reset are available, and progress saves locally. Closing the board returns to the charm; no puzzle timers or scores are added.
 
-**Appearance > Cord material** matches the charm or remembers your chosen cord. **Focus > Small wins** records achievements and completed live focus sessions, with undo and optional celebrations. **Photo charms** opens a local crop and frame editor: only the finished keepsake is stored, with no uploads. Sunny blinks, glances toward a nearby pointer and reacts to squeezing and wins; Reduced Motion stops idle animation. All these controls stay tucked away until selected.
+**Appearance > Cord material** matches the charm or remembers your choice from thirteen materials. All 23 pets give a calm blink or breath when tapped. Explore Europe, Americas, Asia and National Parks, including fifteen new place miniatures. **Focus > Small wins** records achievements and completed live focus sessions, with undo and optional celebrations. **Photo charms** opens a local crop and frame editor: only the finished keepsake is stored, with no uploads. Sunny blinks, glances toward a nearby pointer and reacts to squeezing and wins; Reduced Motion stops idle animation. All these controls stay tucked away until selected.
 
 <img src="../docs/store-assets/desktop-minimal.png" width="960" alt="Actual desktop views: charm only, optional background and toolbar, and the selected Focus panel">
 

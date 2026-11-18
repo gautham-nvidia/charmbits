@@ -1,13 +1,14 @@
 // Gautham Anebajagane · TM · Operations
 import { drawTextureMesh, type TextureMesh } from './live-art-renderer';
+import type { PetMotionProfile } from './charm-motion';
 
-type PetKind = 'pet-dog' | 'pet-cat' | 'pet-rabbit';
+type PetKind = 'pet' | 'pet-dog' | 'pet-cat' | 'pet-rabbit';
 export type EffectKind = 'gem' | 'metal' | 'leaves' | 'flame' | 'water' | 'curry' | 'mj' | 'sway' | PetKind;
 type Point = { x: number; y: number };
 type Rect = { x: number; y: number; w: number; h: number };
 type Surface = { mesh: TextureMesh; points: Point[]; rect: Rect };
 type Eye = { x: number; y: number; rx: number; ry: number };
-const petProfiles: Record<PetKind, { eyes: Eye[]; accent: Rect }> = {
+const petProfiles: Partial<Record<PetKind, { eyes: Eye[]; accent?: Rect; gesture?: string }>> = {
 	'pet-dog': {
 		eyes: [
 			{ x:146.19,y:54.56,rx:6,ry:3.8 },
@@ -27,7 +28,7 @@ const petProfiles: Record<PetKind, { eyes: Eye[]; accent: Rect }> = {
 		accent: {x:81,y:30,w:37,h:80},
 	},
 };
-const isPet = (kind?: EffectKind): kind is PetKind => Boolean(kind && kind in petProfiles);
+const isPet = (kind?: EffectKind): kind is PetKind => Boolean(kind && (kind === 'pet' || kind in petProfiles));
 const clamp = (v: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const smooth = (t: number) => { t = clamp(t); return t * t * (3 - 2 * t); };
@@ -77,6 +78,7 @@ export class MaterialMotion {
 	private ballLight?: HTMLCanvasElement;
 	private closedEyes?: HTMLCanvasElement;
 	private petAccent?: Surface;
+	private petProfile?: { eyes: Eye[]; accent?: Rect; gesture?: string };
 	private kind?: EffectKind;
 	private enabled = false;
 	private timer?: number;
@@ -108,8 +110,8 @@ export class MaterialMotion {
 		host.addEventListener('pointerleave', () => { this.pointer = { x: 0, y: 0 }; });
 	}
 	get configured() { return this.kind !== undefined; }
-	async select(url: string, kind?: EffectKind, options: { hook?: Point; blink?: string } = {}) {
-		const selection = JSON.stringify([url, kind, options.hook, options.blink]);
+	async select(url: string, kind?: EffectKind, options: { hook?: Point; blink?: string; pet?: PetMotionProfile } = {}) {
+		const selection = JSON.stringify([url, kind, options.hook, options.blink, options.pet]);
 		if (selection === this.selection) { return; }
 		this.selection = selection;
 		const generation = ++this.generation;
@@ -131,7 +133,7 @@ export class MaterialMotion {
 		try {
 			await Promise.all([image.decode(),pose?.decode()]);
 			if (generation !== this.generation) { return; }
-			this.prepare(image, kind, pose);
+			this.prepare(image, kind, pose, options.pet);
 		} catch (error) {
 			if (generation !== this.generation) { return; }
 			this.source = undefined; this.kind = undefined;
@@ -147,7 +149,7 @@ export class MaterialMotion {
 		}
 		this.owner.dataset.materialRendered = 'true'; this.paint();
 	}
-	private prepare(image: HTMLImageElement, kind: EffectKind, pose?: HTMLImageElement) {
+	private prepare(image: HTMLImageElement, kind: EffectKind, pose?: HTMLImageElement, profile?: PetMotionProfile) {
 		this.source = canvas();
 		// Match the original img's object-fit: contain, including non-square imported packs.
 		const fit = Math.min(432 / image.naturalWidth, 504 / image.naturalHeight);
@@ -163,7 +165,7 @@ export class MaterialMotion {
 		}
 		if (kind === 'water') { this.prepareWater(); }
 		if (kind === 'curry') { this.prepareCurry(); }
-		if (isPet(kind)) { this.preparePet(kind,pose); }
+		if (isPet(kind)) { this.preparePet(kind, pose, profile); }
 	}
 	setActive(enabled: boolean) {
 		if (this.enabled === enabled) { return; }
@@ -227,9 +229,11 @@ export class MaterialMotion {
 		this.ballMask = canvas(); this.ballMask.getContext('2d')!.putImageData(data, 0, 0);
 		this.ballLight = canvas();
 	}
-	private preparePet(kind: PetKind, pose?: HTMLImageElement) {
-		const profile = petProfiles[kind];
-		this.petAccent = surface(this.source!,profile.accent,12,16);
+	private preparePet(kind: PetKind, pose?: HTMLImageElement, artwork?: PetMotionProfile) {
+		const profile = artwork ? { ...artwork, eyes: artwork.eyes.map(([x, y, rx, ry]) => ({ x, y, rx, ry })) }
+			: petProfiles[kind] ?? { eyes: [] };
+		this.petProfile = profile;
+		this.petAccent = profile.accent ? surface(this.source!, profile.accent, 12, 16) : undefined;
 		this.closedEyes = undefined;
 		if (!pose) { return; }
 		const overlay = canvas(), ctx = overlay.getContext('2d')!;
@@ -253,21 +257,33 @@ export class MaterialMotion {
 		ctx.putImageData(pixels,0,0); this.closedEyes = overlay;
 	}
 	private pet(progress: number) {
+		// A small breath keeps sleeping pets responsive without inventing open eyes.
+		const breath = Math.sin(progress * Math.PI) ** 2;
+		const ctx = this.context;
+		ctx.clearRect(0, 0, 432, 504);
+		ctx.save(); ctx.translate(216, 480); ctx.scale(1 + breath * .003, 1 + breath * .005);
+		ctx.translate(-216, -480); ctx.drawImage(this.source!, 0, 0);
 		const blink = smooth((progress-.07)/.11) * (1-smooth((progress-.29)/.17));
 		if (this.closedEyes) {
 			this.context.save(); this.context.globalAlpha = blink;
 			this.context.drawImage(this.closedEyes,0,0); this.context.restore();
 		}
-		const layer = this.petAccent!, {rect} = layer;
-		const gesture = Math.sin(progress*Math.PI)**2 * Math.sin(progress*Math.PI*3) * .7;
-		this.context.clearRect(rect.x*2,rect.y*2,rect.w*2,rect.h*2);
-		deform(this.context,layer,p=>{
-			const edge = smooth((p.x-rect.x)/5)*smooth((rect.x+rect.w-p.x)/5)
-				* smooth((p.y-rect.y)/5)*smooth((rect.y+rect.h-p.y)/5);
-			if (this.kind==='pet-rabbit') { return {x:p.x+gesture*edge*smooth((p.y-60)/30),y:p.y}; }
-			const root = this.kind==='pet-dog' ? smooth((75-p.x)/17) : smooth((p.x-155)/30);
-			return {x:p.x,y:p.y+gesture*edge*root};
-		});
+		if (this.petAccent) {
+			const layer = this.petAccent, {rect} = layer;
+			const gesture = breath * Math.sin(progress*Math.PI*3) * .7;
+			this.context.clearRect(rect.x*2,rect.y*2,rect.w*2,rect.h*2);
+			deform(this.context,layer,p=>{
+				const edge = smooth((p.x-rect.x)/5)*smooth((rect.x+rect.w-p.x)/5)
+					* smooth((p.y-rect.y)/5)*smooth((rect.y+rect.h-p.y)/5);
+				if (this.petProfile?.gesture === 'ear' || this.kind==='pet-rabbit') {
+					return {x:p.x+gesture*edge*smooth((p.y-60)/30),y:p.y};
+				}
+				const root = this.petProfile?.gesture === 'tail-left' || this.kind==='pet-dog'
+					? smooth((75-p.x)/17) : smooth((p.x-155)/30);
+				return {x:p.x,y:p.y+gesture*edge*root};
+			});
+		}
+		ctx.restore();
 	}
 	private sway(progress: number) {
 		const amount = Math.sin(progress*Math.PI)**2 * Math.sin(progress*Math.PI*2);

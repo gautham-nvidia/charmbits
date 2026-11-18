@@ -28,6 +28,7 @@
     "cyber-monday-keyboard": 2
   },
   "retire": [
+    "robot-assistant",
     "logic-gate", "finfet", "photon-link", "hbm-tower", "cache-stack",
     "chiplet-bridge", "vector-lane", "tensor-array", "neural-tile",
     "silicon-lattice", "bump-grid", "interposer", "memory-bus", "alu-key",

@@ -336,8 +336,15 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.equal(await window.locator('#stage').getAttribute('data-charm'), 'garden:hibiscus');
   await window.locator('#charm-image').evaluate(image => image.decode());
   assert.equal(await window.locator('#charm-image').evaluate(image => image.naturalWidth), 216);
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored, { timeout: 5000 }).toBe(false);
+  const hoverCharm = async () => {
+    // Forwarded physical mouse movement can supersede an injected hover on a
+    // developer desktop. Reapply the action while checking its IPC response.
+    await expect.poll(async () => {
+      await window.locator('#charm').hover();
+      return (await diagnostic(application)).ignored;
+    }, { timeout: 5000 }).toBe(false);
+  };
+  await hoverCharm();
   await window.mouse.move(1, start.bounds.height - 1);
   await expect.poll(async () => (await diagnostic(application)).ignored, { timeout: 5000 }).toBe(true);
 
@@ -357,8 +364,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       await touch('touchMove', { x: grab.x + (target.x - grab.x) * step / 15, y: grab.y + (target.y - grab.y) * step / 15 });
     }
   };
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored).toBe(false);
+  await hoverCharm();
   await touch('touchStart', grab);
   try {
     await moveTouch({ x: grab.x, y: targetY });
@@ -370,8 +376,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(window.locator('#charm')).not.toHaveClass(/dragging/);
   await expect.poll(async () => Math.abs(Number(await window.locator('#charm').getAttribute('data-position-y')) - grab.y)).toBeLessThan(2);
   const targetX = Math.min(start.bounds.width - 90, grab.x + 500);
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored).toBe(false);
+  await hoverCharm();
   await touch('touchStart', grab);
   try {
     await moveTouch({ x: targetX, y: grab.y + 60 });
@@ -897,29 +902,46 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
     await fourth.window.locator('#motion').click();
   }
   await fourth.window.locator('#arrangement').selectOption('bracelet');
-  await expect(fourth.window.locator('#bracelet-controls select:visible')).toHaveCount(3);
+  await expect(fourth.window.locator('#bracelet-controls .bracelet-choice select:visible')).toHaveCount(3);
+  await expect(fourth.window.locator('#bracelet-style option')).toHaveCount(5);
+  await fourth.window.locator('#bracelet-style').selectOption('rose-gold');
   await fourth.window.getByRole('button', { name: 'Remove charm 3', exact: true }).click();
-  await expect(fourth.window.locator('#bracelet-controls select:visible')).toHaveCount(2);
+  await expect(fourth.window.locator('#bracelet-controls .bracelet-choice select:visible')).toHaveCount(2);
   await fourth.window.locator('#bracelet-add').click();
   await fourth.window.locator('#settings-close').click();
   const bracelet = fourth.window.locator('#bracelet-stage');
+  await expect(bracelet).toHaveAttribute('data-style', 'rose-gold');
   const slots = bracelet.locator('.bracelet-charm:not([hidden])');
   await expect(slots).toHaveCount(3);
   await expect(fourth.window.locator('#charm')).toBeHidden();
-  for (let index = 0; index < 3; index++) {
-    const slot = slots.nth(index);
-    for (const direction of [-1, 1]) {
-      const box = await slot.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
-      await fourth.window.mouse.move(x, y); await fourth.window.mouse.down();
-      try {
-        await fourth.window.mouse.move(x + direction * 45, y + 8, { steps: 12 });
-        await expect(slot).toHaveClass(/\bdragging\b/);
-        await expect.poll(async () => {
-          const moved = await slot.boundingBox();
-          return direction * (moved.x + moved.width / 2 - x);
-        }, { message: `Desktop bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
-      } finally { await fourth.window.mouse.up(); }
+  // As with the single-charm geometry check, use an independent touch pointer
+  // so forwarded, unheld physical mouse moves cannot cancel simulated capture.
+  const braceletInput = await fourth.window.context().newCDPSession(fourth.window);
+  await braceletInput.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+  const braceletTouch = (type, point) => braceletInput.send('Input.dispatchTouchEvent', {
+    type, touchPoints: point ? [{ ...point, id: 1, radiusX: 1, radiusY: 1, force: 1 }] : [],
+  });
+  try {
+    for (let index = 0; index < 3; index++) {
+      const slot = slots.nth(index);
+      for (const direction of [-1, 1]) {
+        const box = await slot.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+        await braceletTouch('touchStart', { x, y });
+        try {
+          for (let step = 1; step <= 12; step++) {
+            await braceletTouch('touchMove', { x: x + direction * 45 * step / 12, y: y + 8 * step / 12 });
+          }
+          await expect(slot).toHaveClass(/\bdragging\b/);
+          await expect.poll(async () => {
+            const moved = await slot.boundingBox();
+            return direction * (moved.x + moved.width / 2 - x);
+          }, { message: `Desktop bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
+        } finally { await braceletTouch('touchEnd'); }
+      }
     }
+  } finally {
+    await braceletInput.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    await braceletInput.detach();
   }
   await appearance();
   await fourth.window.locator('#motion').click();
@@ -930,6 +952,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await new Promise(resolve => setTimeout(resolve, 350));
   await expect(bracelet).toHaveAttribute('data-frames', braceletFrames);
   assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).bracelet.charms.length, 3);
+  assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).bracelet.style, 'rose-gold');
   await bracelet.screenshot({ path: join(output, 'desktop-bracelet.png') });
   await appearance();
   await fourth.window.locator('#arrangement').selectOption('single');

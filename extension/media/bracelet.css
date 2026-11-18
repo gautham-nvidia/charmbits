@@ -18,3 +18,7 @@
 .bracelet-choice button { min-width: 0; padding: 3px; font-size: 15px; }
 .bracelet-choice button:disabled, #bracelet-add:disabled { opacity: .45; cursor: default; }
 #bracelet-add { justify-self: start; }
+.bracelet-style-choice { display: grid; grid-template-columns: 1fr; gap: 5px; padding: 6px; min-width: 0; }
+.bracelet-style-choice label { font-size: 11px; opacity: .8; }
+.bracelet-style-choice select { width: 100%; min-width: 0; padding: 5px 7px; font: inherit; color: var(--vscode-dropdown-foreground, #263c33); background: var(--vscode-dropdown-background, #faf9f4); border: 1px solid var(--vscode-dropdown-border, #8888); border-radius: 4px; }
+.bracelet-style-choice select:focus-visible { outline: 2px solid var(--vscode-focusBorder, #43826c); outline-offset: 2px; }

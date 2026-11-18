@@ -15,9 +15,10 @@ import { createWinCelebration } from '../extension/src/win-celebration';
 import { createBloomView } from '../extension/src/bloom-view';
 import type { BloomShape } from '../extension/src/bloom-motion';
 import { MaterialMotion } from '../extension/src/charm-motion-view';
-import { blinkFile, motionKind } from '../extension/src/charm-motion';
+import { blinkFile, motionKind, petMotionProfile } from '../extension/src/charm-motion';
 import { createFlowerStemBridge } from '../extension/src/flower-stem-view';
 import { BraceletView } from '../extension/src/bracelet-view';
+import { BRACELET_STYLES, isBraceletStyle, type BraceletStyle } from '../extension/src/bracelet-core';
 
 interface DemoCharm {
 	id: string; name: string; preview: string; group?: string; attachment?: CharmAttachment; bloom?: BloomShape;
@@ -42,6 +43,11 @@ const nudgeButton = required<HTMLButtonElement>('demo-nudge');
 const resetButton = required<HTMLButtonElement>('demo-reset');
 const braceletButton = document.getElementById('demo-arrangement') as HTMLButtonElement | null;
 const pauseButton = document.getElementById('demo-pause') as HTMLButtonElement | null;
+const braceletDesign = document.getElementById('demo-bracelet-style') as HTMLSelectElement | null;
+braceletDesign?.replaceChildren(...Object.entries(BRACELET_STYLES).map(([id, label]) => new Option(label, id)));
+braceletDesign?.addEventListener('change', () => {
+	if (isBraceletStyle(braceletDesign.value)) { braceletStyle = braceletDesign.value; updateBracelet(); }
+});
 let userPaused = false;
 const braceletStage = document.createElement('div');
 braceletStage.id = 'demo-bracelet'; braceletStage.className = 'bracelet-stage';
@@ -50,6 +56,7 @@ let braceletView: BraceletView | undefined;
 let braceletEnabled = false;
 let braceletItems: DemoCharm[] = [];
 let braceletSelected = 0;
+let braceletStyle: BraceletStyle = 'silver';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const demoSize = Math.max(60, Math.min(200, Number(stage.dataset.charmSize) || 100));
 const viewScale = Math.max(1, Math.min(1.5, Number(stage.dataset.viewScale) || 1));
@@ -101,12 +108,14 @@ function updateBracelet() {
 	charm.hidden = braceletEnabled; anchor.hidden = braceletEnabled;
 	thread.ownerSVGElement!.style.display = braceletEnabled ? 'none' : '';
 	braceletButton?.setAttribute('aria-pressed', String(braceletEnabled));
+	const designControl = document.getElementById('demo-bracelet-design');
+	if (designControl) { designControl.hidden = !braceletEnabled; }
 	if (!braceletEnabled) { braceletView?.setActive(false, motionReduced()); return; }
 	braceletView ??= new BraceletView(braceletStage, {
 		image: item => item.source!,
 		asset: file => new URL(`assets/default/${file}`, document.baseURI).href,
 		state: () => ({ ...DEFAULT_STATE, arrangement: 'bracelet', puzzles,
-			bracelet: { charms: braceletItems.map(item => item.id), selected: braceletSelected } }),
+			bracelet: { charms: braceletItems.map(item => item.id), selected: braceletSelected, style: braceletStyle } }),
 		select: index => {
 			braceletSelected = index;
 			selectedId = braceletItems[index].id;
@@ -389,6 +398,7 @@ export function setCharm(selected: DemoCharm) {
 	const pose = blinkFile(selected);
 	void materialMotion.select(preview.href, motionKind(selected), {
 		hook: attachment, blink: pose ? new URL(`assets/default/${pose}`, document.baseURI).href : undefined,
+		pet: petMotionProfile(selected),
 	}).catch(error => console.warn('Charm motion could not load; the original artwork remains visible.', error));
 	image.style.transformOrigin = `${attachment.x * 100}% ${attachment.y * 100}%`;
 	charm.dataset.soft = String(isSoftCharm(selected.id));
