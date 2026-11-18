@@ -308,8 +308,9 @@ for (const [source, target] of [['LICENSE', 'software-license.txt'], ['ARTWORK-L
   await copyFile(join(repo, 'extension', source), join(dist, target));
 }
 const redirect = legacyPagesRedirect(process.env.CF_PAGES_URL);
+// The local server handles this route; static Pages hosting needs the JSON alias.
+await writeFile(join(dist, '_redirects'), `${redirect}/api/studio/config /api/studio/config.json 200\n`);
 if (redirect) {
-  await writeFile(join(dist, '_redirects'), redirect);
   console.log('Old Pages project redirects to https://charmbits.pages.dev/.');
 }
 if (privateReview) console.log('PRIVATE OWNER PREVIEW: contains review packs and an installer. Do not deploy this output.');

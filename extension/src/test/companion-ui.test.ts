@@ -1069,6 +1069,11 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 			await frame.locator('#settings-toggle').click();
 			await frame.locator('#menu-appearance').click();
 		};
+		// Let both initial host snapshots and their saved acknowledgements settle
+		// before measuring a reaction that must not be reset by initialization.
+		for (const attribute of ['data-companion-ready', 'data-persisted', 'data-companion-persisted']) {
+			await expect(frame.locator('#stage')).toHaveAttribute(attribute, 'true');
+		}
 		if (process.env.CHARMBITS_TEST_PERSONAL === '1') {
 			await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 			await expect(frame.locator('#access-label')).toHaveText('Personal edition');
@@ -1083,7 +1088,17 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 		await focusCharmForKeyboard(editor, frame);
 		await editor.window.keyboard.press('Space');
 		await expect(frame.locator('#charm')).toHaveAttribute('data-tap-motion', 'playing');
-		await expect.poll(async () => Number(await pet.getAttribute('data-progress'))).toBeGreaterThan(.15);
+		try {
+			await expect.poll(async () => Number(await pet.getAttribute('data-progress'))).toBeGreaterThan(.15);
+		} catch (error) {
+			writeFileSync(testInfo.outputPath('pet-reaction-state.json'), JSON.stringify(await frame.evaluate(() => ({
+				stage: { ...document.getElementById('stage')!.dataset },
+				charm: { ...document.getElementById('charm')!.dataset },
+				canvas: { ...(document.querySelector('#charm canvas[data-progress]') as HTMLElement)?.dataset },
+				focused: document.hasFocus(), hidden: document.hidden,
+			})), null, 2));
+			throw error;
+		}
 		const progress = Number(await pet.getAttribute('data-progress'));
 		await editor.window.keyboard.press('Space');
 		expect(Number(await pet.getAttribute('data-progress'))).toBeGreaterThanOrEqual(progress);
@@ -1218,11 +1233,18 @@ test(`${installedPersonalization ? 'installed VSIX' : 'playful charms'} reacts t
 			await expect(frame.locator('#charm')).toHaveAttribute('data-tap-motion', 'idle');
 		}
 		const rendered = (key: string) => TRIAL_CHARMS.find(charm => charm.artworkKey === key)!.id;
-		for (const id of ['terminal', rendered('starter-drishti'), rendered('new-emoji-heart'),
-			'live:seal', 'fidget:bubbles', rendered('flower-sunflower')]) {
+		for (const [id, renderer] of [
+			['terminal', 'material'], [rendered('starter-drishti'), 'material'],
+			[rendered('new-emoji-heart'), 'soft'], ['live:seal', 'live'],
+			['fidget:bubbles', 'fidget'], [rendered('flower-sunflower'), 'bloom'],
+		]) {
 			await appearance();
 			await frame.locator('#charm-select').selectOption(id);
 			await closeAppearance();
+			// Selection arrives before image decoding on slower extension hosts.
+			// Exercise the loaded renderer rather than racing its initial reset.
+			await expect(frame.locator('#charm')).toHaveAttribute(
+				renderer === 'soft' ? 'data-soft' : `data-${renderer}-rendered`, 'true');
 			if (id === 'terminal') {
 				await frame.locator('#charm').click();
 				await expect(frame.locator('#charm')).toHaveAttribute('data-tap-motion', 'playing');

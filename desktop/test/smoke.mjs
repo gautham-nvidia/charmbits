@@ -148,7 +148,9 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   }
   async function openTools(window) {
     if (await window.locator('body').getAttribute('data-desktop-tools') === 'true') return;
-    await window.locator('#charm').hover();
+    // Bracelet mode hides the single pendant; reveal controls from a visible
+    // charm in either arrangement, including when native tests unpin the toolbar.
+    await window.locator('#charm:visible, #bracelet-stage .bracelet-charm:visible').first().hover();
     await window.getByRole('button', { name: 'Show controls', exact: true }).click();
     await expect(window.locator('#primary-nav')).toBeVisible();
   }
