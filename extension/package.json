@@ -1,8 +1,9 @@
 {
   "name": "charmlet",
-  "displayName": "Charmlet: Coding Charms",
-  "description": "Free focus sessions, a daily garden, motivation and interactive charms for your coding day.",
-  "version": "0.9.0",
+  "displayName": "CharmBits: Coding Charms",
+  "description": "Free coding companions, calm pet reactions, charm bracelets, focus sessions, a daily garden and local photo keepsakes.",
+  "version": "0.16.0",
+  "license": "SEE LICENSE IN LICENSE",
   "pricing": "Free",
   "icon": "media/marketplace-icon.png",
   "galleryBanner": {
@@ -15,11 +16,11 @@
   "publisher": "gautham-nvidia",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gautham-nvidia/charmlet.git"
+    "url": "https://github.com/gautham-nvidia/charmbits.git"
   },
-  "homepage": "https://github.com/gautham-nvidia/charmlet#readme",
+  "homepage": "https://charmbits.pages.dev/",
   "bugs": {
-    "url": "https://github.com/gautham-nvidia/charmlet/issues"
+    "url": "https://github.com/gautham-nvidia/charmbits/issues"
   },
   "extensionKind": [
     "ui"
@@ -48,7 +49,7 @@
       "activitybar": [
         {
           "id": "charmlet",
-          "title": "Charmlet",
+          "title": "CharmBits",
           "icon": "media/charmlet-icon.svg"
         }
       ]
@@ -57,7 +58,7 @@
       "charmlet": [
         {
           "id": "charmlet.view",
-          "name": "Charmlet",
+          "name": "CharmBits",
           "type": "webview",
           "visibility": "collapsed",
           "initialSize": 280,
@@ -69,43 +70,43 @@
       {
         "command": "charmlet.show",
         "title": "Show Charm",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.toggle",
         "title": "Toggle Charm",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.focus",
         "title": "Focus Session",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.garden",
         "title": "Open Garden",
-        "category": "Charmlet",
+        "category": "CharmBits",
         "icon": "$(heart)"
       },
       {
         "command": "charmlet.hide",
         "title": "Hide Charm",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.reset",
         "title": "Reset Charm",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.importPack",
         "title": "Import Charm Pack",
-        "category": "Charmlet"
+        "category": "CharmBits"
       },
       {
         "command": "charmlet.removePack",
         "title": "Remove Charm Pack",
-        "category": "Charmlet"
+        "category": "CharmBits"
       }
     ],
     "menus": {
@@ -133,8 +134,8 @@
     "test:unit": "npm run compile-tests && node --test out/test/state.test.js out/test/packs.test.js out/test/companion.test.js",
     "test:ui": "playwright test",
     "test": "npm run test:unit && npm run test:ui",
-    "package:vsix": "vsce package --no-dependencies --skip-license",
-    "package:release": "vsce package --no-dependencies"
+    "package:vsix": "node package-vsix.mjs",
+    "package:release": "node package-vsix.mjs --release"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
@@ -145,7 +146,7 @@
     "@types/vscode": "1.90.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.0.0",
-    "@vscode/vsce": "^4.0.0",
+    "@vscode/vsce": "4.1.1",
     "esbuild": "^0.28.1",
     "eslint": "^10.5.0",
     "npm-run-all": "^4.1.5",
@@ -156,7 +157,9 @@
   },
   "overrides": {
     "diff": "^8.0.4",
-    "serialize-javascript": "^7.0.6"
+    "serialize-javascript": "^7.0.6",
+    "minimatch@>=7.0.0 <11.0.1": "11.0.8",
+    "glob@>=9.0.0 <=14.0.1": "14.0.6"
   },
   "dependencies": {
     "lucide": "^1.47.0",

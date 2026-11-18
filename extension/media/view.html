@@ -5,37 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src __CSP__ data:; style-src __CSP__; script-src 'nonce-__NONCE__';">
   <link rel="stylesheet" href="__STYLE__">
-  <title>Charmlet</title>
+  <title>CharmBits</title>
 </head>
 <body>
-  <main id="app" aria-label="Charmlet">
+  <main id="app" aria-label="CharmBits">
     <div id="stage" data-ready="false" data-running="false" data-persisted="true" data-companion-ready="false" data-companion-persisted="true">
       <div class="identity"><span id="charm-swatch" class="swatch" aria-hidden="true"></span><span id="charm-name">Terminal</span></div>
       <div id="rig"><div id="hanging" hidden>
         <svg id="cord" aria-hidden="true"><path id="thread"></path></svg><span id="anchor" aria-hidden="true"></span>
         <svg id="focus-ring" viewBox="0 0 24 24" aria-hidden="true" hidden><circle class="focus-track" cx="12" cy="12" r="10"></circle><circle id="focus-progress" cx="12" cy="12" r="10" pathLength="100"></circle></svg>
         <button id="charm" type="button" aria-label="Nudge terminal charm" title="Nudge charm" draggable="false"><img id="charm-image" src="__CHARM__" alt="" width="72" height="84" draggable="false"></button>
-      </div></div>
+      </div><div id="bracelet-stage" class="bracelet-stage" aria-label="Charm bracelet" hidden></div></div>
       <button id="restore" type="button" aria-label="Restore charm" title="Restore charm" hidden></button>
     </div>
     <section id="care-cue" aria-label="Gentle reminder" hidden><div><p id="care-cue-label" role="status" aria-live="polite"></p><p id="care-cue-copy"></p></div><div class="care-actions"><button id="care-done" type="button">Done</button><button id="care-snooze" type="button">Snooze 10 min</button><button id="care-skip" type="button">Skip</button></div></section>
     <div id="message-card" class="message-card">
-      <div class="message-body"><div id="message-meta" class="message-meta" hidden><span id="card-kind"></span><span id="card-topic"></span></div><p id="message-text"></p><p id="message-answer" hidden></p><div class="message-links"><button id="reveal-answer" type="button" hidden>Reveal answer</button><button id="message-source" type="button" hidden>Read source</button></div></div>
+      <div class="message-body"><div id="message-meta" class="message-meta" hidden><span id="card-kind"></span><span id="card-topic"></span></div><p id="message-text"></p><p id="message-answer" hidden></p><div class="message-links"><button id="reveal-answer" type="button" hidden>Reveal answer</button><button id="message-source" type="button" hidden>Read source</button></div><div id="weather-summary" hidden><strong id="weather-value"></strong><span id="weather-time"></span></div></div>
       <button id="next-message" type="button" aria-label="Next coding message" title="Next message"></button>
     </div>
-    <nav id="primary-nav" class="tools" aria-label="Charmlet tools">
+    <nav id="primary-nav" class="tools" aria-label="CharmBits tools">
       <button id="charms-toggle" type="button" aria-label="Browse charms" aria-controls="charm-picker" aria-expanded="false" aria-haspopup="dialog">Charms</button>
       <button id="companion-toggle" type="button" aria-label="Focus" title="Focus session" aria-controls="companion-tools" aria-expanded="false"><span id="care-badge" aria-hidden="true" hidden></span><span>Focus</span></button>
       <button id="garden-readout" type="button" aria-label="Open garden" aria-controls="companion-tools" aria-expanded="false" title="Plant your first seed">Garden</button>
+      <button id="puzzle-toggle" type="button" aria-label="Open puzzle" aria-controls="puzzle-editor" aria-expanded="false" hidden>Play</button>
       <button id="settings-toggle" type="button" aria-label="Charm settings" title="Settings" aria-controls="settings-menu" aria-expanded="false" aria-haspopup="menu">Settings</button>
     </nav>
     <div class="readout"><span id="phase" role="status" aria-live="polite">Parked</span><button id="focus-readout" type="button" aria-label="Open focus session" hidden>Focus</button><output id="length">126 px</output></div>
-    <footer class="app-footer" aria-label="About Charmlet"><span id="website-placeholder">Website — coming soon</span><span>Made in Silicon Valley <span id="app-version">v__APP_VERSION__</span></span></footer>
+    <footer class="app-footer" aria-label="About CharmBits"><button id="website-placeholder" type="button" disabled>More charms ↗</button><span>Made in Silicon Valley <span id="app-version">v__APP_VERSION__</span></span></footer>
     <div id="tools-backdrop" hidden aria-hidden="true"></div>
     <section id="charm-picker" class="tool-popup" role="dialog" aria-labelledby="picker-title" aria-modal="false" hidden>
       <header class="popup-heading"><div><h2 id="picker-title">Browse charms</h2><p>Find a little something that's you.</p></div><button id="picker-photo" type="button">Add photo</button><button id="picker-close" type="button" class="popup-close" aria-label="Close charm picker"></button></header>
-      <div class="picker-body"><label class="charm-search-label"><span id="charm-search-icon" aria-hidden="true"></span><input id="charm-search" type="search" aria-label="Search charms" placeholder="Search your charms…" autocomplete="off"></label><div id="charm-groups" role="group" aria-label="Charm categories"></div><p id="charm-results" role="status" aria-live="polite"></p><div id="charm-grid" aria-label="Installed charm collection"></div><div id="charm-empty" hidden><p>No charms match that search.</p><button id="clear-charm-search" type="button">Clear filters</button></div><p class="companion-hint">The complete trial collection is included. Flower previews are ready to try; your garden still records what you grow. Your imported packs are here too.</p></div>
+      <div class="access-strip"><strong id="access-label">Free starter</strong><button id="browse-packs" type="button" disabled>Get more charms</button><button id="activate-access" type="button" disabled>Activate access</button></div>
+      <div class="picker-body"><label class="charm-search-label"><span id="charm-search-icon" aria-hidden="true"></span><input id="charm-search" type="search" aria-label="Search charms" placeholder="Search your charms…" autocomplete="off"></label><div id="charm-groups" role="group" aria-label="Charm categories"></div><p id="charm-results" role="status" aria-live="polite"></p><div id="charm-grid" aria-label="Installed charm collection"></div><div id="charm-empty" hidden><p>No charms match that search.</p><button id="clear-charm-search" type="button">Clear filters</button></div><p id="access-detail" class="companion-hint">Your free companions, personal packs and earned flowers are ready to use.</p></div>
     </section>
+    <section id="puzzle-editor" class="tool-popup" role="dialog" aria-labelledby="puzzle-title" aria-modal="false" hidden></section>
     <section id="settings-menu" class="settings-menu" role="menu" aria-label="Settings" hidden>
       <header class="popup-heading"><h2>Settings</h2><button id="menu-close" type="button" class="popup-close" aria-label="Close settings menu"></button></header>
       <button id="menu-appearance" type="button" role="menuitem" data-action="appearance">Appearance</button>
@@ -52,11 +55,23 @@
     <section id="settings" class="tool-popup" role="dialog" aria-labelledby="appearance-title" aria-modal="false" hidden>
       <header class="popup-heading"><div><h2 id="appearance-title">Appearance</h2><p>Make a little room for your charm.</p></div><button id="settings-close" class="popup-close" type="button" aria-label="Close appearance settings"></button></header>
       <div class="appearance-fields">
+        <label for="arrangement">Arrangement</label><select id="arrangement"><option value="single">Single charm</option><option value="bracelet">Charm bracelet</option></select>
+        <div id="bracelet-controls" hidden></div>
         <label for="charm-select">Charm</label><select id="charm-select" aria-describedby="charm-description"></select><p id="charm-description"></p>
-        <label for="size">Size</label><input id="size" type="range" min="60" max="140" step="10" value="100"><output id="size-value" for="size">100%</output>
+        <label id="cali-outfit-label" for="cali-outfit" hidden>Cali's outfit</label><select id="cali-outfit" hidden></select>
+					<label for="size">Size</label><input id="size" type="range" min="60" max="200" step="5" value="100"><output id="size-value" for="size">100%</output>
         <label for="cord-length">Cord</label><input id="cord-length" type="range" min="48" step="2" value="126"><output id="cord-value" for="cord-length">126 px</output>
         <label for="cord-style">Cord design</label><select id="cord-style" aria-describedby="cord-style-hint"></select>
         <p id="cord-style-hint" class="companion-hint"></p>
+        <details id="weather-settings" hidden><summary>Nimbus weather</summary>
+          <label class="message-choice"><input id="weather-enabled" type="checkbox"> Use current US weather</label>
+          <label for="weather-station">Observation station</label><select id="weather-station"></select>
+          <label for="weather-unit">Temperature</label><select id="weather-unit"><option value="f">Fahrenheit</option><option value="c">Celsius</option></select>
+          <p class="companion-hint">Optional, free US airport observations. Your chosen station is sent to the National Weather Service. Checks every ten minutes while CharmBits is visible.</p>
+          <p id="weather-status" class="companion-hint">Weather is off.</p>
+          <button id="weather-save" type="button" disabled>Save weather settings</button><button id="weather-source" type="button">National Weather Service</button>
+          <p id="weather-feedback" class="companion-hint" role="status" aria-live="polite"></p>
+        </details>
         <div class="appearance-actions"><button id="layout-mode" type="button" aria-label="Orbit layout" title="Orbit layout" aria-pressed="false">Orbit layout</button><button id="motion" type="button" role="switch" aria-checked="true" aria-label="Motion" title="Motion">Motion</button></div>
         <label class="message-choice"><input id="festive-enabled" type="checkbox" aria-describedby="festive-hint"> Use festive defaults</label>
         <label class="message-choice"><input id="charm-pinned" type="checkbox" aria-describedby="festive-hint"> Pin this charm</label>

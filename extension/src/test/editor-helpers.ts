@@ -1,7 +1,21 @@
-import { expect, type Frame, type Page } from '@playwright/test';
+import { test, expect, type Frame, type Page } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
 
 export const primaryModifier = process.platform === 'darwin' ? 'Meta' : 'Control';
 export const endOfDocument = process.platform === 'darwin' ? 'Meta+ArrowDown' : 'Control+End';
+
+export function isolatedEditorEnvironment(): Record<string, string> {
+	const environment: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		// Editor-launched terminals carry their parent's IPC hooks, entry point
+		// and compile cache. A disposable host must establish its own runtime.
+		if (value !== undefined && !key.startsWith('VSCODE_')
+			&& key !== 'ELECTRON_RUN_AS_NODE' && key !== 'DEVIN_FD_PATH') {
+			environment[key] = value;
+		}
+	}
+	return environment;
+}
 
 export function commandInput(window: Page) {
 	const widget = window.locator('.quick-input-widget');
@@ -35,22 +49,33 @@ export async function command(window: Page, title: string) {
 
 export async function readyFrame(window: Page, excluded: ReadonlySet<Frame> = new Set<Frame>()): Promise<Frame> {
 	let result: Frame | undefined;
-	await expect.poll(async () => {
-		for (const frame of window.frames()) {
-			if (excluded.has(frame) || frame.isDetached()) { continue; }
-			try {
-				if (await frame.locator('#stage[data-ready="true"]').isVisible() && !frame.isDetached()) {
-					result = frame;
-					return true;
+	try {
+		await expect.poll(async () => {
+			for (const frame of window.frames()) {
+				if (excluded.has(frame) || frame.isDetached()) { continue; }
+				try {
+					if (await frame.locator('#stage[data-ready="true"]').isVisible() && !frame.isDetached()) {
+						result = frame;
+						return true;
+					}
+				} catch (error) {
+					if (!frame.isDetached()) { throw error; }
 				}
-			} catch (error) {
-				if (!frame.isDetached()) { throw error; }
 			}
-		}
-		return false;
-	}, { timeout: 30000 }).toBe(true);
+			return false;
+		}, { timeout: 30000 }).toBe(true);
+	} catch (error) {
+		try {
+			writeFileSync(test.info().outputPath('webview-readiness.json'), JSON.stringify({
+				body: await window.locator('body').innerText({ timeout: 3000 }),
+				frames: window.frames().map(frame => ({ url: frame.url(), detached: frame.isDetached() })),
+			}, null, 2));
+			await window.screenshot({ path: test.info().outputPath('webview-readiness.png'), timeout: 3000 });
+		} catch { /* Preserve the readiness failure if the host has already closed. */ }
+		throw error;
+	}
 	if (!result) {
-		throw new Error('Charmlet did not create a ready webview.');
+		throw new Error('CharmBits did not create a ready webview.');
 	}
 	return result;
 }
@@ -58,7 +83,7 @@ export async function readyFrame(window: Page, excluded: ReadonlySet<Frame> = ne
 export async function reloadCharm(window: Page): Promise<Frame> {
 	const previous = new Set(window.frames());
 	await Promise.all([
-		window.waitForEvent('domcontentloaded'),
+		window.waitForEvent('domcontentloaded', { timeout: 30000 }),
 		command(window, 'Developer: Reload Window'),
 	]);
 	return readyFrame(window, previous);

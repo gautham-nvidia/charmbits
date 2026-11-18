@@ -1,4 +1,4 @@
-# Charmlet project log
+# CharmBits project log
 
 Dates use YYYY-MM-DD; Git preserves exact timestamps and authors. Append dated entries for new work
 and corrections rather than erasing history. Record the linked issue/PR, commit description, evidence
@@ -546,3 +546,166 @@ The earlier Windows Reduced Motion and editor-readiness failures are resolved: a
 Both website checks pass for 167 unique charms, 201 validated PNGs, 160 selected designs, 29 app comparisons and 23 packs. New comparisons preserve actual capture pixels from the installed 0.9.0 extension and the 0.6.0 desktop development app; both pet sheets and Cali's normal/fallback, encouragement and win views were inspected. These are assistant inspections, not the owner's final artwork selection. Privacy, provenance, README and payment guidance now include Cali and the expanded count.
 
 The next gate is the expanded candidate's eight hosted jobs, followed by technical merge/main verification and fresh packages from that checkout. Public licences, publisher/signing choices, native macOS/mixed-display validation and the explicitly deferred website/paid decisions remain separate.
+
+## 2026-11-06 - Phase 10 California mascot candidate
+
+Starting from verified main `4bb0905` (PR #29), the owner requested a sharper real-grizzly Cali with a Silicon Valley coder wardrobe, a relaxed Friday outfit, clear live gestures and California companions. The new branch `feat/phase-10-california-mascots` contains extension 0.10.0 / desktop 0.7.0 and 178 charms.
+
+The illustrated renderer preserves the detailed concepts through curved surfaces and a jointed Cali head, arms and paws. Seven outfits follow the local date; eleven California figures have live gaze and gentle reactions. GPU and software rendering share artwork and geometry. The rejected untextured mesh prototype was not retained as the production implementation. Thirty-two prepared textures/thumbnails are covered by provenance hashes.
+
+Local source verification passed compile/lint, 88 models, the expanded 25.9-second editor mascot check, twelve desktop models and the existing 46.6-second desktop scenario. The editor check covers all eleven new figures, visible cord contact, current outfit, rendered cheer, GPU loss, saved preferences and restart. Production audit reported zero vulnerabilities. Final installed-package, expanded desktop, website, archive and hosted checks remain in progress; [Phase 10 verification](docs/phase-10-california-mascots.md) tracks the current gates.
+
+Artwork remains for the owner's design review. Website launch and paid choices remain explicitly deferred, alongside the existing licence, publisher, signing, native macOS and mixed-display decisions.
+
+The final local Phase 10 pass completed all four installed-extension scenarios on Windows / VS Code 1.145.0, twelve desktop models, the expanded 51.1-second desktop scenario, the extracted 59.8-second Windows archive scenario, both website checks and 28 artwork/Photo Studio/package tests. Catalogue and exact VSIX-download validation passed. Review sheets now cover the installed app, desktop development app, seven outfits and detailed California figures.
+
+Regression work corrected a pending-reaction/midnight scheduling boundary and the website's handling of batched visibility observations; both have deterministic regression coverage. An initial local Sunny hold missed without a failure trace; its cause remains unconfirmed, while an explicit focus gate and traced four-case rerun passed. The eight hosted platform jobs are the next gate, tracked on the candidate PR.
+
+## 2026-11-09 - Playful charms and themed collections
+
+The owner approved the detailed Cali and California family. Extension 0.11.0 / desktop 0.8.0 expand the trial to 200 charms, with Terminal first and Live 3D next. Cali has four playful tap reactions and a saved outfit selector; every charm can wiggle on a tap, the default size grows 15%, and Appearance supports 60–200%. Four directly draggable spinners and three optional, persistent puzzle boards complete the interactive Stress Busters.
+
+Nimbus now has textured cloud artwork with sunrise, rain and lightning. Byte has a jointed metal body and binary, compile-check and terminal displays. Twelve instruments form Music; California gains recognizable architecture and coastal scenes; seasonal replacements include clear shopping-day objects, Diwali and Halloween. Soldering Iron and Digital Caliper retire with saved-selection and cord migration. Ten artist-inspired studies remain separate local review material.
+
+Local verification passed 95 shared models, all thirteen source editor scenarios across the full run and two affected reruns, six installed-VSIX scenarios, thirteen desktop models, the expanded desktop scenario, extracted Windows ZIP verification and 28 artwork/Photo Studio/package checks. Both website checks pass for 200 charms, 219 validated review PNGs, 47 app comparisons and mobile layouts. Manual browser interaction confirmed all six weather/code reactions and the twelve-item Music filter. Eleven new review sheets were inspected at their stated sizes.
+
+Windows persistence now retries temporary file-lock errors with a bounded wait while preserving the previous save. A separate initial topmost-flag loss was captured in an extracted launch; Windows reapplies that initial preference after loading, and every restart is checked. The precise native cause remains unconfirmed. A final artwork-notice refresh changed only `ARTWORK.md` in both packages; all previously tested application and media bytes remained identical, and the final ZIP passed extraction and app checks again.
+
+The candidate remains on draft [PR #30](https://github.com/gautham-nvidia/charmlet/pull/30), which tracks the final hosted matrix. Website launch, pricing, licences and publisher/signing remain owner decisions; native macOS interaction and mixed-display checks remain manual gates. Vercel CLI is still logged out.
+
+The first hosted matrix passed both desktop jobs and the three VS Code 1.90 jobs. The newer Linux/macOS editor checks exposed an exact-pixel assumption after native resizing; the test now verifies current viewport geometry and the unchanged saved cord preference. A separate Windows startup missed the activity-bar icon before the navigation case began; its cause is unconfirmed, and failure capture now preserves launch windows and logs. Both affected scenarios passed on local pinned VS Code 1.140.0. These changes affect tests and validation notes only; the trial package bytes remain unchanged.
+
+The follow-up passed all source scenarios across the six editor configurations and six of eight complete jobs. The remaining installed-package checks missed Sunny's focus on macOS and the first puzzle-open click after reload on Linux. Those paths now establish native-window and webview focus before input, assert that selection actually closes the picker, and retain pointer/dialog state on failure. The input actions themselves are not retried. Both affected installed scenarios passed twice locally on pinned 1.140.0; package bytes remain unchanged.
+
+The next matrix passed both macOS versions, Windows1.140, Linux1.90 and both desktop jobs. Linux1.140's new trace proved that its post-reload click landed on the outer VS Code iframe; no pointer event reached the puzzle document. Reload-persistence checks now use keyboard input, while initial and subsequent puzzle openings retain mouse coverage. Windows1.90 timed out waiting five seconds for its last queued puzzle save (pending, not an error acknowledgement); the exact cause is unconfirmed. The test now allows 15 seconds for the serial atomic-write queue, retains exact file/reload checks, and saves acknowledgement timing plus before/after-close file diagnostics. Five installed Windows1.90 puzzle runs passed locally. These remain test-only changes.
+
+## 2026-11-10 — Music Icons and a new website
+
+The owner approved all 34 artist studies for inclusion, bringing extension 0.12.0 and desktop 0.9.0 to 234 charms. Music Icons follows the instrument collection. Reprocessing initially changed the approved PNG hashes and produced duplicate bundled/imported figures; profile4 now preserves the exact three approved packs' PNG bytes. A regression checks all 34 saved IDs, pins and cords. The original pack files are retained.
+
+The website was rebuilt around a brand kit informed by the owner's workflow video: a large live Cali playground, product tour, featured collections, garden, desktop/editor installation and a dedicated searchable gallery. Search handles accents and URL state; previews stay near the selected card. The old unavailable Photo Studio is removed from promotion while its disabled URL remains. No paid product or physical merchandise launch is activated.
+
+Local checks passed 96 models, thirteen source editor scenarios, seven installed-VSIX scenarios, thirteen desktop models, the expanded desktop smoke and extracted Windows ZIP. Website checks cover all 234 charms, fifteen live companions, three puzzles, saved filter URLs, focus, drag/reset/close, Reduced Motion, exact downloads and 320/390/768-pixel layouts. The review validates 253 PNGs and 51 app comparisons; four new 0.12.0 captures show actual installed artists at 100%. Twenty-three artwork/Studio boundary checks pass. Own unpublished superseded artist outputs were moved to an ignored, hash-verified archive; approved originals and referenced downloads remain.
+
+[Phase13 readiness](docs/phase-13-artists-website.md) records package hashes and the required eight hosted jobs on draft PR #30. [Vercel hosting](docs/vercel-hosting.md) now uses the current branch and `greensilver-personal`; the CLI remains logged out. [Commerce guidance](docs/monetization-and-payments.md) compares verified Stripe, Square and Shopify costs and fulfillment, recommends Shopify for new digital packs and later merchandise, and separates payment collection from delivery. Business, price, rights, signing and production decisions remain with the owner.
+
+## 2026-11-13 — Free starter, verified access and the approved website
+
+Extension 0.13.0 and desktop 0.10.0 start new profiles with 31 fixed free picks. Existing beta profiles retain their frozen 234-design collection. The service supports 15 additional free claims, a once-per-verified-email 30-day trial, permanent individual purchases and Pro at the owner's $7.49 launch / $17.49 regular price. The current artwork and shared renderer remain bundled for offline use.
+
+The approved Terminal identity and homepage now show Desktop/VS Code placement, focus, encouragement, visible cheers and confetti before pricing. Flexible cord motion, the attached locket chain, light/dark themes, About Charmlet, About Us, Press, shop and email-download pages are included. The locket is still labelled as a website prototype. Twelve sports studies were visually reviewed on light/dark backgrounds and prepared as an optional private import pack, outside the public catalogue.
+
+The Cloudflare service uses durable D1 trial/ownership records, one-use email links, optional confirmed offers, signed app grants, server prices, verified/idempotent payment events, refund handling and private R2 delivery. Sandbox credentials and orders cannot become live access. A clean static build asks the service which installers are published, and email confirmation also works in an already-open tab.
+
+Local evidence includes 100 app models, 14 source-editor scenarios, installed-package starter/beta/Restricted Mode checks, 13 desktop models and the extracted Windows archive. The 13 service and six release tests pass. Browser tests cover the 234-design gallery, 15 live companions, three puzzle boards, Reduced Motion, mobile layouts and isolated signup/checkout/delivery fixtures. All three dependency audits report zero known findings. CI adds service/website security checks, pinned Actions and weekly dependency updates; final hosted results belong in the release handoff.
+
+The [current setup guide](service/README.md) supersedes the earlier Shopify-first recommendation: Cloudflare, Brevo and Lemon Squeezy serve the digital launch; merchandise is deferred. [Security findings and limits](docs/phase-15-security-and-launch.md) record the references used and the pages this network could not fully retrieve. Live accounts, checkout, public distribution, artwork/source licensing and desktop signing remain launch prerequisites; no real customer email or payment was sent during these checks.
+
+## 2026-11-13 — Sports, US skylines and optional Pro offers
+
+The 0.14.0 / desktop 0.11.0 candidate adds 14 Sports Icons included with Pro and 13 US tech-hub skylines. Dhoni, Tendulkar, Curry and Hamilton replace Hamm and Clark in the sports lineup. Generic office/tower names and the current circular Cupertino campus replace the earlier labels/design. Three retired starter choices migrate to free San Francisco, Austin and Seattle replacements while preserving selection details and existing imports.
+
+The approved website now has a single Auto/Light/Dark control and a dismissible, confirmed-email offers popup. Subscription remains separate from trial access. Pro checkout supports provider coupon codes, with signed discounted-order checks and no individual sports sale route. Account setup is still disabled in the checked-in configuration.
+
+Local testing found and corrected a thin-silhouette attachment issue. The review inventory remains bounded at 300 records, with 280 prepared and 234 featured. [Phase 16 scope and checks](docs/phase-16-collections-and-offers.md) tracks validation, final packaging and remaining public-launch requirements.
+
+The owner's follow-up adds Roger Federer, Rafael Nadal and Michael Phelps, bringing Sports Icons to 17 and the catalogue to 261 designs. The three additions use a separate immutable source pack; the fourteen existing images are preserved. The owner also supplied **getcharmlet@gmail.com** as the official inbox, now used for website contact. This configures contact information without opening subscriber collection. The candidate remains local pending the public-artwork sharing decision.
+
+## 2026-11-15–16 — CharmBits and free VS Code features
+
+The owner approved public review of the artwork, then selected **CharmBits** and authorized the repository and website update. The repository is now `gautham-nvidia/charmbits`. Extension 0.15.0 presents all VS Code features as free, with 31 starter charms and optional paid charms; desktop 0.12.0 preserves its existing trial, Pro pricing and access. The visible rebrand retains installed IDs, saved data, cryptographic identities and immutable pack metadata.
+
+Local validation passed 102 app models, 13 access-service checks, 7 release checks, 23 artwork/Studio checks, 14 editor scenarios, 8 installed-VSIX scenarios, 13 desktop models and the extracted Windows archive. An actual 0.14→0.15 installation retained an owned profile's photo bytes, imported pack, settings, paused focus, garden progress, saved win and 235 available choices. Website checks passed with no console errors; a later visual pass corrected stale Sports Icons and Photo Studio copy.
+
+The prepared Marketplace workflow uses Trusted Publishing with pinned vsce4.1.1. The rebuilt VSIX's 324 runtime/art entries match the UI-tested package exactly. Current listing screenshots show the actual 31-charm starter. [Phase18 evidence and remaining owner decisions](docs/phase-18-charmbits.md) distinguishes tested review artifacts from publication and live-service readiness. No source/artwork licence, publisher ownership or successful paid launch is assumed.
+
+## 2026-11-16 — Release terms, new address and the homepage
+
+The owner approved proprietary software terms and separate artwork terms for the
+0.15.1 / desktop 0.12.1 candidate. The public app catalogue contains 210 designs,
+with 31 starter charms and 15 optional free downloads. The 51 artist and athlete
+studies are excluded from app packages; saved selections and cord choices retain
+their identity with a neutral placeholder. Existing imports and user progress
+remain compatible.
+
+The owner requested Stephen Curry and Michael Jackson as two homepage concept
+previews. Those WebPs are kept outside the downloadable catalogue, paid products
+and press kit. The website's large Cali now has room to move on both sides;
+browser checks exercise left/right dragging and the return swing across desktop,
+sidebar and mobile layouts.
+
+App links use `https://charmbits.pages.dev/`. The old Cloudflare project's build
+generates a permanent redirect to the new hostname. [Phase19 validation](docs/phase-19-licensing-and-site.md)
+records the scope, data compatibility, local checks and remaining publisher and
+provider requirements. Deployment and hosted results are recorded after observation.
+
+## 2026-11-17 — CharmBits 0.16 motion and free editor candidate
+
+The editor includes all 227 released designs and all features without activation
+or a trial. Desktop keeps its starter, 30-day Pro trial and purchases. New pets,
+parks and wonders join the collection; Robot Assistant uses the approved ivory
+design, and Nimbus offers optional timestamped US weather observations.
+
+Approved motion now shares one renderer across the editor, desktop and website:
+front-facing blooms join a curved stem underneath, selected pets react calmly
+to a tap, and material effects remain subtle. An optional bracelet holds two or
+three independently movable charms with saved choices, reordering and removal.
+Left and right pulls, settling, hidden views and Reduced Motion are covered.
+
+Local validation passed 114 app units, 11 release checks, 36 service/artwork/Photo
+Studio checks, all 15 editor scenarios and the full website suite. The private
+Windows archive passed its extracted-app test, including three bracelet slots
+moving both ways. The private installed VSIX passed all 278 designs, no activation,
+pet/flower/bracelet motion, saved preferences and reload.
+
+Editor tests now discard inherited editor IPC, entry-point and compile-cache
+variables when launching disposable hosts. A VS Code test had inherited Devin's
+runtime paths, producing unknown agent-host channels and a blocked shutdown;
+the same personal package passed in 30.5 seconds with an isolated environment.
+Reload and teardown waits are bounded so future host failures retain diagnostics.
+
+The [Marketplace/Open VSX draft](docs/marketplace-0.16-draft.md), current editor
+screenshots and public VSIX are prepared. Personal artifacts stay in ignored local
+output and cannot pass the public packaging gate. Store account verification and
+publication remain separate; deployment and hosted results must be observed.
+
+The public Windows archive subsequently passed its extracted-app smoke, including
+all three bracelet slots moving left and right. All nine public installed-VSIX
+checks passed in a serial run. Cursor 3.26.16 and Devin 3.14.30819 accepted the VSIX;
+fresh-profile account screens prevented full functional checks. Their current
+versions and the precise verification limits are recorded in editor distribution.
+
+## 2026-11-18 — Complete pets, regional collections and bracelet designs
+
+The 0.16 candidate now contains 241 public designs and 20 collections. All 23
+pets have a calm tap reaction. Front-facing flowers use a straight leafy stem;
+thirteen cord materials and five independently saved bracelet styles provide
+matching choices. Fifteen new place miniatures join Europe, Americas, Asia and
+National Parks, reusing existing designs and retiring the duplicate static robot.
+Photo-keepsake copy is warmer, and ownership/non-affiliation notices explicitly
+state that credit or inspiration does not grant likeness, trademark or music rights.
+
+An actual stage resize exposed a pet reaction being cancelled by input cleanup.
+Separating input release from reaction cancellation fixed both resize timing
+cases. The regression now changes the observed element's geometry rather than
+dispatching a window event that did not exercise ResizeObserver.
+
+Local checks passed 115 app units, 13 desktop units, 47 release/service checks,
+15 source editor scenarios, nine installed public VSIX scenarios in VS Code and
+nine in VSCodium. A real 0.15-to-0.16 upgrade preserved synthetic preferences,
+photo/import bytes, focus, garden progress and a saved win. The website suite
+passed the current collection, five bracelet styles, motion, mobile layouts and
+Reduced Motion. Current store screenshots were refreshed and visually reviewed.
+
+The public Windows package and extracted archive passed. The new personal
+Windows archive and installed VSIX passed with all 292 designs unlocked.
+Forwarded physical mouse movement interrupted one simulated desktop drag;
+the geometry check now uses an independent touch pointer, matching the existing
+single-charm check. The separate native OS input checks remain unfiltered.
+
+Cursor and Devin accepted the exact current VSIX. Cursor did not expose its
+automation connection; Devin reached an account screen. Their full functional
+verification remains pending. Desktop and service audits report zero findings,
+while picomatch 4.0.7 remains the latest published version and the extension's
+dependency audit still fails. No exemption or forced downgrade was added.
+Hosted checks and deployment are recorded only after their results are observed.

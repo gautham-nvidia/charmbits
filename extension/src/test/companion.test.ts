@@ -1,10 +1,11 @@
 import { strict as assert } from 'node:assert';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { execFileSync } from 'node:child_process';
+import { PNG } from 'pngjs';
 import {
 	applyCompanionAction, companionSnapshot, currentLearningCard, defaultCompanionState, formatFocusTime,
 	matchesCompanionState, MINUTE_MS, COMPANION_STATE_VERSION, parseCompanionAction, reconcileCompanion, remainingFocusMs,
@@ -18,11 +19,126 @@ import * as garden from '../garden-core';
 import * as care from '../care-core';
 import { winsToday } from '../small-wins';
 import { gardenArtwork, gardenCharms } from '../garden-catalog';
-import { buildCatalogue } from '../charm-catalog';
-import { restoreState } from '../charm-state';
+import { buildCatalogue, LIVE_CHARMS, isSoftCharm } from '../charm-catalog';
+import { matchesSavedState, resetState, restoreState } from '../charm-state';
+import { CUBE_FACES, DEFAULT_PUZZLES, neighboringTiles, puzzleSolved, restorePuzzles, shufflePuzzle, slideTile, toggleLight, turnCube } from '../puzzle-core';
 import { cordForCharm } from '../cord-design';
-import { followGaze, nearestBubble, stepSpinner } from '../interactive-motion';
+import { followGaze, liveCharacter, nearestBubble, stepSpinner, turnSpinner } from '../interactive-motion';
 import { mascotEncouragement, mascotTransition } from '../mascot-core';
+import { CALI_WEEK, caliOutfitAt } from '../cali-wardrobe';
+import { artPoint, artToStage, ROBOT_GESTURES, CALI_TAP_GESTURES, caliArt, isArtCharacter, NIMBUS_GESTURES, partOpacity, type ArtPose } from '../live-art-core';
+import { CALIFORNIA_COMPANIONS, regionalArt } from '../california-companions';
+import { ROBOT_ART, NIMBUS_ART } from '../weather-code-companions';
+import { DEFAULT_WEATHER, parseWeatherObservation, parseWeatherSettings, WEATHER_REFRESH_MS, WEATHER_STALE_MS,
+	type WeatherReading, type WeatherSettings, type WeatherStationId } from '../weather-core';
+import { WeatherController } from '../weather-controller';
+import { fetchWeatherObservation } from '../weather-client';
+
+test('Cali wears distinct local weekday outfits and changes at local midnight', () => {
+	const output = execFileSync(process.execPath, ['-e', `
+		const wardrobe = require(process.argv[1]), garden = require(process.argv[2]);
+		const week = Array.from({length:7}, (_, index) => wardrobe.caliOutfitAt(new Date(2026,10,2+index,12).getTime()));
+		const friday = Date.parse('2026-11-06T23:59:59-08:00');
+		const midnight = garden.nextLocalMidnight(friday);
+		console.log(JSON.stringify({week, before:wardrobe.caliOutfitAt(friday).id,
+			after:wardrobe.caliOutfitAt(midnight).id, wait:midnight-friday}));
+	`, require.resolve('../cali-wardrobe'), require.resolve('../garden-core')],
+	{ env: { ...process.env, TZ: 'America/Los_Angeles' }, encoding: 'utf8' });
+	const observed = JSON.parse(output);
+	assert.deepEqual(observed.week.map((outfit: { id: string }) => outfit.id), [
+		'monday-denim', 'tuesday-hoodie', 'wednesday-vest', 'thursday-flannel',
+		'friday-coast', 'saturday-trail', 'sunday-knit',
+	]);
+	assert.equal(new Set(observed.week.map((outfit: { file: string }) => outfit.file)).size, 7);
+	assert.equal(observed.before, 'friday-coast');
+	assert.equal(observed.after, 'saturday-trail');
+	assert.equal(observed.wait, 1000);
+});
+
+test('live illustrated characters have complete bundled frames and cords touching their hooks', () => {
+	const definitions = [
+		...CALI_WEEK.map((_, day) => caliArt(new Date(2026, 10, 1 + day, 12).getTime())),
+		...CALIFORNIA_COMPANIONS.map(companion => regionalArt(companion.character)!),
+		NIMBUS_ART, ROBOT_ART,
+	];
+	const files = new Set(definitions.flatMap(definition => definition.parts.map(part => part.file)));
+	assert.equal(files.size, 22, 'Seven outfits, two donor gestures, eleven regional figures and two weather/code figures are bundled.');
+	for (const file of files) {
+		assert.match(file, /^live-art-[a-z0-9-]+\.png$/);
+		const frame = PNG.sync.read(readFileSync(join(__dirname, '../../media', file)));
+		assert.equal(frame.width, 512);
+		assert.equal(frame.height, 512);
+		assert.equal(frame.data[3], 0, `${file} must have a transparent background.`);
+	}
+	for (const charm of LIVE_CHARMS) {
+		if (!isArtCharacter(liveCharacter(charm.id))) { continue; }
+		const image = PNG.sync.read(readFileSync(join(__dirname, '../../media', charm.file)));
+		const x = Math.round(charm.attachment!.x * image.width);
+		const y = Math.round(charm.attachment!.y * image.height);
+		assert.ok(image.data[(y * image.width + x) * 4 + 3] > 80, `${charm.id} cord must touch its visible hook.`);
+		assert.equal(isSoftCharm(charm.id), charm.id === 'live:cloud', 'Nimbus keeps its soft squeeze; solid figures do not squash.');
+		assert.equal(cordForCharm(charm, { [charm.id]: 'ribbon' }), 'ribbon', 'A saved manual cord choice takes precedence.');
+	}
+	for (const definition of [NIMBUS_ART, ROBOT_ART]) {
+		for (const gesture of definition === NIMBUS_ART ? NIMBUS_GESTURES : ROBOT_GESTURES) {
+			for (const progress of [0, .2, .5, .8, 1]) {
+				for (const gazeX of [-1, 0, 1]) {
+					const pose: ArtPose = { character: definition.character, gesture, reactionProgress: progress,
+						gazeX, gazeY: -gazeX, blink: 0, pressed: false, happy: false, wink: false, greeting: false };
+					for (const part of definition.parts) {
+						for (const point of part.polygon) {
+							const [x, y] = artToStage(definition, artPoint(part, point, pose));
+							assert.ok(x >= 0 && x <= 72 && y >= 0 && y <= 84, `${definition.character} ${gesture} ${part.id}: ${x},${y}`);
+						}
+					}
+				}
+			}
+		}
+	}
+});
+
+test('a chosen Cali outfit survives a day change and restoring automatic follows the local day', () => {
+	const monday = new Date(2026, 10, 9, 12).getTime();
+	const tuesday = new Date(2026, 10, 10, 12).getTime();
+	const state = restoreState({ caliOutfit: 'friday-coast' });
+	assert.equal(caliOutfitAt(monday, state.caliOutfit).id, 'friday-coast');
+	assert.equal(caliArt(tuesday, state.caliOutfit).outfit, 'friday-coast');
+	assert.equal(restoreState(JSON.parse(JSON.stringify(state))).caliOutfit, 'friday-coast');
+	assert.equal(caliOutfitAt(monday, 'daily').id, 'monday-denim');
+	assert.equal(caliOutfitAt(tuesday, 'daily').id, 'tuesday-hoodie');
+	assert.equal(restoreState({ caliOutfit: '../not-an-outfit.png' }).caliOutfit, 'daily');
+	assert.equal(restoreState({}).caliOutfit, 'daily');
+});
+
+test('Cali tap gestures are distinct, stay framed and return to the same resting geometry', () => {
+	const definition = caliArt(new Date(2026, 10, 6, 12).getTime());
+	const resting: ArtPose = { character: 'cali', gazeX: 0, gazeY: 0, blink: 0, pressed: false,
+		happy: false, wink: false, greeting: false };
+	const head = definition.parts.find(part => part.role === 'head')!;
+	const signatures = new Set<string>();
+	for (const gesture of CALI_TAP_GESTURES) {
+		const samples: number[] = [];
+		for (const progress of [0, .1, .25, .45, .65, .9, 1]) {
+			const pose = { ...resting, gesture, happy: gesture === 'shimmy', wink: gesture === 'wink', reactionProgress: progress };
+			samples.push(...artPoint(head, head.polygon[0], pose));
+			for (const part of definition.parts) {
+				if (partOpacity(part, pose) <= .001) { continue; }
+				for (const point of part.polygon) {
+					const projected = artPoint(part, point, pose);
+					const [x, y] = artToStage(definition, projected);
+					assert.ok(Number.isFinite(x) && Number.isFinite(y));
+					assert.ok(x >= 0 && x <= 72 && y >= 0 && y <= 84, `${gesture} ${part.id}: ${x},${y}`);
+					if (progress === 0 || progress === 1) { assert.deepEqual(projected, artPoint(part, point, resting)); }
+				}
+			}
+		}
+		signatures.add(JSON.stringify(samples));
+		const quiet = { ...resting, gesture, reducedMotion: true };
+		assert.deepEqual(artPoint(head, head.polygon[0], { ...quiet, reactionProgress: .2 }),
+			artPoint(head, head.polygon[0], { ...quiet, reactionProgress: .6 }), 'Reduced Motion must not animate a gesture.');
+	}
+	assert.equal(signatures.size, CALI_TAP_GESTURES.length);
+});
 
 test('live gaze responds within 84ms independently of refresh rate', () => {
 	for (const hz of [30, 60, 120]) {
@@ -50,6 +166,80 @@ test('spinner conserves direction, slows smoothly and rests at different refresh
 	assert.ok(Math.max(...results) - Math.min(...results) < .003, 'Refresh rate must not change the final rotation perceptibly.');
 	assert.equal(nearestBubble(22, 33), 0);
 	assert.equal(nearestBubble(50, 67), 5);
+});
+
+test('rotor dragging crosses the angle seam in either direction without a jump', () => {
+	const clockwise = turnSpinner(0, Math.PI - .05, -Math.PI + .05, 16);
+	const counterclockwise = turnSpinner(0, -Math.PI + .05, Math.PI - .05, 16);
+	assert.ok(Math.abs(clockwise.angle - .1) < 1e-10);
+	assert.ok(Math.abs(counterclockwise.angle + .1) < 1e-10);
+	assert.ok(clockwise.velocity > 0 && counterclockwise.velocity < 0);
+	assert.ok(Math.abs(turnSpinner(0, 0, Math.PI, 0).velocity) <= 34);
+	assert.ok(stepSpinner(clockwise.angle, clockwise.velocity, 16).angle > clockwise.angle);
+});
+
+test('cube face turns move the expected adjacent strips and invert without losing pieces', () => {
+	const solved = DEFAULT_PUZZLES.cube;
+	const front = turnCube(solved, 'F');
+	assert.deepEqual(front.slice(6, 9), [4, 4, 4]);
+	assert.deepEqual([front[9], front[12], front[15]], [0, 0, 0]);
+	assert.deepEqual(front.slice(27, 30), [1, 1, 1]);
+	assert.deepEqual([front[38], front[41], front[44]], [3, 3, 3]);
+	assert.deepEqual(front.slice(45), solved.slice(45));
+	for (const face of CUBE_FACES) {
+		assert.deepEqual(turnCube(turnCube(solved, face), face, -1), solved);
+		let cube = solved;
+		for (let count = 0; count < 4; count++) { cube = turnCube(cube, face); }
+		assert.deepEqual(cube, solved);
+	}
+	const moves = ['R', 'U', 'F', 'L', 'D', 'B', 'U', 'R'] as const;
+	let mixed = solved;
+	for (const face of moves) { mixed = turnCube(mixed, face); }
+	assert.ok(!puzzleSolved('cube', { ...DEFAULT_PUZZLES, cube: mixed }));
+	assert.deepEqual(restorePuzzles({ ...DEFAULT_PUZZLES, cube: mixed }).cube, mixed);
+	for (const face of [...moves].reverse()) { mixed = turnCube(mixed, face, -1); }
+	assert.deepEqual(mixed, solved);
+});
+
+test('sliding and light moves obey their board rules and shuffles stay solvable', () => {
+	assert.deepEqual(neighboringTiles(DEFAULT_PUZZLES.tiles), [5, 7]);
+	assert.equal(slideTile(DEFAULT_PUZZLES.tiles, 0), DEFAULT_PUZZLES.tiles);
+	const moved = slideTile(DEFAULT_PUZZLES.tiles, 7);
+	assert.deepEqual(moved, [1, 2, 3, 4, 5, 6, 7, 0, 8]);
+	assert.deepEqual(slideTile(moved, 8), DEFAULT_PUZZLES.tiles);
+	assert.equal(toggleLight(0, 0), 0b000001011);
+	assert.equal(toggleLight(0, 4), 0b010111010);
+	for (let cell = 0; cell < 9; cell++) { assert.equal(toggleLight(toggleLight(177, cell), cell), 177); }
+	let seed = 19;
+	const random = () => ((seed = (1664525 * seed + 1013904223) >>> 0) / 2 ** 32);
+	for (const kind of ['cube', 'tiles', 'lights'] as const) {
+		for (let sample = 0; sample < 15; sample++) {
+			const state = shufflePuzzle(kind, DEFAULT_PUZZLES, random);
+			assert.equal(puzzleSolved(kind, state), false);
+			assert.deepEqual(restorePuzzles(state), state);
+		}
+	}
+	// Every nine-light board has a solution using each switch at most once.
+	const possible = new Set<number>();
+	for (let presses = 0; presses < 512; presses++) {
+		let lights = 0;
+		for (let cell = 0; cell < 9; cell++) { if (presses & (1 << cell)) { lights = toggleLight(lights, cell); } }
+		possible.add(lights);
+	}
+	assert.equal(possible.size, 512);
+});
+
+test('puzzle progress is bounded, survives saved-state confirmation and is retained by Reset position', () => {
+	const state = restoreState({ charmId: 'fidget:cube', caliOutfit: 'friday-coast', puzzles: {
+		cube: turnCube(DEFAULT_PUZZLES.cube, 'R'), tiles: slideTile(DEFAULT_PUZZLES.tiles, 5), lights: 31,
+	} });
+	assert.equal(matchesSavedState(state, JSON.parse(JSON.stringify(state))), true);
+	assert.deepEqual(restoreState(JSON.parse(JSON.stringify(state))), state);
+	assert.deepEqual(resetState(state).puzzles, state.puzzles);
+	assert.equal(matchesSavedState(state, { ...state, puzzles: { ...state.puzzles, lights: 30 } }), false);
+	assert.deepEqual(restorePuzzles({ cube: Array(54).fill(0), tiles: [2, 1, 3, 4, 5, 6, 7, 8, 0], lights: 512 }), DEFAULT_PUZZLES);
+	assert.deepEqual(restorePuzzles({ cube: [], tiles: Array(9), lights: -1 }), DEFAULT_PUZZLES);
+	assert.equal(restoreState({ size: 125 }).size, 125);
 });
 
 const START = 1800000000000;
@@ -259,6 +449,167 @@ class MemoryStorage implements CompanionStorage {
 	}
 	async read() { return structuredClone(this.value); }
 }
+
+function weatherStorage(saved: unknown = undefined) {
+	return {
+		value: saved, writes: 0, failNext: false, staleNext: false,
+		async read() { return structuredClone(this.value); },
+		async write(value: WeatherSettings) {
+			this.writes++;
+			if (this.failNext) { this.failNext = false; throw new Error('Storage unavailable'); }
+			if (this.staleNext) { this.staleNext = false; return; }
+			this.value = structuredClone(value);
+		},
+	};
+}
+
+const settleWeather = () => new Promise<void>(resolve => setImmediate(resolve));
+const weatherReading = (clock: FakeClock, stationId: WeatherStationId = 'KSFO'): WeatherReading => ({
+	stationId, observedAt: clock.now() - 20 * MINUTE_MS, checkedAt: clock.now(), temperatureC: 14,
+	description: 'Partly Cloudy', condition: 'night',
+});
+
+test('weather requests require a confirmed opt-in; failed saves leave the prior configuration active', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	let requests = 0;
+	const controller = new WeatherController({ saved: undefined, storage, clock,
+		request: async station => { requests++; return weatherReading(clock, station); } });
+	controller.setVisible(true);
+	clock.advance(WEATHER_REFRESH_MS);
+	assert.equal(requests, 0);
+	assert.equal(storage.writes, 0);
+	assert.equal(controller.snapshot().status, 'disabled');
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, stationId: 'https://invalid.test' }), false);
+	for (const failure of ['failNext', 'staleNext'] as const) {
+		storage[failure] = true;
+		assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), false);
+		clock.advance(0);
+		assert.equal(requests, 0);
+		assert.equal(controller.snapshot().settings.enabled, false);
+	}
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), true);
+	clock.advance(0); await settleWeather();
+	assert.equal(requests, 1);
+	assert.equal(controller.snapshot().status, 'ready');
+	assert.equal(controller.snapshot().reading?.temperatureC, 14);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, unit: 'c' }), true);
+	clock.advance(WEATHER_REFRESH_MS - 1); await settleWeather();
+	assert.equal(requests, 1);
+	clock.advance(1); await settleWeather();
+	assert.equal(requests, 2);
+	controller.setVisible(false);
+	assert.equal(clock.pending.size, 0);
+	clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(requests, 2);
+	assert.equal(controller.snapshot().status, 'paused');
+	clock.time -= 2 * 24 * 60 * MINUTE_MS;
+	controller.setVisible(true); clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(requests, 3, 'a clock rollback must not postpone the next check for days');
+	await controller.dispose();
+});
+
+test('weather city changes and disposal abort requests and discard responses from an obsolete request', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	const pending: { station: WeatherStationId; signal: AbortSignal; resolve: (reading: WeatherReading) => void }[] = [];
+	const controller = new WeatherController({ saved: { ...DEFAULT_WEATHER, enabled: true }, storage, clock,
+		request: (station, signal) => new Promise(resolve => { pending.push({ station, signal, resolve }); }) });
+	let emissions = 0;
+	controller.subscribe(() => { emissions++; });
+	controller.setVisible(true); clock.advance(0);
+	assert.equal(pending.length, 1);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, stationId: 'KJFK' }), true);
+	assert.equal(pending[0]!.signal.aborted, true);
+	clock.advance(0);
+	assert.equal(pending.length, 2);
+	pending[0]!.resolve(weatherReading(clock)); await settleWeather();
+	assert.equal(controller.snapshot().reading, undefined);
+	pending[1]!.resolve(weatherReading(clock, 'KJFK')); await settleWeather();
+	assert.equal(controller.snapshot().reading?.stationId, 'KJFK');
+	clock.advance(WEATHER_REFRESH_MS);
+	assert.equal(pending.length, 3);
+	await controller.dispose();
+	const lastEmission = emissions;
+	assert.equal(pending[2]!.signal.aborted, true);
+	pending[2]!.resolve(weatherReading(clock, 'KJFK')); await settleWeather();
+	assert.equal(emissions, lastEmission);
+	assert.equal(clock.pending.size, 0);
+});
+
+test('weather outages preserve the observation timestamp, expose stale data and survive unit changes honestly', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	let fail = false;
+	const controller = new WeatherController({ saved: { ...DEFAULT_WEATHER, enabled: true }, storage, clock,
+		request: async station => { if (fail) { throw new Error('Offline'); } return weatherReading(clock, station); } });
+	controller.setVisible(true); clock.advance(0); await settleWeather();
+	const original = controller.snapshot().reading;
+	assert.ok(original);
+	assert.notEqual(original.checkedAt, original.observedAt);
+	fail = true; clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(controller.snapshot().status, 'unavailable');
+	assert.deepEqual(controller.snapshot().reading, original);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, unit: 'c' }), true);
+	assert.equal(controller.snapshot().status, 'unavailable');
+	clock.advance(WEATHER_STALE_MS); await settleWeather();
+	assert.equal(controller.snapshot().stale, true);
+	assert.deepEqual(controller.snapshot().reading, original);
+	await controller.dispose();
+});
+
+test('weather data from a newer version or an unreadable file is preserved without network requests', async () => {
+	for (const saved of [{ ...DEFAULT_WEATHER, version: 2, enabled: true }, undefined]) {
+		const clock = new FakeClock(), storage = weatherStorage(saved);
+		const controller = new WeatherController({ saved, storage, clock, unreadable: saved === undefined,
+			request: async () => { assert.fail('Protected weather settings must never make a request.'); } });
+		controller.setVisible(true); clock.advance(WEATHER_REFRESH_MS);
+		assert.equal(controller.snapshot().readOnly, true);
+		assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), false);
+		assert.equal(storage.writes, 0);
+		assert.deepEqual(storage.value, saved);
+		await controller.dispose();
+	}
+	assert.equal(parseWeatherSettings({ ...DEFAULT_WEATHER, enabled: 'yes' }), undefined);
+});
+
+test('NWS observations reject missing temperatures, incorrect stations and misleading timestamps', () => {
+	const now = Date.now(), properties = {
+		station: 'https://api.weather.gov/stations/KSFO', timestamp: new Date(now - 20 * MINUTE_MS).toISOString(),
+		temperature: { unitCode: 'wmoUnit:degC', value: 14 }, textDescription: 'Partly Cloudy',
+		icon: 'https://api.weather.gov/icons/land/night/sct?size=medium',
+	};
+	const observation = parseWeatherObservation({ properties }, 'KSFO', now);
+	assert.equal(observation.condition, 'night');
+	assert.equal(observation.temperatureC, 14);
+	assert.equal(observation.checkedAt - observation.observedAt, 20 * MINUTE_MS);
+	for (const invalid of [
+		{ temperature: { unitCode: 'wmoUnit:degC', value: null } },
+		{ temperature: { unitCode: 'wmoUnit:degC', value: Infinity } },
+		{ temperature: { unitCode: 'wmoUnit:degF', value: 57 } },
+		{ station: 'https://api.weather.gov/stations/KJFK' },
+		{ timestamp: new Date(now + 6 * MINUTE_MS).toISOString() },
+		{ timestamp: new Date(now - 3 * 24 * 60 * MINUTE_MS).toISOString() },
+	]) { assert.throws(() => parseWeatherObservation({ properties: { ...properties, ...invalid } }, 'KSFO', now)); }
+});
+
+test('weather HTTP is restricted to a known station, rejects redirects and bounds streamed responses', async () => {
+	let requests = 0, cancelled = false;
+	const request: typeof fetch = async (url, options) => {
+		requests++;
+		assert.equal(url, 'https://api.weather.gov/stations/KSFO/observations/latest');
+		assert.equal(options?.redirect, 'error');
+		assert.equal(new Headers(options?.headers).has('Authorization'), false);
+		assert.match(new Headers(options?.headers).get('User-Agent')!, /^CharmBits\//);
+		return new Response(new ReadableStream({
+			start(stream) { stream.enqueue(new Uint8Array(128 * 1024 + 1)); },
+			cancel() { cancelled = true; },
+		}));
+	};
+	await assert.rejects(fetchWeatherObservation('../private' as WeatherStationId, new AbortController().signal, request), /Unknown weather station/);
+	assert.equal(requests, 0);
+	await assert.rejects(fetchWeatherObservation('KSFO', new AbortController().signal, request), /size limit/);
+	assert.equal(cancelled, true);
+	await assert.rejects(fetchWeatherObservation('KSFO', new AbortController().signal,
+		async () => new Response(null, { status: 302 })), /302/);
+});
 
 test('learning catalogue has sourced facts and answerable trivia with unique stable identities', () => {
 	assert.equal(FACT_CARDS.length, 60);

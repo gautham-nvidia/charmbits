@@ -1,18 +1,120 @@
 import { strict as assert } from 'node:assert';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, promises as filesystem } from 'node:fs';
 import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { DEFAULT_STATE, getLayout, matchesSavedState, resetState, restoreState, type CharmState, type LayoutMode } from '../charm-state';
-import { buildCatalogue, CHARMS, FIDGET_CHARMS, LIVE_CHARMS, ORIGINAL_CHARMS, RETIRED_CHARMS, TRIAL_CHARMS } from '../charm-catalog';
+import { buildCatalogue, CHARMS, FIDGET_CHARMS, getCharm, LIVE_CHARMS, ORIGINAL_CHARMS, RETIRED_CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS } from '../charm-catalog';
 import { MESSAGES } from '../messages';
 import { MESSAGE_ROTATION_MS, MessageRotation } from '../message-rotation';
 import { Pendulum } from '../pendulum';
 import { StateStore } from '../state-store';
 import { StateWriter } from '../state-writer';
 import { displayedCharm, festiveCharm, festiveDay } from '../festive-charms';
-import { chainLinks, cordForCharm, cordPath } from '../cord-design';
+import { chainLinks, cordForCharm, cordPath, stemLeaves, stemFoliage } from '../cord-design';
+import { bloomPoint } from '../bloom-motion';
+import { CordMotion } from '../cord-motion';
+import { AccessController } from '../access-controller';
+import { signAccessGrant, type AccessGrant } from '../access-grant';
+import { starterSelection, freeDownloadSelection } from '../catalogue-access';
+import { charmCollection } from '../charm-collections';
+import betaCatalogue from '../beta-catalogue.json';
+import { PNG } from 'pngjs';
+import { flowerBaseFromPixels } from '../charm-attachment';
+
+test('the starter remains fixed across gallery reordering and beta migration never grants future content', async context => {
+	const directory = mkdtempSync(join(tmpdir(), 'charmlet-access-migration-'));
+	context.after(() => rm(directory, { recursive: true, force: true }));
+	const secrets = { get: async () => undefined, set: async () => undefined };
+	const starter = starterSelection();
+	assert.equal(starter.length, 31);
+	assert.deepEqual(new Set(starterSelection([...CHARMS].reverse())), new Set(starter));
+	assert.equal(freeDownloadSelection().some(id => starter.includes(id)), false);
+	for (const group of new Set(CHARMS.map(charmCollection))) {
+		const count = CHARMS.filter(charm => starter.includes(charm.id) && charmCollection(charm) === group).length;
+		const exceptions: Record<string, number> = {
+			Terminal: 1, California: 1, 'National Parks': 3, Europe: 0, Americas: 0, Asia: 0,
+			'Plants & Trees': 0, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
+		};
+		assert.equal(count, exceptions[group] ?? 2, group);
+	}
+	const future = { ...CHARMS[0], id: 'trial:future-paid-design' };
+	const fresh = new AccessController({ application: 'desktop', directory: join(directory, 'fresh'), secrets });
+	await fresh.initialize(undefined);
+	assert.equal(fresh.catalogue([...CHARMS, future]).length, 31);
+	assert.equal(fresh.snapshot.label, 'Free starter');
+	assert.equal(fresh.snapshot.activationLabel, 'Activate access');
+	const reopen = new AccessController({ application: 'desktop', directory: join(directory, 'fresh'), secrets });
+	await reopen.initialize({ version: 1 }); // Existing metadata wins even if an old-looking preference is later supplied.
+	assert.equal(reopen.catalogue([...CHARMS, future]).length, 31);
+	const beta = new AccessController({ application: 'desktop', directory: join(directory, 'beta'), secrets });
+	await beta.initialize({ version: 1, charmId: 'live:robot' });
+	assert.equal(betaCatalogue.length, 234);
+	assert.equal(new Set(betaCatalogue).size, 234);
+	assert.deepEqual(new Set(beta.catalogue([...CHARMS, future]).map(charm => charm.id)),
+		new Set([...betaCatalogue, ...starter].filter(id => CHARMS.some(charm => charm.id === id))));
+	assert.equal(beta.catalogue(CHARMS).some(charm => charm.group === 'Sports Icons'), false);
+	const newPreferences = new AccessController({ application: 'desktop', directory: join(directory, 'new-preferences'), secrets });
+	await newPreferences.initialize(DEFAULT_STATE);
+	assert.equal(newPreferences.catalogue(CHARMS).length, 31);
+	const freeVscode = new AccessController({ application: 'vscode', directory: join(directory, 'free-vscode'), secrets });
+	await freeVscode.initialize(DEFAULT_STATE);
+	assert.deepEqual(freeVscode.catalogue([...CHARMS, future]), [...CHARMS, future]);
+	assert.equal(freeVscode.snapshot.application, 'vscode');
+	assert.equal(freeVscode.snapshot.canActivate, false);
+	assert.match(freeVscode.snapshot.detail, /All included charms and features are free/);
+});
+
+(['vscode', 'desktop'] as const).forEach(application => test(`native ${application} signed access expires without losing purchases, photos or earned flowers and rejects forged activation`, async context => {
+	const directory = mkdtempSync(join(tmpdir(), 'charmlet-signed-access-'));
+	context.after(() => rm(directory, { recursive: true, force: true }));
+	let now = Date.UTC(2026, 10, 12, 12), stored: string | undefined;
+	const keys = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+	const publicKeys = { test: await crypto.subtle.exportKey('jwk', keys.publicKey) };
+	const options = { application, directory, keys: publicKeys, now: () => now,
+		secrets: { get: async () => stored, set: async (value: string) => { stored = value; } } };
+	const controller = new AccessController(options);
+	await controller.initialize(DEFAULT_STATE);
+	assert.equal(controller.catalogue(CHARMS).length, application === 'vscode' ? CHARMS.length : 31);
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free starter');
+	assert.equal(controller.snapshot.canActivate, application === 'desktop');
+	const base: AccessGrant = { iss: 'charmlet', aud: 'charmlet-apps', sub: 'a'.repeat(64),
+		iat: now / 1000, kind: 'trial', items: ['trial:new-electric-guitar'],
+		trialStartedAt: now / 1000, exp: now / 1000 + 30 * 86400 };
+	const token = await signAccessGrant(base, keys.privateKey, 'test');
+	const file = (value: string) => Buffer.from(JSON.stringify({ format: 'charmlet-access', version: 1, token: value }));
+	await controller.importDocument(file(token));
+	assert.equal(controller.catalogue(CHARMS).length, CHARMS.length);
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Pro trial');
+	const photo = { ...CHARMS[0], id: 'pack:photo-personal:portrait' };
+	const flower = { ...CHARMS[0], id: 'garden:hibiscus' };
+	now += 30 * 86400000;
+	await controller.observeClock();
+	const ids = controller.catalogue([...CHARMS, photo, flower]).map(charm => charm.id);
+	for (const id of ['terminal', 'live:cali', 'trial:new-electric-guitar', photo.id, flower.id]) {
+		assert(ids.includes(id));
+	}
+	assert.equal(ids.includes('live:robot'), application === 'vscode');
+	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free + your items');
+	if (application === 'vscode') { assert.match(controller.snapshot.detail, /All included charms and features are free/); }
+	const reopened = new AccessController(options);
+	await reopened.initialize(DEFAULT_STATE);
+	assert.deepEqual(JSON.parse(stored!), [token], 'Opening a free edition must retain the saved signed grant.');
+	assert.deepEqual(reopened.catalogue([...CHARMS, photo, flower]).map(charm => charm.id), ids);
+	const pieces = token.split('.');
+	pieces[1] = Buffer.from(JSON.stringify({ ...base, kind: 'pro', exp: undefined, trialStartedAt: undefined })).toString('base64url');
+	await assert.rejects(reopened.importDocument(file(pieces.join('.'))), /invalid|not recognized/);
+	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), application === 'vscode');
+	const { exp: _expiry, trialStartedAt: _start, ...paid } = base;
+	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'pro', iat: now / 1000 }, keys.privateKey, 'test')));
+	assert.equal(reopened.catalogue(CHARMS).length, CHARMS.length);
+	assert.equal(reopened.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'CharmBits Pro');
+	now += 1000;
+	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'items', iat: now / 1000 }, keys.privateKey, 'test')));
+	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), application === 'vscode');
+	await assert.rejects(reopened.importDocument(file(token)), /older/);
+}));
 
 test('missing or invalid saved values restore a usable charm', () => {
 	assert.deepEqual(restoreState(undefined), DEFAULT_STATE);
@@ -26,9 +128,10 @@ test('missing or invalid saved values restore a usable charm', () => {
 
 test('hide and motion preferences survive a reload without trusting unknown fields', () => {
 	assert.deepEqual(restoreState({ cordLength: 180, hidden: true, reducedMotion: true, extra: 'ignored' }), {
-		version: 1, charmId: 'terminal', layoutMode: 'hanging', showMessages: true, rotateMessages: true, messageIndex: 0,
+		version: 1, editionVersion: 1, charmId: 'terminal', layoutMode: 'hanging', showMessages: true, rotateMessages: true, messageIndex: 0,
+		arrangement: 'single', bracelet: { charms: [], selected: 0, style: 'silver' },
 		cordLength: 180, size: 100, hidden: true, reducedMotion: true,
-		festiveEnabled: true, charmPinned: false, cordChoices: {},
+		festiveEnabled: true, charmPinned: false, cordChoices: {}, caliOutfit: 'daily', puzzles: DEFAULT_STATE.puzzles,
 	});
 });
 
@@ -36,9 +139,12 @@ test('cords follow the visible charm and preserve independent manual choices', (
 	const ruby = CHARMS.find(charm => charm.id === 'trial:new-ruby')!;
 	const soft = CHARMS.find(charm => charm.id === 'trial:new-smiley-happy')!;
 	const murugan = CHARMS.find(charm => charm.id === 'trial:new-murugan')!;
+	const flower = CHARMS.find(charm => charm.group === 'Garden Flowers')!;
 	assert.equal(cordForCharm(ruby), 'gold-chain');
 	assert.equal(cordForCharm(soft), 'soft');
 	assert.equal(cordForCharm(murugan), 'braid');
+	assert.equal(cordForCharm(flower), 'stem');
+	assert.equal(cordForCharm(flower, { [flower.id]: 'ribbon' }), 'ribbon');
 	const saved = restoreState({ ...DEFAULT_STATE, cordChoices: {
 		[ruby.id]: 'silver-chain', [soft.id]: 'ribbon', missing: 'braid', terminal: 'script',
 	} });
@@ -63,6 +169,104 @@ test('chain geometry remains finite and bounded during long pulls in every direc
 	}
 });
 
+test('cord flex lags a pull, settles after release and resets without leftover motion', () => {
+	const motion = new CordMotion();
+	const anchor = { x: 0, y: 0 };
+	motion.reset({ x: 0, y: 180 });
+	motion.step(anchor, { x: 80, y: 180 });
+	assert.ok(motion.bend > 0, 'the middle trails a pull to the right');
+	assert.equal(motion.moving, true);
+	for (let frame = 0; frame < 240; frame++) {
+		motion.step(anchor, { x: 80, y: 180 });
+		assert.ok(Number.isFinite(motion.bend) && Math.abs(motion.bend) <= 64);
+	}
+	assert.equal(motion.bend, 0);
+	assert.equal(motion.moving, false);
+	motion.step(anchor, { x: -600, y: 40 });
+	assert.equal(motion.moving, true);
+	motion.reset();
+	assert.equal(motion.bend, 0);
+	assert.equal(motion.moving, false);
+	motion.step(anchor, { x: Number.NaN, y: 10 });
+	assert.equal(motion.moving, false);
+});
+
+test('flexible cords keep both attachment points and carry their metal links around the bend', () => {
+	const anchor = { x: 50, y: 0 }, hook = { x: 50, y: 200 };
+	assert.equal(cordPath(anchor, hook, 0), cordPath(anchor, hook));
+	assert.equal(chainLinks(anchor, hook, false, 0), chainLinks(anchor, hook));
+	const curve = cordPath(anchor, hook, 40);
+	assert.ok(curve.startsWith('M 50 0 Q '));
+	assert.ok(curve.endsWith(' 50 200'));
+	for (const balls of [true, false]) {
+		const links = chainLinks(anchor, hook, balls, 40);
+		const xs = [...links.matchAll(/M (-?[\d.]+)/g)].map(match => Number(match[1]));
+		assert.ok(Math.min(...xs) < 35, 'links follow the curved middle rather than the straight chord');
+		assert.ok(Math.max(...xs) < 53);
+		assert.doesNotMatch(links, /NaN|Infinity/);
+	}
+});
+
+test('flower leaves follow a flexible stem with bounded geometry and no foliage on a collapsed cord', () => {
+	assert.deepEqual(stemLeaves({ x: 0, y: 0 }, { x: 0, y: 0 }), { leaves: '', veins: '' });
+	for (const hook of [{ x: 0, y: 48 }, { x: -160, y: -200 }, { x: 400, y: 1200 }]) {
+		const shape = stemLeaves({ x: 0, y: 0 }, hook, 40);
+		assert.doesNotMatch(shape.leaves + shape.veins, /NaN|Infinity/);
+		assert.ok((shape.leaves.match(/ Z/g) ?? []).length >= 2);
+		assert.ok((shape.leaves.match(/ Z/g) ?? []).length <= 7);
+		assert.notEqual(shape.leaves, stemLeaves({ x: 0, y: 0 }, hook, -40).leaves);
+		assert.ok(cordPath({ x: 0, y: 0 }, hook, 40).endsWith(`${hook.x} ${hook.y}`));
+		const breeze = stemFoliage({ x: 0, y: 0 }, hook, 40, 4);
+		assert.equal(breeze.length, stemFoliage({ x: 0, y: 0 }, hook, 40).length);
+		assert.notEqual(breeze.map(leaf => leaf.blade).join(' '), shape.leaves);
+		assert.doesNotMatch(breeze.map(leaf => leaf.blade + leaf.fold + leaf.veins).join(' '), /NaN|Infinity/);
+	}
+});
+
+test('living blooms keep the stem join fixed while their petals open and remain bounded', () => {
+	const shape = { x: .5, y: .65, radiusX: .42, radiusY: .3 }, hook = { x: .5, y: .12 };
+	for (const seconds of [0, 1, 12, 1000]) {
+		for (const opening of [0, .5, 1]) {
+			const pose = { seconds, opening, sway: 1 };
+			assert.deepEqual(bloomPoint([hook.x, hook.y], shape, hook, pose), [hook.x, hook.y]);
+			assert.deepEqual(bloomPoint([.6, .1], shape, hook, pose), [.6, .1]);
+			for (let x = 0; x <= 1; x += .1) {
+				for (let y = 0; y <= 1; y += .1) {
+					const moved = bloomPoint([x, y], shape, hook, pose);
+					assert.ok(moved.every(Number.isFinite));
+					assert.ok(Math.abs(moved[0] - x) < .08 && Math.abs(moved[1] - y) < .08);
+				}
+			}
+		}
+	}
+	assert.notDeepEqual(bloomPoint([.8, .65], shape, hook, { seconds: 0, opening: 0, sway: 0 }),
+		bloomPoint([.8, .65], shape, hook, { seconds: 0, opening: 1, sway: 0 }));
+	const lowerHook = { x: .5, y: .96 };
+	const open = { seconds: 1, opening: 1, sway: .5 };
+	assert.deepEqual(bloomPoint([lowerHook.x, lowerHook.y], shape, lowerHook, open), [lowerHook.x, lowerHook.y]);
+	assert.deepEqual(bloomPoint([.55, 1], shape, lowerHook, open), [.55, 1]);
+	assert.notDeepEqual(bloomPoint([.8, .5], shape, lowerHook, open), [.8, .5],
+		'A lower stem must pin the stalk without freezing every petal above it.');
+});
+
+test('frontal flower joins enter opaque stalk pixels and matching old imports receive the same connection', async () => {
+	for (const key of ['flower-red-rose', 'flower-sunflower', 'flower-lily']) {
+		assert.ok(TRIAL_CHARMS.find(charm => charm.artworkKey === key)?.baseAttachment, `${key} needs its approved lower join.`);
+	}
+	for (const charm of TRIAL_CHARMS.filter(charm => charm.baseAttachment)) {
+		const pixels = PNG.sync.read(await readFile(join(__dirname, '../../media', charm.file)));
+		const connection = flowerBaseFromPixels(pixels.width, pixels.height, pixels.data,
+			charm.artworkKey === 'flower-sakura' ? 'wood' : 'green');
+		if (!charm.stemCalyx) { assert.deepEqual(connection?.baseAttachment, charm.baseAttachment); }
+		const { x, y: baseY } = charm.baseAttachment!;
+		const y = baseY - (charm.stemCalyx ? .045 : 0);
+		assert.ok(pixels.data[(Math.floor(y * pixels.height) * pixels.width + Math.floor(x * pixels.width)) * 4 + 3] >= 128,
+			`${charm.name} must not join across a transparent gap.`);
+		const imported = { ...charm, id: `pack:old:${charm.artworkKey}`, baseAttachment: undefined };
+		assert.deepEqual(buildCatalogue([imported]).find(item => item.id === imported.id)?.baseAttachment, charm.baseAttachment);
+	}
+});
+
 test('legacy and unknown charm selections retain the other preferences', () => {
 	for (const charmId of [undefined, 'missing', '../outside.svg', null]) {
 		const state = restoreState({ charmId, layoutMode: 'orbit', showMessages: false, rotateMessages: false, messageIndex: MESSAGES.length - 1, cordLength: 210, size: 80, hidden: true, reducedMotion: true });
@@ -78,12 +282,47 @@ test('legacy and unknown charm selections retain the other preferences', () => {
 	}
 });
 
+test('bracelet slots survive storage, missing packs and position reset without changing the single default', () => {
+	assert.equal(restoreState(undefined).arrangement, 'single');
+	const bracelet = { charms: ['live:cali', 'trial:flower-red-rose', 'pack:missing:keepsake'], selected: 2, style: 'rose-gold' };
+	const saved = restoreState({ ...DEFAULT_STATE, arrangement: 'bracelet', bracelet, reducedMotion: true });
+	const serialized = JSON.parse(JSON.stringify(saved));
+	assert.equal(matchesSavedState(saved, serialized), true);
+	assert.deepEqual(restoreState(serialized).bracelet, bracelet);
+	assert.deepEqual(resetState(saved).bracelet, bracelet);
+	assert.equal(resetState(saved).arrangement, 'bracelet');
+	serialized.bracelet.charms[2] = 'terminal';
+	assert.equal(matchesSavedState(saved, serialized), false);
+	const damaged = restoreState({ arrangement: 'bracelet', bracelet: { charms: ['terminal', null, 'live:cali', 'live:cloud', 'extra'], selected: 99 } });
+	assert.equal(damaged.bracelet.charms.length, 3);
+	assert.equal(damaged.bracelet.selected, 2);
+	assert.equal(damaged.bracelet.charms.includes('pack:missing:keepsake'), false);
+	assert.equal(damaged.bracelet.style, 'silver');
+	assert.equal(restoreState({ bracelet: { style: '__proto__' } }).bracelet.style, 'silver');
+	serialized.bracelet = { ...bracelet, style: 'gold' };
+	assert.equal(matchesSavedState(saved, serialized), false);
+	assert.deepEqual(saved.bracelet, bracelet);
+});
+
+test('the former static robot restores the live assistant and preserves its cord and bracelet position', () => {
+	const old = 'trial:new-robot-assistant';
+	const state = restoreState({ charmId: old, cordChoices: { [old]: 'silk' },
+		bracelet: { charms: ['terminal', old, 'pack:missing:family'], selected: 1, style: 'pearl' } });
+	assert.equal(state.charmId, 'live:robot');
+	assert.equal(state.cordChoices['live:robot'], 'silk');
+	assert.deepEqual(state.bracelet, { charms: ['terminal', 'live:robot', 'pack:missing:family'], selected: 1, style: 'pearl' });
+	assert.equal(CHARMS.filter(charm => charm.name.startsWith('Robot Assistant')).length, 1);
+});
+
 test('every bundled selection survives saved-state restoration', () => {
 	assert.deepEqual(ORIGINAL_CHARMS.map(charm => charm.id), ['terminal']);
 	assert.equal(CHARMS.length, ORIGINAL_CHARMS.length + TRIAL_CHARMS.length + LIVE_CHARMS.length + FIDGET_CHARMS.length);
 	assert.equal(new Set(CHARMS.map(charm => charm.id)).size, CHARMS.length);
+	assert.equal(CHARMS[0].id, 'terminal');
+	assert.equal(CHARMS[1].id, 'live:cali');
+	assert.ok(CHARMS.slice(1, 1 + LIVE_CHARMS.length).every(charm => charm.id.startsWith('live:')));
 	assert.ok(TRIAL_CHARMS.length > 100, 'The complete curated trial must be bundled, not require imports.');
-	for (const group of ['Solar System', 'Gemstones', 'Zodiac', 'Test Bench', 'Sacred Traditions', 'Seasonal']) {
+	for (const group of ['Solar System', 'Gemstones', 'Zodiac', 'Test Bench', 'Sacred Traditions', 'Seasonal', 'California', 'Celebrations', 'Music']) {
 		assert.ok(TRIAL_CHARMS.some(charm => charm.group === group), `Missing trial collection: ${group}`);
 	}
 	for (const planet of ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']) {
@@ -91,6 +330,19 @@ test('every bundled selection survives saved-state restoration', () => {
 	}
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Zodiac').length, 12);
 	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Garden Flowers').length, 18);
+	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'Music').length, 12);
+	assert.equal(TRIAL_CHARMS.some(charm => ['Music Icons', 'Sports Icons'].includes(charm.group)), false);
+	assert.equal(WITHHELD_CHARMS.filter(charm => charm.group === 'Music Icons').length, 34);
+	assert.deepEqual(new Set(WITHHELD_CHARMS.filter(charm => charm.group === 'Sports Icons').map(charm => charm.artworkKey)),
+		new Set(['lionel-messi', 'cristiano-ronaldo', 'ms-dhoni', 'sachin-tendulkar', 'michael-jordan',
+			'kobe-bryant', 'lebron-james', 'stephen-curry', 'tom-brady', 'patrick-mahomes',
+			'serena-williams', 'roger-federer', 'rafael-nadal', 'michael-phelps', 'usain-bolt', 'simone-biles',
+			'lewis-hamilton'].map(id => `athlete-${id}`)));
+	assert.equal(TRIAL_CHARMS.filter(charm => charm.group === 'US Tech Hubs & Skylines').length, 13);
+	assert.ok(TRIAL_CHARMS.every(charm => !/NVIDIA|Salesforce|Apple|Alpine Lake|Night Sky|Ringed Planet/.test(`${charm.name} ${charm.description}`)));
+	for (const artist of ['travis-scott', 'whitney-houston', 'beyonce', 'prince']) {
+		assert.ok(WITHHELD_CHARMS.some(charm => charm.id === `trial:artist-${artist}`));
+	}
 	assert.ok(TRIAL_CHARMS.every(charm => !charm.source && /^trial-[a-z0-9-]+\.png$/.test(charm.file)));
 	assert.equal(MESSAGES.length, 80);
 	assert.equal(new Set(MESSAGES).size, MESSAGES.length);
@@ -99,6 +351,34 @@ test('every bundled selection survives saved-state restoration', () => {
 		const requested = { ...DEFAULT_STATE, charmId: charm.id, cordLength: 210, size: 80 };
 		assert.deepEqual(restoreState(JSON.parse(JSON.stringify(requested))), requested);
 	}
+});
+
+test('withheld review artwork keeps saved selections and every cord without exposing its image', () => {
+	const cordChoices = Object.fromEntries(WITHHELD_CHARMS.map(charm => [charm.id, 'silver-chain']));
+	for (const charm of WITHHELD_CHARMS) {
+		const saved = { ...DEFAULT_STATE, charmId: charm.id, charmPinned: true, size: 80, cordLength: 210, cordChoices };
+		const restored = restoreState(JSON.parse(JSON.stringify(saved)));
+		assert.deepEqual(restored, saved);
+		assert.deepEqual(restoreState(JSON.parse(JSON.stringify(restored))), restored);
+		const displayed = getCharm(restored.charmId);
+		assert.equal(displayed.id, charm.id);
+		assert.equal(displayed.file, ORIGINAL_CHARMS[0].file);
+		assert.match(displayed.name, /unavailable/);
+		assert.equal(CHARMS.some(item => item.id === charm.id), false);
+	}
+});
+
+test('a personally imported withheld image remains usable and inherits its saved choice and cord', () => {
+	const original = WITHHELD_CHARMS[0];
+	const imported = { ...original, id: 'pack:personal-review:keepsake', source: 'data:image/png;base64,fixture' };
+	const catalogue = buildCatalogue([imported]);
+	const restored = restoreState({ ...DEFAULT_STATE, charmId: original.id,
+		cordChoices: { [original.id]: 'ribbon' }, charmPinned: true }, catalogue);
+	assert.equal(restored.charmId, imported.id);
+	assert.equal(restored.cordChoices[imported.id], 'ribbon');
+	assert.equal(getCharm(restored.charmId, catalogue).source, imported.source);
+	assert.equal(catalogue.filter(charm => charm.artworkKey === original.artworkKey).length, 1);
+	assert.deepEqual(restoreState(JSON.parse(JSON.stringify(restored)), catalogue), restored);
 });
 
 test('retiring the early designs preserves the matching choice, pin and cord', () => {
@@ -317,6 +597,33 @@ test('unreadable preference JSON reports the problem and leaves the legacy fallb
 	assert.equal(await readFile(store.path, 'utf8'), '{broken');
 });
 
+test('Windows file replacement retries temporary locks, bounds failures and preserves the prior save',
+	{ skip: process.platform !== 'win32' }, async context => {
+		const directory = mkdtempSync(join(tmpdir(), 'charmlet-state-'));
+		context.after(() => rm(directory, { recursive: true, force: true }));
+		const store = new StateStore(directory);
+		await store.write({ ...DEFAULT_STATE });
+		const originalRename = filesystem.rename;
+		let busyAttempts = 2, calls = 0;
+		const locked = Object.assign(new Error('File temporarily locked'), { code: 'EPERM' });
+		context.mock.method(filesystem, 'rename', async (...args: Parameters<typeof filesystem.rename>) => {
+			calls++;
+			if (busyAttempts-- > 0) { throw locked; }
+			return originalRename(...args);
+		});
+		const selected = { ...DEFAULT_STATE, charmId: 'fidget:cube' };
+		await store.write(selected);
+		assert.equal(calls, 3);
+		assert.deepEqual(await store.read(), selected);
+		assert.deepEqual(await readdir(directory), ['preferences.json']);
+
+		busyAttempts = Infinity; calls = 0;
+		await assert.rejects(store.write({ ...DEFAULT_STATE }), error => error === locked);
+		assert.equal(calls, 6);
+		assert.deepEqual(await store.read(), selected);
+		assert.deepEqual(await readdir(directory), ['preferences.json']);
+	});
+
 test('preference file errors reject saves and allow a later successful write', async context => {
 	const root = mkdtempSync(join(tmpdir(), 'charmlet-state-'));
 	context.after(() => rm(root, { recursive: true, force: true }));
@@ -403,14 +710,16 @@ test('size persists and Phase 0 states gain the default without losing their par
 	assert.equal(restoreState({ cordLength: 210 }).size, 100);
 	assert.equal(restoreState({ cordLength: 210 }).cordLength, 210);
 	assert.equal(restoreState({ size: 140 }).size, 140);
-	assert.equal(restoreState({ size: 999 }).size, 140);
+	assert.equal(restoreState({ size: 175 }).size, 175);
+	assert.equal(restoreState({ size: 200 }).size, 200);
+	assert.equal(restoreState({ size: 999 }).size, 200);
 	assert.equal(restoreState({ size: -1 }).size, 60);
 	assert.equal(restoreState({ size: Number.NaN }).size, 100);
 });
 
 test('every supported size fits the logical view without overwriting requested preferences', () => {
 	for (const mode of ['hanging', 'orbit'] as LayoutMode[]) {
-		for (const size of [60, 100, 140]) {
+		for (const size of [60, 100, 140, 175, 200]) {
 			for (const height of [80, 144, 240, 500]) {
 				const state = restoreState({ cordLength: 320, size });
 				const layout = getLayout(96, height, state.cordLength, state.size, mode);
@@ -443,7 +752,7 @@ test('resizing clamps the parked cord to keep the charm in the view', () => {
 });
 
 test('compact panels keep downward pull room and return to the visible rest', () => {
-	for (const size of [60, 100, 140]) {
+	for (const size of [60, 100, 140, 200]) {
 		for (const mode of ['hanging', 'orbit'] as LayoutMode[]) {
 			const requestedPreference = 126;
 			const pendulum = new Pendulum(180, 120, requestedPreference, size, mode);
@@ -492,7 +801,7 @@ test('a click impulse moves the charm, then the pendulum sleeps', () => {
 });
 
 test('opposite nudges have balanced travel in a narrow dock', () => {
-	for (const size of [60, 100, 140]) {
+	for (const size of [60, 100, 140, 200]) {
 		const left = new Pendulum(180, 500, 320, size);
 		const right = new Pendulum(180, 500, 320, size);
 		try {
@@ -631,7 +940,7 @@ test('release before the next physics frame does not jump to an unrendered point
 test('imported attachment geometry scales with the image and remains bounded during a rebound', () => {
 	for (const mode of ['hanging', 'orbit'] as const) {
 		for (const attachment of [{ x: 0.5, y: 0 }, { x: 0.45, y: 14 / 84 }, { x: 0.55, y: 0.5 }]) {
-			const p = new Pendulum(180, 140, 48, 140, mode, attachment);
+			const p = new Pendulum(180, 140, 48, 200, mode, attachment);
 			try {
 				const rest = p.position;
 				assert.ok(Math.abs(p.layout.attachmentX - (attachment.x - 0.5) * p.layout.charmWidth) < 0.001);
@@ -718,12 +1027,14 @@ test('a downward pull returns to rest without a stuck drag constraint', () => {
 
 test('size changes scale the body and attachment without accumulating walls or constraints', () => {
 	const pendulum = new Pendulum(280, 400, 126);
-	for (const size of [140, 60, 100]) {
+	for (const size of [140, 200, 60, 100]) {
 		pendulum.grab(pendulum.position);
 		pendulum.resize(280, 400, 126, size);
 		const radius = pendulum.body.circleRadius;
 		assert.ok(typeof radius === 'number');
-		assert.ok(Math.abs(radius - 34 * size / 100) < 0.001);
+		assert.ok(Math.abs(radius - 34 * 1.15 * size / 100) < 0.001);
+		assert.ok(Math.abs(pendulum.layout.charmWidth - 82.8 * size / 100) < 0.001);
+		assert.ok(Math.abs(pendulum.layout.charmHeight - 96.6 * size / 100) < 0.001);
 		assert.equal(pendulum.tether.length, pendulum.layout.cordLength + pendulum.layout.attachmentOffset);
 		assert.equal(pendulum.engine.world.constraints.length, 1);
 		assert.equal(pendulum.engine.world.bodies.length, 4);
@@ -733,7 +1044,7 @@ test('size changes scale the body and attachment without accumulating walls or c
 });
 
 test('complete peg orbits stay visible in both directions and return from above', () => {
-	for (const size of [60, 100, 140]) {
+	for (const size of [60, 100, 140, 200]) {
 		for (const immediate of [false, true]) {
 			for (const direction of [-1, 1]) {
 				const p = new Pendulum(340, 800, 126, size, 'orbit');

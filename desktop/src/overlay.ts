@@ -23,7 +23,7 @@ for (const child of [...element('app').children]) {
 	if (child !== stage) { frame.append(child); }
 }
 element('app').append(frame);
-const interactive = '#desktop-header, #charm, #anchor, #restore, #message-card, #care-cue, #primary-nav, #settings, #companion-tools, #charm-picker, #settings-menu, #photo-editor';
+const interactive = '#desktop-header, #charm, .bracelet-charm, #anchor, #restore, #message-card, #care-cue, #primary-nav, #settings, #companion-tools, #charm-picker, #settings-menu, #photo-editor, #puzzle-editor';
 let view = restoreDesktopView(undefined);
 let ignored: boolean | undefined;
 let charmHeld = false;
@@ -80,7 +80,7 @@ function ensureMessages() {
 function setExpanded(value: boolean) {
 	if (value === expanded) { return; }
 	if (!value) {
-		for (const id of ['picker-close', 'menu-close', 'settings-close', 'companion-close', 'photo-close']) {
+	for (const id of ['picker-close', 'menu-close', 'settings-close', 'companion-close', 'photo-close', 'puzzle-close']) {
 			const close = element<HTMLButtonElement>(id);
 			if (close.getClientRects().length) { close.click(); }
 		}
@@ -122,7 +122,7 @@ function saveView(key: keyof DesktopView) {
 	api.postMessage({ type: 'desktop-view-save', value: view, revision: ++revision });
 }
 function syncPanels() {
-	const open = ['charm-picker', 'settings-menu', 'settings', 'companion-tools', 'photo-editor'].some(id => !element(id).hidden);
+	const open = ['charm-picker', 'settings-menu', 'settings', 'companion-tools', 'photo-editor', 'puzzle-editor'].some(id => !element(id).hidden);
 	const messagePanel = !element('companion-tools').hidden && !element('learn-panel').hidden;
 	body.dataset.desktopPanel = String(open);
 	body.dataset.desktopMessagePanel = String(messagePanel);
@@ -189,23 +189,33 @@ window.addEventListener('mouseleave', () => {
 	if (!charmHeld && !moving) { setIgnored(true); hideToolbarLater(); }
 });
 charm.addEventListener('pointerdown', event => { if (event.button === 0) { charmHeld = true; setIgnored(false); } });
+stage.addEventListener('pointerdown', event => {
+	if (event.button === 0 && event.target instanceof Element && event.target.closest('.bracelet-charm')) {
+		charmHeld = true; setIgnored(false);
+	}
+}, true);
 for (const event of ['pointerup', 'pointercancel'] as const) {
 	window.addEventListener(event, () => { charmHeld = false; endMove(); requestAnimationFrame(refreshHitTest); }, true);
 }
 charm.addEventListener('lostpointercapture', () => { charmHeld = false; requestAnimationFrame(refreshHitTest); });
+stage.addEventListener('lostpointercapture', event => {
+	if (event.target instanceof Element && event.target.closest('.bracelet-charm')) {
+		charmHeld = false; requestAnimationFrame(refreshHitTest);
+	}
+});
 window.addEventListener('blur', () => { charmHeld = false; endMove(); pointer = undefined; setIgnored(true); hideToolbarLater(); });
 document.addEventListener('focusin', () => { if (header.contains(document.activeElement)) { showToolbar(); } });
 document.addEventListener('pointerdown', event => {
 	keyboard = false;
 	const target = event.target instanceof Element ? event.target.closest('button, input, select, summary, a') : null;
-	if (target && target !== charm) { api.postMessage({ type: 'desktop-focus' }); }
+	if (target && target !== charm && !target.matches('.bracelet-charm')) { api.postMessage({ type: 'desktop-focus' }); }
 }, true);
 document.addEventListener('keydown', event => {
 	keyboard = true;
 	if (event.key === 'Escape' && !hadPanel) { setExpanded(false); }
 }, true);
 document.addEventListener('contextmenu', event => {
-	if (!(event.target instanceof Element) || !event.target.closest('#charm, #anchor')) { return; }
+	if (!(event.target instanceof Element) || !event.target.closest('#charm, .bracelet-charm, #anchor')) { return; }
 	event.preventDefault();
 	api.postMessage({ type: 'desktop-focus' });
 	setExpanded(true);
@@ -244,7 +254,7 @@ window.addEventListener('message', event => {
 	}
 });
 const panels = new MutationObserver(syncPanels);
-for (const id of ['charm-picker', 'settings-menu', 'settings', 'companion-tools', 'learn-panel', 'photo-editor']) {
+for (const id of ['charm-picker', 'settings-menu', 'settings', 'companion-tools', 'learn-panel', 'photo-editor', 'puzzle-editor']) {
 	panels.observe(element(id), { attributes: true, attributeFilter: ['hidden'] });
 }
 setIgnored(true);

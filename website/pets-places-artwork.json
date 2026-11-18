@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "shiba-inu", "name": "Shiba Inu", "group": "Animals", "accent": "#c79058",
+      "description": "A bright-eyed Shiba with a curled tail and warm sesame fur.",
+      "subject": "A complete adult red Shiba Inu dog seated in a relaxed three-quarter view, with anatomically believable compact proportions, upright triangular ears, a fox-like face, warm rust-orange fur, creamy white urajiro cheeks and chest, dark intelligent eyes, black nose and its distinctly curled fluffy tail visible beside its hindquarters. Soft realistic fur detail and a quietly curious expression. No collar, clothing, props, meme references or exaggerated cartoon smile."
+    },
+    {
+      "id": "french-bulldog", "name": "French Bulldog", "group": "Animals", "accent": "#a49182",
+      "description": "A compact Frenchie with bat ears and a gentle head tilt.",
+      "subject": "A complete healthy fawn French Bulldog seated with a small natural head tilt. Recognizable large upright bat ears, compact muscular body, short fawn coat, darker muzzle, expressive dark eyes, a small white chest patch and four believable paws. Anatomically natural, softly lit with realistic short fur and gentle facial folds. Keep the ears and paws entirely within the image. No clothing, props, collar or cartoon exaggeration."
+    },
+    {
+      "id": "dachshund", "name": "Dachshund", "group": "Animals", "accent": "#a36443",
+      "description": "A little long-bodied companion with glossy chestnut fur.",
+      "subject": "A complete smooth-haired chestnut Dachshund in a side-biased three-quarter standing pose. Show its recognizable long low body, very short sturdy legs, gently tapered muzzle, long soft folded ears and slim curved tail. All four paws and the entire tail visible, anatomically credible and comfortably posed. Rich brown fur, warm eyes and restrained studio highlights. No clothing, collar, costume, extra limbs or cartoon proportions."
+    },
+    {
+      "id": "pomeranian", "name": "Pomeranian", "group": "Animals", "accent": "#d4a56d",
+      "description": "A small golden puff of fur with a lively, friendly face.",
+      "subject": "A complete golden cream Pomeranian sitting upright with a believable small dog body beneath its abundant double coat. A fox-like face, alert small triangular ears, dark eyes, black nose, a full neck ruff, tiny visible front paws and a fluffy plume tail curling over its back. Naturally layered detailed fur, not a perfect sphere or plush toy. No clothes, accessories or oversized cartoon eyes."
+    },
+    {
+      "id": "maine-coon", "name": "Maine Coon", "group": "Animals", "accent": "#8b7965",
+      "description": "A majestic long-haired cat with tufted ears and a soft ruff.",
+      "subject": "A complete adult brown tabby Maine Coon cat sitting in a relaxed three-quarter pose. Show its distinctive large rectangular body, broad square muzzle, tufted lynx-like ears, thick neck ruff, substantial tufted paws and a long bushy tail curled visibly beside the body. Warm brown and charcoal striped fur with a pale chest, natural green-gold eyes and a calm expression. Realistic fur and feline anatomy; no props, collar or cartoon features."
+    },
+    {
+      "id": "ragdoll", "name": "Ragdoll", "group": "Animals", "accent": "#a8b8cc",
+      "description": "A soft blue-eyed Ragdoll with cream fur and a calm gaze.",
+      "subject": "A complete blue-point bicolor Ragdoll cat sitting with relaxed shoulders and its fluffy tail laid alongside it. Silky cream-white semi-long fur, cool grey ears and tail, a gentle inverted white V on its face, soft blue eyes, a pink nose and white paws. Believable medium-large cat proportions, delicate fur texture and a placid affectionate expression. No accessories, stylized facial symbols or oversized eyes."
+    },
+    {
+      "id": "siamese", "name": "Siamese", "group": "Animals", "accent": "#9caac1",
+      "description": "A sleek seal-point Siamese with bright blue eyes.",
+      "subject": "A complete elegant traditional Siamese cat in a seated three-quarter pose. A lean cream body, dark seal-brown mask, ears, paws and long slender tail, vivid but natural almond-shaped blue eyes and a graceful moderately wedge-shaped head. Short glossy fur, realistic anatomy and a gently attentive expression. Entire tail and ears visible. No clothing, collar, extreme elongated features or cartoon styling."
+    },
+    {
+      "id": "lop-rabbit", "name": "Lop Rabbit", "group": "Animals", "accent": "#c7ad95",
+      "description": "A velvet-soft little rabbit with gently folded ears.",
+      "subject": "A complete small Holland Lop rabbit resting in a naturally compact sitting pose. Warm broken-fawn and cream fur, two soft floppy ears hanging beside its cheeks, realistic dark eyes, a tiny nose, fine whiskers, visible front paws and a little rounded tail. Keep a believable rabbit skeleton and gentle breathing-room between ears and body. Soft detailed fur, no clothing, carrot, basket or cartoon exaggeration."
+    },
+    {
+      "id": "hamster", "name": "Golden Hamster", "group": "Animals", "accent": "#cc9b66",
+      "description": "A tiny golden hamster with busy paws and soft cheeks.",
+      "subject": "A complete golden Syrian hamster seated on its hindquarters, tiny front paws held naturally near its chest. Realistic warm golden fur over the back and head, pale cream belly, small rounded ears, dark glossy eyes, delicate whiskers and small visible hind feet. A gently curious expression, true small-animal proportions rather than a spherical plush toy. No food, cage, accessories or cartoon features."
+    },
+    {
+      "id": "cockatiel", "name": "Cockatiel", "group": "Animals", "accent": "#d8b86f",
+      "description": "A cheerful crested bird with orange cheeks and a long tail.",
+      "subject": "A complete normal-grey cockatiel perched naturally on a short narrow unbranded wooden branch, with the entire long tapered tail visible. Soft grey body, pale wing patches, yellow face and lifted crest, distinct orange cheek patches, dark eyes, small curved beak and two anatomically correct gripping feet. Realistic layered feathers, restrained colour and a friendly head tilt. No cage, stand, clothing, text or decorative objects."
+    },
+    {
+      "id": "yellowstone-geyser", "name": "Yellowstone Geyser", "group": "National Parks", "accent": "#bca471", "greenDespill": "all",
+      "description": "An Old Faithful-inspired geyser rising above a mineral basin.",
+      "subject": "A compact photographic-style illustrated Yellowstone landscape inspired by Old Faithful: a recognizable pale mineral geyser cone erupting with a clear vertical plume of white water and steam, warm cream sinter terraces, a small touch of turquoise runoff and a few dark lodgepole pines behind. Use natural irregular terrain contours and a readable layered silhouette. No enclosing sky rectangle, circular souvenir base, pedestal, frame, boardwalk signs, visitors or park logos. Preserve the complete plume with generous margins."
+    },
+    {
+      "id": "zion-canyon", "name": "Zion Canyon", "group": "National Parks", "accent": "#b16e51",
+      "description": "Warm sandstone cliffs and a quiet river bend, inspired by Zion.",
+      "subject": "A compact photographic-style illustrated landscape inspired by Zion National Park: tall richly layered red and cream sandstone canyon walls, one broad monumental cliff rising behind another, a narrow green cottonwood-lined Virgin River bend at their feet. Express realistic rock texture, warm late-afternoon light and depth in an irregular freeform scenic silhouette. No enclosing rectangular sky, plaque, pedestal, souvenir disk, buildings, signs, visitors or logos."
+    },
+    {
+      "id": "crater-lake", "name": "Crater Lake", "group": "National Parks", "accent": "#5f91bc",
+      "description": "A deep-blue caldera lake with a small volcanic island.",
+      "subject": "A compact photographic-style illustrated view of Oregon's Crater Lake from an elevated angle: deep clear cobalt-blue water enclosed by a curved rugged caldera rim, small conical Wizard Island clearly visible, scattered dark evergreen trees and a few restrained snow patches on the upper rim. An organic irregular landscape silhouette with real geological texture and believable depth. No rectangular backdrop, souvenir base, plinth, badges, text, buildings or logos."
+    },
+    {
+      "id": "mount-fuji", "name": "Mount Fuji", "group": "National Parks", "accent": "#92a7bd",
+      "description": "A calm snow-capped volcano above a small lakeside landscape.",
+      "subject": "A compact photographic-style illustrated landscape inspired by Mount Fuji: the recognizable symmetrical volcanic cone with a clean snow cap and nuanced slate-blue slopes, a small curved lakeshore at its base and a restrained spray of pale pink cherry blossoms near one lower edge. Natural irregular contours, elegant realistic depth and a crisp readable mountain silhouette. No postcard rectangle, souvenir plaque, pedestal, torii gate, text, logos or surrounding sky panel."
+    },
+    {
+      "id": "machu-picchu", "name": "Machu Picchu", "group": "World Wonders", "accent": "#82936d", "revision": 2,
+      "description": "Ancient stone terraces tucked into a dramatic green mountain ridge.",
+      "subject": "A small isolated three-dimensional Machu Picchu landscape charm, fully contained in the central 60 percent of the canvas. It has a complete irregular rocky underside, layered grey stone Inca terraces on a small saddle ridge, and the steep distinctive Huayna Picchu mountain behind. Render a self-contained scenic object, not a rectangular photograph or a cropped panorama. Weathered stone and deep olive grass, a readable miniature silhouette, elevated three-quarter view. Leave a wide uninterrupted flat PURE #00FF00 green margin above, below, left and right of the entire object. Every background pixel has exactly the same green colour, including all four corners and beneath the rocky underside. No background rectangle, green inner frame, gradient, floor, shadow, plaque, pedestal, visitors, signs or text."
+    },
+    {
+      "id": "taj-mahal", "name": "Taj Mahal", "group": "World Wonders", "accent": "#b7bbc8",
+      "description": "White marble domes and a quiet reflection, inspired by Agra.",
+      "subject": "A compact photographic-style CGI illustration of the Taj Mahal in a slightly elevated three-quarter frontal view: luminous ivory marble central onion dome, four slender minarets correctly separated around the main structure, smaller domed pavilions and a short narrow reflecting pool with restrained garden greenery. Realistic architectural detail and soft warm daylight. The complete building, minarets and natural ground contour must fit with clear margins. No enclosing picture frame, souvenir disk, pedestal, inscription, crowd, flags or logo."
+    },
+    {
+      "id": "great-wall", "name": "Great Wall", "group": "World Wonders", "accent": "#a49b79", "revision": 2,
+      "description": "A winding stone wall following a rugged green mountain ridge.",
+      "subject": "A small isolated three-dimensional Great Wall of China landscape charm, fully contained in the central 60 percent of the canvas: one weathered stone watchtower and a short crenellated wall winding in an elegant S curve across two small rugged mountain ridges. Include the complete naturally irregular rocky underside, restrained dark olive foliage and realistic stonework. It must be a self-contained scenic object with generous clear space on EVERY side. The ENTIRE background must be perfectly flat PURE RGB(0,255,0), #00FF00, including the four corners and beneath the object. Absolutely no white or pale background, sky, coloured outline, floor, cast shadow, rectangular picture, pedestal, text, people, flags or logos."
+    },
+    {
+      "id": "eiffel-tower", "name": "Eiffel Tower", "group": "World Wonders", "accent": "#ad957b",
+      "description": "Paris in daylight, with delicate iron latticework and four graceful arches.",
+      "subject": "The complete Eiffel Tower in Paris in warm natural daylight, seen from a slightly elevated three-quarter angle. Accurate elegant tapered proportions, four splayed iron legs and recognizable curved lower arches, two observation platforms, delicate warm bronze-grey latticework and the full narrow antenna. A tiny irregular patch of pale stone paving and restrained dark olive shrubs under the four feet. A beautifully detailed, dimensional miniature architectural illustration with no nighttime lighting display. Keep all four feet and the top within generous margins. One isolated scenic object, no sky, postcard panel, backing disk, pedestal, people, lettering, logos or hanging hardware."
+    },
+    {
+      "id": "colosseum", "name": "Colosseum", "group": "World Wonders", "accent": "#c1a17b",
+      "description": "Rome's weathered amphitheatre, with warm stone arches and an open arena.",
+      "subject": "The Roman Colosseum as one compact dimensional architectural illustration, seen from an elevated three-quarter angle. Correct elliptical amphitheatre shape, recognizable partly broken outer wall with three tiers of repeated stone arches, ochre travertine textures and a visible open central arena. A small irregular ground footprint, softly sunlit warm stone and dark arch interiors. Preserve architectural detail while making a clear silhouette at small size. Complete self-contained object with generous margins on every side, no sky panel, square base, pedestal, hanging loop, people, text or logos."
+    },
+    {
+      "id": "big-ben", "name": "Big Ben", "group": "World Wonders", "accent": "#b6a077",
+      "description": "London's Elizabeth Tower, with its familiar clock faces and Gothic spire.",
+      "subject": "London's Elizabeth Tower, commonly called Big Ben, as a complete upright dimensional architectural miniature. Accurate warm limestone Gothic clock tower, two readable ivory clock faces with dark hands and hour marks but no invented lettering, intricate upper stonework and dark slate pyramidal spire with a fine gold tip. A very small fragment of matching Parliament stonework at the foot, restrained enough that the tower dominates. Natural overcast daylight, fine realistic stone texture, full tower visible with wide clear margins. No flag, people, sky rectangle, souvenir disk, pedestal, hanging hardware, captions or logos."
+    },
+    {
+      "id": "santorini", "name": "Santorini", "group": "World Wonders", "accent": "#83a9c8",
+      "description": "Whitewashed Cycladic homes and blue domes above the Aegean.",
+      "subject": "A small self-contained Santorini hillside village landscape in Greece: three whitewashed Cycladic houses with curved walls, one beautiful cobalt-blue church dome with a small discreet cross, narrow pale stone steps and a trace of deep turquoise water at the base. Bright but gentle Mediterranean daylight, realistic plaster textures and crisp shaded recesses. Build an irregular natural cliff silhouette underneath rather than a square diorama platform. Entire scenic object comfortably inside the central two-thirds of the canvas, no rectangular sky, distant panorama, people, brand signs, words, souvenir backing, frame or hanging loop."
+    },
+    {
+      "id": "neuschwanstein", "name": "Neuschwanstein Castle", "group": "World Wonders", "accent": "#aab5b5",
+      "description": "A Bavarian hilltop castle with ivory towers and blue-grey roofs.",
+      "subject": "Neuschwanstein Castle in Bavaria as a small recognizable three-quarter architectural landscape: ivory limestone Romanesque walls, clustered tall cylindrical towers with blue-grey pointed roofs, the long main hall and its red brick gatehouse, resting on a compact irregular wooded rocky hill. Fine realistic stone, restrained dark forest-green conifers, soft clear daytime light and believable dimensional depth. Keep the entire castle, every roof tip and the natural rocky underside inside generous margins. No branded fantasy castle, flags, fog or sky rectangle, souvenir plaque, square plinth, hanging hardware, people or text."
+    },
+    {
+      "id": "statue-of-liberty", "name": "Statue of Liberty", "group": "World Wonders", "accent": "#7ca798",
+      "description": "New York's copper-green figure, with raised torch and a seven-ray crown.",
+      "subject": "The complete Statue of Liberty in New York as a beautifully detailed dimensional miniature, natural oxidized copper green with realistic patina. Correct robed female figure, raised right arm holding a small golden torch, seven-ray crown, left arm holding a tablet with no readable text, full draped body and feet on its recognizable short stone pedestal. The actual statue pedestal is part of the monument; do not add a second souvenir stand or disk. Slight three-quarter frontal view, gentle daylight, clear complete silhouette with wide margins. No people, skyline panel, flag, label, extra torch, hanging loop or logos."
+    },
+    {
+      "id": "niagara-falls", "name": "Niagara Falls", "group": "World Wonders", "accent": "#79adb7",
+      "description": "A broad horseshoe of falling water between Canada and the United States.",
+      "subject": "A compact isolated three-dimensional Niagara Horseshoe Falls landscape, viewed slightly from above. A recognizable broad curved horseshoe rim of turquoise river pouring in many fine white cascades into a deep blue pool, with subtle translucent mist kept close to the base and small dark rocky olive-green banks. Include a naturally irregular rocky underside and the whole curved waterfall. Realistic moving-water textures, fresh daylight and miniature landscape clarity. All parts fit comfortably within generous green margins. No wide panorama, rectangular photograph, sky, base disk, souvenir plinth, boats, visitors, flags or lettering."
+    },
+    {
+      "id": "angkor-wat", "name": "Angkor Wat", "group": "World Wonders", "accent": "#a4977b", "revision": 2,
+      "description": "Cambodia's lotus-shaped temple towers and weathered sandstone galleries.",
+      "subject": "A small isolated Angkor Wat temple scene in Cambodia, entirely within the central60percent of the canvas. Recognizable five lotus-bud sandstone towers with the central tower highest, stepped galleries and a short causeway beside a small reflecting pool. Fine grey-brown stone carvings, restrained dark olive shrubs and a complete organically shaped rocky underside. Render the stone in gentle warm light but DO NOT LIGHT OR SHADE THE BACKGROUND. Every background pixel must be EXACTLY PURE RGB(0,255,0), #00FF00, from all four corners to underneath the object. A perfectly uniform chroma key field, not a photographed green studio wall. No gradient, shading, shadow, desaturated green, vignette, floor, reflected colour, sky, plaque, platform, people, lettering, flags or hanging hardware. Preserve very generous pure-green margins on every side."
+    },
+    {
+      "id": "petra", "name": "Petra", "group": "World Wonders", "accent": "#c88e75",
+      "description": "Jordan's rose-stone Treasury, carved into a warm sandstone cliff.",
+      "subject": "The Treasury facade at Petra in Jordan carved into one compact irregular rose-red sandstone cliff fragment. A clearly recognizable two-storey classical facade with six lower columns, triangular pediment and central upper circular tholos, fine weathered stone details and dark recessed doorway. Warm terracotta, salmon and ochre strata, soft grazing daylight and real depth around the carved columns. A natural cliff silhouette with a complete irregular lower edge, generous clear margins. No square stone slab, frame, souvenir disk, pedestal, people, camels, desert panorama, signs, inscriptions or hanging loop."
+    },
+    {
+      "id": "kyoto-torii", "name": "Kyoto Torii Gates", "group": "World Wonders", "accent": "#c3704f",
+      "description": "A quiet path through vermilion torii gates, inspired by Kyoto.",
+      "subject": "A small dimensional scene inspired by Kyoto's Fushimi Inari shrine paths: three elegant vermilion torii gates receding gently along a short pale stone stairway, accurate curved upper crossbeams and black lower post bases, one small dark olive maple sprig and a compact naturally irregular mossy rock footprint. No written inscriptions on the gates. Slight elevated three-quarter view, soft dappled daylight, natural materials and warm quiet atmosphere. Entire scene fully isolated with generous margins, no backdrop rectangle, forest panorama, platform, souvenir backing, people, lantern text, logos or hanging hardware."
+    },
+    {
+      "id": "bryce-canyon", "name": "Bryce Canyon", "group": "National Parks", "accent": "#ce946b",
+      "description": "Warm orange hoodoos and pale limestone spires from Utah's high plateau.",
+      "subject": "A compact photographic-style dimensional landscape inspired by Bryce Canyon National Park in Utah. A small amphitheatre of recognizable tall orange and peach sandstone hoodoo spires, pale cream capstones, fine layered erosion and one tiny dark evergreen on a rim. Natural irregular rocky underside, warm low morning light, clear sculptural silhouettes, believable geological textures. One self-contained isolated landscape object inside the central sixty percent of the image. No people, trails with signs, postcard rectangle, sky panel, cut stone block, souvenir base, hanging hardware or words."
+    },
+    {
+      "id": "grand-teton", "name": "Grand Teton", "group": "National Parks", "accent": "#92a4b8", "revision": 2,
+      "description": "Jagged Wyoming peaks above a still lake and a quiet line of pines.",
+      "subject": "A small isolated three-dimensional Grand Teton National Park landscape from Wyoming, fully contained in the central60percent of the canvas. The distinctive steep jagged Teton granite skyline with the main Grand Teton summit and lower adjacent peaks, narrow snow gullies, a little dark-blue glacial lake and a few tiny dark conifers. Complete organically irregular rocky underside. Detailed mountain stone and quiet cool daylight ON THE SUBJECT ONLY. Every background pixel must be EXACTLY PURE RGB(0,255,0), #00FF00, including all four corners and beneath the rocky underside. Perfectly flat uniform chroma green, no darker green, studio light gradient, vignette, cast shadow, floor, sky, coloured frame, photograph rectangle, pedestal, people, signs, words or hanging hardware. Very wide uninterrupted pure-green margins on every side."
+    },
+    {
+      "id": "glacier-national-park", "name": "Glacier National Park", "group": "National Parks", "accent": "#7eafa7",
+      "description": "Montana's rugged alpine peaks and jewel-clear turquoise water.",
+      "subject": "A compact dimensional landscape inspired by Glacier National Park in Montana: a broad rugged stratified grey mountain wall with small remaining snowfields, a bright clear turquoise alpine lake and a few tiny dark conifers along an irregular rocky shore. Subtle reddish pebbles visible through shallow foreground water, crisp natural mountain textures and gentle clear daylight. The complete scenic object has an organic rocky underside and wide empty margins on every side. No rectangular panorama, enclosing sky panel, souvenir disk, flat plinth, people, signs, words or hanging hardware."
+    },
+    {
+      "id": "acadia", "name": "Acadia", "group": "National Parks", "accent": "#829fa5",
+      "description": "Maine's pink granite shore, evergreen trees and Atlantic surf.",
+      "subject": "A compact isolated Acadia National Park landscape from Maine: rounded rose-pink granite coastal rocks with layered cracks, three small dark evergreen spruce trees on the upper shore, deep navy Atlantic water with delicate white surf curling around the lowest rocks. A natural irregular rocky underside, cool clear morning light and realistic coastal stone and sea textures. One self-contained scenic charm with generous margins, not a postcard or full seascape. No lighthouse, people, boats, signs, sky rectangle, frame, souvenir base, words or hanging loop."
+    },
+    {
+      "id": "joshua-tree", "name": "Joshua Tree", "group": "National Parks", "accent": "#b9a477",
+      "description": "A branching Joshua tree beside rounded desert boulders.",
+      "subject": "A compact dimensional Joshua Tree National Park landscape in California. One unmistakable mature Joshua tree with shaggy branching trunk and small spiky dark olive leaf clusters, a pair of rounded warm granite desert boulders and a little sandy irregular ground beneath. Natural tree anatomy, dry desert textures, gentle golden daylight and a readable asymmetrical silhouette. Entire tree including every leaf tip and the rocky underside sits well inside generous margins. No cactus substitution, sky rectangle, distant panorama, pot, platform, people, animals, signs, text or hanging hardware."
+    }
+  ]
+}
