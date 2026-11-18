@@ -21,9 +21,9 @@ await mkdir(output, { recursive: true });
 const base = process.env.CHARMLET_GALLERY_URL || 'http://127.0.0.1:4173/';
 const gallery = new URL('charms.html', base).href;
 const counts = { coding: 1, live: 15, stress: 18, music: 12,
-  california: 12, 'us-cities': 13, animals: 13, silicon: 15, parks: 6, space: 13, zodiac: 12, gemstones: 8, culture: 25,
+  california: 12, 'us-cities': 13, animals: 23, silicon: 15, parks: 10, trees: 2, space: 13, zodiac: 12, gemstones: 8, culture: 26,
   sports: 5, seasonal: 24, flowers: 18 };
-assert.equal(data.charms.length, 210);
+assert.equal(data.charms.length, 227);
 assert.deepEqual(data.homepagePreviews.map(item => item.id).sort(),
   ['artist-michael-jackson', 'athlete-stephen-curry']);
 const homepageImages = new Set(data.homepagePreviews.map(item => item.preview.replace(/^\.\//, '')));
@@ -152,6 +152,51 @@ async function checkCaliSwing() {
     `The swing must cross its resting point: ${JSON.stringify({ restX, ...travel })}`);
   await page.locator('#demo-reset').click();
 }
+
+async function checkBracelet() {
+  await page.locator('#demo-arrangement').click();
+  await expect(page.locator('#demo-arrangement')).toHaveAttribute('aria-pressed', 'true');
+  const bracelet = page.locator('#demo-bracelet'), slots = bracelet.locator('.bracelet-charm:not([hidden])');
+  await expect(slots).toHaveCount(3);
+  await expect(page.locator('#demo-charm')).toBeHidden();
+  for (let index = 0; index < 3; index++) {
+    const slot = slots.nth(index);
+    for (const direction of [-1, 1]) {
+      await slot.scrollIntoViewIfNeeded();
+      const box = await slot.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await page.mouse.move(x, y); await page.mouse.down();
+      try {
+        await page.mouse.move(x + direction * 45, y + 8, { steps: 12 });
+        await expect(slot).toHaveClass(/\bdragging\b/);
+        await expect.poll(async () => {
+          const moved = await slot.boundingBox();
+          return direction * (moved.x + moved.width / 2 - x);
+        }, { message: `Bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
+      } finally { await page.mouse.up(); }
+      await expect(slot).not.toHaveClass(/\bdragging\b/);
+    }
+  }
+  const pet = bracelet.locator('[data-charm="new-shiba-inu"]');
+  await expect(pet).toHaveAttribute('data-material-rendered', 'true');
+  await pet.press('Enter');
+  await expect(pet).toHaveAttribute('data-tap-motion', 'playing');
+  await expect(pet.locator('canvas[data-progress]')).toHaveAttribute('data-motion', 'still');
+  await page.locator('#demo-pause').click();
+  await slots.first().scrollIntoViewIfNeeded();
+  await expect(bracelet).toHaveAttribute('data-running', 'false');
+  await expect(bracelet.locator('canvas[data-motion="living"]')).toHaveCount(0);
+  const frames = await bracelet.getAttribute('data-frames');
+  await page.waitForTimeout(350);
+  await expect(bracelet).toHaveAttribute('data-frames', frames);
+  assert.equal(await overflow(), false);
+  await page.screenshot({ path: join(output, `bracelet-${page.viewportSize().width}.png`) });
+  await page.locator('#demo-pause').click();
+  await page.locator('#demo-arrangement').click();
+  await expect(bracelet).toBeHidden();
+  await expect(page.locator('#demo-charm')).toBeVisible();
+  await page.getByRole('button', { name: 'Try Cali', exact: true }).click();
+}
+
 try {
   console.log('Checking the approved homepage, placement, reactions, email gate and garden.');
   const homepage = await page.goto(base, { waitUntil: 'networkidle' });
@@ -197,7 +242,7 @@ try {
     assert.equal((await page.request.get(new URL(item.preview, base).href)).status(), 200);
   }
   assert.equal(await page.locator('a[href="./studio/"]').count(), 0);
-  for (const name of ['Sunny', 'Nimbus', 'Byte', 'Cali']) {
+  for (const name of ['Sunny', 'Nimbus', 'Robot Assistant', 'Cali']) {
     await page.getByRole('button', { name: `Try ${name}`, exact: true }).click();
     await expect(page.locator('#demo-name')).toHaveText(name);
     await expect(page.locator('#live-smiley')).toBeVisible();
@@ -208,6 +253,20 @@ try {
   await page.getByRole('button', { name: 'Desktop', exact: true }).click();
   await expect(page.locator('#playground')).toHaveAttribute('data-workspace', 'desktop');
   await checkCaliSwing();
+  await checkBracelet();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await checkBracelet();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  for (const slot of ['sports', 'music']) {
+    await page.locator(`[data-home-preview="${slot}"] button`).click();
+    await expect(page.locator('#demo-image')).toHaveAttribute('src', /assets\/home-previews\//);
+    await expect(page.locator('#demo-charm')).toHaveAttribute('data-material-rendered', 'true');
+    await expect(page.locator('#demo-charm')).toBeInViewport();
+    await page.locator('#demo-charm').press('Enter');
+    await expect(page.locator('#demo-charm')).toHaveAttribute('data-tap-motion', 'playing');
+    await expect(page.locator('#demo-charm canvas[data-progress]')).toHaveAttribute('data-motion', 'still');
+  }
+  await page.getByRole('button', { name: 'Try Cali', exact: true }).click();
   await page.getByRole('button', { name: '✦ Cheer', exact: true }).click();
   await expect(page.locator('#demo-charm .win-sparkles[data-kind="confetti"] i')).toHaveCount(28);
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -235,7 +294,7 @@ try {
 
   console.log('Checking collection filters, search, preview focus and protected download boundaries.');
   await page.goto(gallery, { waitUntil: 'networkidle' });
-  await expect(page.locator('.charm-card')).toHaveCount(210);
+  await expect(page.locator('.charm-card')).toHaveCount(227);
   await expect(page.locator('.charm-card').nth(0)).toHaveAttribute('data-charm-id', 'terminal');
   await expect(page.locator('.charm-card').nth(1)).toHaveAttribute('data-charm-id', 'live:cali');
   for (const collection of data.collections) {
@@ -254,7 +313,7 @@ try {
   await expect(page.locator('#empty-state')).toBeVisible();
   await page.locator('#reset-filters').click();
   await expect(page.locator('#search')).toBeFocused();
-  await expect(page.locator('.charm-card')).toHaveCount(210);
+  await expect(page.locator('.charm-card')).toHaveCount(227);
   const musicButton = page.locator('.charm-card[data-charm-id="new-electric-guitar"] .card-art');
   await musicButton.click();
   await expect(page.locator('#preview-dialog')).toBeVisible();
@@ -564,7 +623,7 @@ try {
   await page.goto(new URL('download.html?checkout=complete', base).href, { waitUntil: 'networkidle' });
   await expect(page.locator('#continue-checkout')).toBeDisabled();
   paid = true;
-  await expect(page.locator('#edition-name')).toContainText('CharmBits Pro', { timeout: 12000 });
+  await expect(page.locator('#edition-name')).toContainText('CharmBits Desktop Pro', { timeout: 12000 });
   await expect(page.locator('#checkout-section')).toBeHidden();
   assert.equal(calls.filter(call => call.path === 'checkout').length, 1);
   assert.equal(await page.evaluate(() => localStorage.getItem('charmlet-basket-v1')), '[]');
@@ -584,8 +643,8 @@ try {
   await page.locator('#email-download').click();
   await expect(page).toHaveURL(marketplace);
   assert.deepEqual(errors, []);
-  const result = { version: manifest.version, charms: 210, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
-    homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: 16,
+  const result = { version: manifest.version, charms: 227, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
+    homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: 17,
     desktop: true, mobileWidths: [390, 320, 768], caliBidirectionalSwing: true, liveCompanions: 15, puzzleBoards: 3,
     publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,

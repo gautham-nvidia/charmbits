@@ -211,17 +211,16 @@
       "preparation": "Chroma removal and neutral spill correction with natural foliage protected; complete silhouette."
     },
     {
-      "file": "live-art-robot.png",
+      "file": "live-art-robot-assistant.png",
       "width": 512,
       "height": 512,
-      "sha256": "bcd91296ba0c838e3881c93d9a04725e7f0df3040608cb47333af1047740c1e0",
-      "sourceVariant": "phase12-byte-rig-r1",
-      "sourceHash": "77c643bb7c44fa757c1a24d6efd1eed80838fea5f130e27ef9e8d5873eb5c2bb",
+      "sha256": "48b55bc48742cc604dbf3569f244cee2919aaf45bd9ba2cdb8a7932a6a382484",
+      "sourceVariant": "new-robot-assistant",
+      "sourceHash": "df02880fa532cd92fe64b1327d55be459eb904b74dc14a8f43977300c0ed9e2d",
       "model": "gcp/google/gemini-3-pro-image",
-      "promptHash": "a0d93809822a6551e76f5d2510c1d1ff1d57929555b468c448ad709174693540",
-      "referenceHash": "47eac443912684d618083047c148fe0cd4d384dd5bc27eb0142a7c25ee75477b",
-      "generatedAt": "2026-11-09T23:40:19.349Z",
-      "preparation": "Transparent registered artwork; neutral cloud spill correction, resized to 512px. Live effects are rendered in the app."
+      "promptHash": "70465979831c781746dd3bad61a4b5208b08f09b4e361208086f07a4abdba21e",
+      "generatedAt": "2026-11-03T20:24:09.002Z",
+      "preparation": "Reviewed ivory Robot Assistant; chroma removal and neutral spill correction, registered at 512px. Expressions are drawn locally."
     },
     {
       "file": "live-art-santa-cruz.png",
@@ -384,17 +383,16 @@
       "preparation": "Chroma removal and neutral spill correction with natural foliage protected; complete silhouette."
     },
     {
-      "file": "live-robot.png",
+      "file": "live-robot-assistant.png",
       "width": 216,
       "height": 252,
-      "sha256": "3ac43f0b82c9c474018a632b37007ffebe1fc631a398e97fff7a50d903876e66",
-      "sourceVariant": "phase12-byte-rig-r1",
-      "sourceHash": "77c643bb7c44fa757c1a24d6efd1eed80838fea5f130e27ef9e8d5873eb5c2bb",
+      "sha256": "f5390c87a38de1f99f73c7f1a984e6d9c2f26c3b51254d5fa454c2a507dee2af",
+      "sourceVariant": "new-robot-assistant",
+      "sourceHash": "df02880fa532cd92fe64b1327d55be459eb904b74dc14a8f43977300c0ed9e2d",
       "model": "gcp/google/gemini-3-pro-image",
-      "promptHash": "a0d93809822a6551e76f5d2510c1d1ff1d57929555b468c448ad709174693540",
-      "referenceHash": "47eac443912684d618083047c148fe0cd4d384dd5bc27eb0142a7c25ee75477b",
-      "generatedAt": "2026-11-09T23:40:19.349Z",
-      "preparation": "Poster rendered by the same layered artwork renderer and effects as the app."
+      "promptHash": "70465979831c781746dd3bad61a4b5208b08f09b4e361208086f07a4abdba21e",
+      "generatedAt": "2026-11-03T20:24:09.002Z",
+      "preparation": "Poster rendered with the same jointed artwork and expressive face used by the app."
     },
     {
       "file": "live-santa-cruz.png",

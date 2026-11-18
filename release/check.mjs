@@ -16,12 +16,14 @@ const targets = ['artifact', 'marketplace', 'open-vsx', 'both'];
 const requiredFiles = [
   'extension/package.json', 'extension/readme.md', 'extension/changelog.md',
   'extension/privacy.md', 'extension/third_party_notices.md', 'extension/artwork.md',
-  'extension/dist/extension.js', 'extension/dist/webview.js',
+  'extension/dist/extension.js', 'extension/dist/webview.js', 'extension/dist/edition.json',
   'extension/media/view.html', 'extension/media/view.css', 'extension/media/marketplace-icon.png',
 ];
-const permitted = /^(?:extension\.vsixmanifest|\[content_types\]\.xml|extension\/(?:package\.json|readme\.md|changelog\.md|privacy\.md|third_party_notices\.md|artwork\.md|artwork-license\.md|licen[cs]e(?:\.txt|\.md)?|dist\/(?:extension|webview)\.js|media\/[a-z0-9-]+\.(?:svg|png|html|css)))$/;
+const permitted = /^(?:extension\.vsixmanifest|\[content_types\]\.xml|extension\/(?:package\.json|readme\.md|changelog\.md|privacy\.md|third_party_notices\.md|artwork\.md|artwork-license\.md|licen[cs]e(?:\.txt|\.md)?|dist\/(?:(?:extension|webview)\.js|edition\.json)|media\/[a-z0-9-]+\.(?:svg|png|html|css)))$/;
 
 export function validateCandidate({ manifest, packaged, identity, files, built, catalogue, siteVsix, vsix, expectedVersion }) {
+  assert.notEqual(manifest.charmbitsEdition, 'personal', 'A personal edition cannot be published.');
+  assert.notEqual(packaged.charmbitsEdition, 'personal', 'A personal edition cannot be published.');
   assert.match(manifest.version, /^\d+\.\d+\.\d+$/, 'Release version must be a stable three-part version.');
   if (expectedVersion) assert.equal(manifest.version, expectedVersion, 'Requested version differs from source.');
   assert.equal(manifest.name, 'charmlet');
@@ -39,6 +41,8 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
     assert.ok(!isWithheldArtworkFile(name), `Withheld review artwork is packaged: ${name}`);
   }
   for (const name of requiredFiles) assert.ok(files.get(name)?.length, `Required package file is missing: ${name}`);
+  assert.equal(JSON.parse(files.get('extension/dist/edition.json').toString('utf8')).edition, 'public',
+    'A personal build cannot enter public distribution.');
   assert.ok(files.get('extension/changelog.md').toString('utf8').includes(`## ${manifest.version} `), 'Changelog does not describe this version.');
   assert.ok(files.get('extension/readme.md').toString('utf8').includes(manifest.version), 'Listing README has a stale version.');
   for (const [name, bytes] of built) assert.ok(files.get(name)?.equals(bytes), `VSIX differs from built file: ${name}`);

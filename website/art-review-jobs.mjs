@@ -235,6 +235,35 @@ export async function artworkJobs(repo) {
       merged.set(item.key, item);
     }
   }
+  const petsAndPlaces = JSON.parse(await readFile(join(repo, 'website/pets-places-artwork.json'), 'utf8'));
+  if (petsAndPlaces.version !== 1 || !Array.isArray(petsAndPlaces.entries) || petsAndPlaces.entries.length > 32) {
+    throw new Error('Invalid pets and places artwork inventory.');
+  }
+  for (const item of petsAndPlaces.entries) {
+    const key = `new-${item.id}`;
+    const revision = item.revision ?? 1;
+    if (!/^[a-z][a-z0-9-]{0,31}$/.test(item.id) || merged.has(key)
+      || !Number.isInteger(revision) || revision < 1 || revision > 9
+      || typeof item.name !== 'string' || !item.name.trim() || item.name.length > 48
+      || !['Animals', 'National Parks', 'World Wonders'].includes(item.group)
+      || item.greenDespill !== undefined && !['all', 'edges'].includes(item.greenDespill)
+      || typeof item.description !== 'string' || item.description.length > 160
+      || !/^#[0-9a-f]{6}$/i.test(item.accent)
+      || typeof item.subject !== 'string' || !item.subject.trim() || item.subject.length > 1800) {
+      throw new Error(`Invalid pets and places artwork entry: ${key}`);
+    }
+    merged.set(key, { ...item, key, family: 'new-worlds', original: null, realistic: true,
+      revision, variant: `${key}-r${revision}`,
+      greenDespill: item.greenDespill ?? (item.group === 'Animals' ? 'all' : 'edges'),
+      preparationProfile: item.greenDespill === 'all' || item.group === 'Animals' ? 5 : undefined,
+      prompt: realisticPrompt(item.subject) });
+  }
+  for (const job of merged.values()) {
+    if (job.family !== 'flowers') continue;
+    job.preparationProfile = 8;
+    job.hangingRotation = 0;
+    job.removeTopLoop = job.id === 'poppy' ? 64 : job.id === 'wild-rose' ? 43 : 0;
+  }
   if (merged.size > 300) throw new Error('The artwork inventory exceeds its bounded limit.');
   return [...merged.values()];
 }

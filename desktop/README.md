@@ -1,8 +1,10 @@
 # CharmBits desktop developer beta
 
+The 0.13 candidate shares the editor's quiet charm effects, front-facing flower attachments and optional bracelet. In **Appearance → Arrangement**, choose two or three charms, then tap or pull them independently. Reduced Motion stops the decorative effects. Public desktop access still follows the starter, trial and purchase rules below.
+
 CharmBits Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
 
-The **0.12.1 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Pro charm access also works in the free VS Code extension; provider setup is still required. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+The **0.13.0 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Provider setup is still required for desktop purchases and trials. The VS Code edition includes all released charms for free. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
 
 The public app and archive names are now CharmBits. The internal app name remains `Charmlet` to preserve the existing profile, single-instance lock and macOS encrypted-access keychain entry. The bundle ID, saved filenames and pack/activation formats also stay stable.
 
@@ -12,11 +14,13 @@ Drag **Move** to place the charm, or focus that button and use the arrow keys (S
 
 Under **Tools > Settings**, **Background**, **Keep toolbar visible** and **Keep messages visible** are separate saved preferences, all off by default. The tray's **Open Controls** and **Reset Window Position** remain available.
 
-The trial shares the extension's **210 public offline charms**: 185 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Nimbus has sunrise, rain and lightning reactions; Byte has a metal body and animated binary/code display. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
+The trial shares the extension's **227 public offline charms**: 202 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Robot Assistant has the preferred ivory body, expressive eyes and thinking, cheering and encouraging gestures. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
+
+Nimbus can optionally follow current US airport weather. Choose Nimbus, then **Tools > Settings > Appearance > Nimbus weather**, select a station and save with weather enabled. The National Weather Service supplies observations without an account or key. Checks run every ten minutes while the app is visible, with observation times and stale/offline labels. With weather off, Nimbus keeps its playful sunrise, rain and lightning reactions.
 
 **US Tech Hubs & Skylines** includes 13 cities. Music Icons and Sports Icons are held for separate rights review and excluded from the public package. Saved withheld selections retain their IDs and cords with a neutral placeholder; personal imports remain usable. The starter and free downloads use generic replacements while keeping their counts. The [software licence](../extension/LICENSE) and [artwork terms](../extension/ARTWORK-LICENSE.md) are included in the desktop build.
 
-**Live 3D** also includes Cali, Sunny and eleven California companions. **Stress Busters** brings four spinners, Bubble Pop, Worry Stone and three puzzles together with the smiley balls and squishies. Giant Panda, seven dog breeds including Goldendoodle and Husky, and two cats remain under **Pets & Wildlife**. The eighteen-flower garden, imports, photos, saved cords and pins carry forward. Final public lineup and pricing remain undecided.
+**Live 3D** also includes Cali, Sunny and eleven California companions. **Stress Busters** brings four spinners, Bubble Pop, Worry Stone and three puzzles together with the smiley balls and squishies. **Pets & Wildlife** adds Shiba Inu, French Bulldog, Dachshund, Pomeranian, Maine Coon, Ragdoll, Siamese, Lop Rabbit, Hamster and Cockatiel as desktop extras. Plants and trees have a separate collection from parks and world wonders. The eighteen-flower garden, imports, photos, saved cords and pins carry forward.
 
 Choose **Cali** for a detailed California grizzly with a coder wardrobe, a new outfit each day and a relaxed Friday shirt. Taps cycle through a curious head tilt, a wink, a double take and a victory shimmy. **Tools > Focus > Cali's encouragement** saves your optional name and controls for bubbles and focus prompts. Escape dismisses a bubble; it never blocks clicks through the desktop. Confetti for new wins follows the Small wins celebration setting and Reduced Motion. Everything stays silent.
 
@@ -80,12 +84,13 @@ Windows 0.1.1 includes the same Charms/Focus/Garden/Settings navigation, motivat
 
 ## Data and security boundaries
 
-- Desktop data stays under the app's own Electron profile: `preferences.json`, `companion.json`, `packs/`, `anchor/preferences.json` and `desktop-view/preferences.json`. Earlier `window/preferences.json` placement is migrated without deleting that file.
+- Desktop data stays under the app's own Electron profile: `preferences.json`, `companion.json`, `weather.json`, `packs/`, `anchor/preferences.json` and `desktop-view/preferences.json`. Earlier `window/preferences.json` placement is migrated without deleting that file.
 - Desktop and IDE profiles do not automatically synchronize focus or garden progress.
 - The renderer uses `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false` and a narrow preload bridge.
 - `charmlet:` serves only the copied template, bundles, styles and known media.
-- Source links are opened only from reviewed learning-card IDs.
-- No telemetry, account, global hotkey, autostart or update polling is present.
+- Learning links use reviewed card IDs; the weather source button opens the fixed National Weather Service website.
+- Optional weather requests send the selected station to `api.weather.gov`, which also sees the connection IP. No GPS, photos, code, email or focus notes are sent. Weather starts off.
+- No telemetry, global hotkey, autostart or application-update polling is present. Desktop trial and purchase activation remain optional and use verified email.
 
 ## What automated evidence proves
 

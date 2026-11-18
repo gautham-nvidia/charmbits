@@ -40,7 +40,7 @@ function comingSoon() {
   studio.dataset.studioState = 'unavailable';
   panel.replaceChildren();
   const section = element('div', 'coming-soon');
-  section.append(element('h2', '', 'Photo Studio is coming soon.'), element('p', '', 'Personal-photo art will be an optional paid creation service. All CharmBits features in VS Code, including local photo tools and importing compatible packs, are free. Extra charms are optional purchases.'));
+  section.append(element('h2', '', 'Photo Studio is coming soon.'), element('p', '', 'Every released charm and all editor-extension features, including local photo keepsakes and importing compatible packs, are free. The separate Photo Studio creation service is not available during this launch.'));
   const link = element('a', 'button', 'Explore free charms');
   link.href = '../#catalogue';
   section.append(link);

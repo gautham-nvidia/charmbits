@@ -1,6 +1,10 @@
 import { artReaction, type ArtBounds, type ArtPose } from './live-art-core';
 
-function weather(pose: ArtPose): 'sunrise' | 'rain' | 'lightning' | undefined {
+function weather(pose: ArtPose): 'sunrise' | 'rain' | 'lightning' | 'night' | 'snow' | undefined {
+	if (pose.weather) {
+		return pose.weather === 'sunny' ? 'sunrise' : pose.weather === 'storm' ? 'lightning'
+			: pose.weather === 'cloudy' ? undefined : pose.weather;
+	}
 	if (pose.pressed) { return 'rain'; }
 	if (pose.gesture === 'sunrise' || pose.gesture === 'rain' || pose.gesture === 'lightning') { return pose.gesture; }
 	return pose.happy || pose.greeting ? 'sunrise' : undefined;
@@ -9,10 +13,17 @@ function weather(pose: ArtPose): 'sunrise' | 'rain' | 'lightning' | undefined {
 export function paintWeather(context: CanvasRenderingContext2D, pose: ArtPose, plane: 'weather-back' | 'weather-front'): void {
 	const kind = weather(pose);
 	if (!kind) { return; }
-	const amount = pose.pressed ? 1 : artReaction(pose);
+	const amount = pose.weather || pose.pressed ? 1 : artReaction(pose);
 	const phase = pose.reducedMotion ? .5 : Math.max(0, Math.min(1, pose.reactionProgress ?? .5));
 	context.globalAlpha = amount;
 	if (plane === 'weather-back') {
+		if (kind === 'night') {
+			context.fillStyle = '#dfebf6'; context.beginPath(); context.arc(285,315,85,0,Math.PI*2); context.fill();
+			context.globalCompositeOperation = 'destination-out';
+			context.beginPath(); context.arc(322,283,75,0,Math.PI*2); context.fill();
+			context.globalCompositeOperation = 'source-over';
+			return;
+		}
 		if (kind !== 'sunrise') { return; }
 		const x = 285, y = 420 - (pose.reducedMotion ? 1 : Math.min(1, phase * 3)) * 110;
 		const halo = context.createRadialGradient(x, y, 65, x, y, 145);
@@ -21,6 +32,16 @@ export function paintWeather(context: CanvasRenderingContext2D, pose: ArtPose, p
 		const sun = context.createRadialGradient(x - 30, y - 35, 10, x, y, 96);
 		sun.addColorStop(0, '#fff6bf'); sun.addColorStop(.6, '#ffd06d'); sun.addColorStop(1, '#ee9a4c');
 		context.fillStyle = sun; context.beginPath(); context.arc(x, y, 96, 0, Math.PI * 2); context.fill();
+		return;
+	}
+	if (kind === 'snow') {
+		const time = pose.reducedMotion ? 0 : (pose.now ?? 0) / 1800;
+		context.strokeStyle = '#d8f1ff'; context.lineWidth = 4; context.lineCap = 'round';
+		for (let index = 0; index < 6; index++) {
+			const fall = (time + index * .17) % 1, x = 270 + index * 90, y = 834 + fall * 110;
+			context.beginPath(); context.moveTo(x - 9,y); context.lineTo(x + 9,y);
+			context.moveTo(x,y - 9); context.lineTo(x,y + 9); context.stroke();
+		}
 		return;
 	}
 	if (kind === 'rain' || kind === 'lightning') {
@@ -49,32 +70,40 @@ export function paintWeather(context: CanvasRenderingContext2D, pose: ArtPose, p
 	}
 }
 
-export function paintBinaryDisplay(context: CanvasRenderingContext2D, pose: ArtPose, display: ArtBounds): void {
+export function paintRobotDisplay(context: CanvasRenderingContext2D, pose: ArtPose, display: ArtBounds): void {
 	const { x, y, width, height } = display;
-	context.beginPath(); context.roundRect(x, y, width, height, 32); context.clip();
-	const phase = pose.reducedMotion ? 1 : Math.max(0, Math.min(1, pose.reactionProgress ?? .5));
-	const action = pose.pressed ? 'binary' : pose.gesture;
-	const centre = x + width / 2 + (pose.reducedMotion ? 0 : pose.gazeX * 8);
-	context.textAlign = 'center'; context.textBaseline = 'middle';
-	context.fillStyle = '#9cecf0'; context.shadowColor = '#52d6ec'; context.shadowBlur = 8;
-	if (action === 'binary') {
-		const step = pose.reducedMotion ? 0 : Math.floor((pose.now ?? 0) / 155) % 4;
-		const lines = ['0101', '1010', '1100', '0011'];
-		context.font = 'bold 64px Consolas, monospace';
-		context.fillText(lines[step], centre, y + height * .31);
-		context.fillStyle = '#63c2df'; context.fillText(lines[(step + 1) % 4], centre, y + height * .75);
-	} else if (action === 'compile' && phase > .58 || pose.happy) {
-		context.shadowBlur = 6; context.strokeStyle = '#9ae7ba'; context.lineWidth = 15;
-		context.lineCap = 'round'; context.lineJoin = 'round';
-		context.beginPath(); context.moveTo(centre - 54, y + 77); context.lineTo(centre - 13, y + 115);
-		context.lineTo(centre + 63, y + 36); context.stroke();
-	} else {
-		context.font = 'bold 108px Consolas, monospace';
-		const text = action === 'compile' ? '{ }' : action === 'cursor' || pose.greeting ? '>_' : pose.blink > .35 ? '10' : '01';
-		context.fillText(text, centre, y + height * .53);
-		if (action === 'compile') {
-			context.shadowBlur = 0; context.fillStyle = '#9ae7ba';
-			context.fillRect(x + 45, y + height - 13, (width - 90) * Math.min(1, phase / .58), 7);
+	context.beginPath(); context.roundRect(x, y, width, height, height * .3); context.clip();
+	const glass = context.createLinearGradient(x, y, x, y + height);
+	glass.addColorStop(0, '#303637'); glass.addColorStop(1, '#141c1e');
+	context.fillStyle = glass; context.fillRect(x, y, width, height);
+	const cheerful = pose.happy || pose.gesture === 'cheer';
+	const encouraging = pose.greeting || pose.gesture === 'encourage';
+	const thinking = pose.gesture === 'think';
+	const gaze = pose.reducedMotion ? 0 : pose.gazeX * 8;
+	const centre = x + width / 2 + gaze + (thinking ? -8 : 0);
+	const eyeY = y + height * .49 + (pose.reducedMotion ? 0 : pose.gazeY * 5) - (thinking ? 6 : 0);
+	const radius = height * .065;
+	context.fillStyle = cheerful ? '#b4edc3' : '#93d5e4';
+	context.strokeStyle = context.fillStyle;
+	context.shadowColor = cheerful ? '#8bdca6' : '#6dc9df';
+	context.shadowBlur = 13; context.lineWidth = height * .035; context.lineCap = 'round';
+	for (const side of [-1, 1]) {
+		const eyeX = centre + side * width * .21;
+		const closed = pose.pressed || pose.blink > .6 || side === -1 && (pose.wink || encouraging);
+		context.beginPath();
+		if (closed || cheerful) {
+			context.moveTo(eyeX - radius, eyeY + radius * .2);
+			context.quadraticCurveTo(eyeX, eyeY - radius * (cheerful ? .8 : .15), eyeX + radius, eyeY + radius * .2);
+			context.stroke();
+		} else {
+			context.ellipse(eyeX, eyeY, radius, radius * (thinking && side === 1 ? .6 : 1), 0, 0, Math.PI * 2);
+			context.fill();
 		}
+	}
+	if (cheerful || encouraging) {
+		context.shadowBlur = 5; context.lineWidth = height * .026;
+		context.beginPath(); context.moveTo(centre - width * .09, y + height * .69);
+		context.quadraticCurveTo(centre, y + height * .79, centre + width * .09, y + height * .69);
+		context.stroke();
 	}
 }

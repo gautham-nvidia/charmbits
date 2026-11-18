@@ -1,38 +1,52 @@
 # CharmBits: Coding Charms
 
-All VS Code extension features are free: focus sessions, a garden, encouragement, small wins, photo keepsakes, imports and playful breaks. Start with 31 included charms; extra paid charms are optional. The public catalogue contains 210 designs. Existing beta access, saved choices, personal imports and progress are retained.
-The default Hanging layout saves headroom; Orbit layout reserves room for full loops.
+A little company while you code. Choose from **227 free charms**, tap a pet for a quiet response, or hang two or three favourites on a bracelet.
 
-**CharmBits candidate, version 0.15.1.** CharmBits lives in a dockable VS Code view, not over your code
+All released charms and extension features are free in VS Code and compatible extension hosts. There is no account, activation, payment or trial timer. Your settings, personal imports and progress carry forward when you update.
+
+| Try | What you can do |
+|---|---|
+| Calm movement | Pull charms left or right, tap for a small response, and let them settle |
+| Charm bracelet | Hang two or three charms; swap, reorder or remove them independently |
+| Pets and flowers | Pat a pet or tap a front-facing bloom attached to a leafy stem |
+| Live companions | Spend a moment with Cali, Nimbus, Sunny or Robot Assistant |
+| Focus and garden | Set a focus timer, record small wins and grow a flower |
+| Photo keepsakes | Make a charm from a photo without uploading it |
+| Quiet breaks | Try spinners, a twisty cube, sliding tiles or Lights Out |
+| Motion controls | Pause decorative movement and honour your system's Reduced Motion setting |
+
+**CharmBits candidate, version 0.16.0.** CharmBits lives in a dockable VS Code view, not over your code
 or desktop. It uses supported APIs and does not modify your VS Code installation.
 It also works in Restricted Mode without asking you to trust workspace code.
 
-The free extension works without an account or an expiring app trial. Optional charm purchases are implemented but not connected to live provider accounts. Desktop retains its 30-day trial and Pro rules; **CharmBits Pro is planned at $7.49 launch / $17.49 regular, once**, with a full charm collection that also works in VS Code. Public activation keys and service addresses must be configured before paid charm access opens. [Setup and delivery details](https://github.com/gautham-nvidia/charmbits/blob/main/service/README.md).
+**Desktop is a separate edition** with a free starter, 30-day Pro trial and optional purchases. Desktop Pro is planned at $7.49 launch / $17.49 regular, paid once. Editor users do not need these purchases. [Desktop plans and availability](https://charmbits.pages.dev/shop.html).
 
 <img src="https://raw.githubusercontent.com/gautham-nvidia/charmbits/main/docs/store-assets/navigation.png" width="240" alt="CharmBits main view, motivation and direct navigation"> <img src="https://raw.githubusercontent.com/gautham-nvidia/charmbits/main/docs/store-assets/picker.png" width="240" alt="Search your available charm collection">
 
+<img src="https://raw.githubusercontent.com/gautham-nvidia/charmbits/main/docs/store-assets/bracelet.png" width="240" alt="A Shiba Inu, front-facing rose and Cali hanging independently from one bracelet">
+
 ## Try it
 
-Install a development VSIX through **Extensions: Install from VSIX...**, or follow the
+Install the candidate VSIX through **Extensions: Install from VSIX…**, or follow the
 [source setup](https://github.com/gautham-nvidia/charmbits#readme).
 
 CharmBits has its own Activity Bar container titled **CharmBits**. You can move it to the right sidebar using VS Code's view controls.
 
 1. Open the Command Palette and run **CharmBits: Show Charm**.
 2. For a right-side dock, run **View: Move View**, select **CharmBits**, then **New Secondary Side Bar Entry**.
-3. Click any charm for a brief wiggle, or use Space/Enter. Cali adds a head tilt, wink, double take or victory shimmy. Pull downward and release for a rebound and smaller settling bounces; Reduced Motion returns directly to rest. Pull straight upward toward the peg to retract, then use the restore arrow to bring it back.
+3. Tap a charm, or use Space/Enter, for its response. Shiba Inu, Maine Coon and Lop Rabbit blink and give a small tail or ear response. Pull left or right and release to swing and settle. Reduced Motion returns directly to rest.
 4. Click **Charms** to open the visual picker, search by name and filter installed collections. Choose **Settings → Appearance** for size, resting cord, visibility, motion and layout. The default 100% is 15% larger than earlier trials; adjust from 60% to 200% in 5% steps. Narrow views fit the charm to the available space.
-5. Switch to **Orbit layout** for a full loop around the fixed peg; Hanging layout keeps a compact top peg and pull room.
+5. Choose **Appearance → Arrangement → Charm bracelet** for two or three charms. Select each slot's charm, use the arrow buttons to reorder, or remove a slot. Tap or pull each charm independently. Switch back to **Single charm** at any time; Hanging and Orbit layouts remain available there.
 6. Click **Focus** or run **CharmBits: Focus Session** for a focus/break timer with presets, custom minutes, pause/resume/stop and an optional intention.
 7. Motivation is the fresh-state default, without a category heading. **Settings → Messages** offers Motivation, Facts + trivia, Facts or Trivia. Existing saved feed choices are preserved.
 8. Click **Garden**, then **Plant a seed**, or run **CharmBits: Open Garden**. Water once per local day and earn an original flower after eleven valid waterings. Optional water/move schedules live under **Settings → Reminders**.
 9. Run **CharmBits: Import Charm Pack** for a downloaded `.charmlet.json`; remove imported packs with **CharmBits: Remove Charm Pack**.
 
-The public selection includes 185 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **210 charms** in all. Open **Charms** to search the available themed packs. Terminal is first, followed by Live 3D, Stress Busters and Music. Existing personal imports keep their saved artwork.
+The public selection includes 202 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools: **227 charms** in all. Open **Charms** to search and filter the collection. Terminal is first, followed by Live 3D, Stress Busters and Music. Existing personal imports keep their saved artwork.
 
 **Music** has twelve instruments and controllers. **US Tech Hubs & Skylines** includes 13 cities from the Bay Area to Boston and New York. Music Icons and Sports Icons remain review material and are excluded from public packages. A saved selection of unavailable review artwork uses a neutral placeholder while retaining its ID and cord; personally imported artwork remains available.
 
-The starter stays at 31 charms, with Redwood Grove and Bay Area / Silicon Valley replacing its two artist studies. The 15 optional free downloads include Electric Guitar in place of the earlier artist study.
+The separate desktop starter has 31 charms. These starter and purchase limits do not apply to the editor.
 
 ## Terms
 
@@ -44,11 +58,19 @@ Read the current [website terms](https://charmbits.pages.dev/terms.html) and [pr
 
 **Pets & Wildlife** includes Giant Panda, Golden Retriever, Labrador, German Shepherd, Husky, Corgi, Beagle and Goldendoodle, plus Silver Tabby and Tuxedo Cat.
 
+The expanded collection adds Shiba Inu, French Bulldog, Dachshund, Pomeranian, Maine Coon, Ragdoll, Siamese, Lop Rabbit, Hamster and Cockatiel. **Nature & Places** adds national parks, landscapes and world wonders; bonsai and other trees have their own **Plants & Trees** collection. City Auto belongs to Culture & Traditions. All released designs are included free in the editor; desktop has its separate starter, trial and purchase rules.
+
 Grow red, pink, white and yellow roses, jasmine and lily alongside the original twelve garden flowers. Each seed still blooms after eleven daily waterings. Existing plants and collected flowers are preserved, and seeds choose flowers you have not collected before returning to familiar varieties.
+
+Flowers keep their front-facing artwork, with a curved leafy stem joining underneath the bloom. Shaded leaves flutter gently and petals move a little when tapped. Selected gemstones, metal, candle, tree and lake charms have quiet material effects. Reduced Motion keeps these effects still, and hiding the charm pauses them.
 
 The nine early designs have retired from the picker. Saved choices, pins and cord materials move to the matching newer artwork. The garden now shows natural soil, terracotta and foliage; earned flowers use the current rendered artwork while keeping their saved IDs, dates and bloom counts.
 
-**Charms > Live 3D** offers Cali the California grizzly, Sunny, Nimbus the cloud and Byte the robot, plus Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. Tap Nimbus for sunrise, rain and lightning, or hold for a small shower. Byte's taps show flowing binary, a compile check and a terminal prompt. They react promptly and rest between interactions. Reduced Motion keeps feedback still; software rendering preserves the detailed artwork when graphics support is unavailable.
+**Charms > Live 3D** offers Cali the California grizzly, Sunny, Nimbus the cloud and Robot Assistant, plus Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. With weather off, tap Nimbus for playful sunrise, rain and lightning, or hold for a small shower. Robot Assistant has a calm ivory body, live gaze, a friendly wave and thinking, cheering and encouraging expressions. Reduced Motion keeps feedback still; software rendering preserves the artwork when graphics support is unavailable.
+
+For current weather, select **Nimbus**, then **Settings > Appearance > Nimbus weather**. Choose a US airport station, enable **Use current US weather**, and save. Observations come directly from the US National Weather Service, with no account or key. Nimbus shows the temperature, observation time and matching weather; observations are checked every ten minutes while CharmBits is visible. The reading can be older than the check, and older or unavailable data is labelled. This is periodic station weather, not a continuous live feed or a forecast.
+
+Weather starts off. Its station and unit preferences are saved locally in `weather.json`. When enabled, the selected station is sent to `api.weather.gov`; the service receives the ordinary connection IP address. No GPS, workspace contents, photos, focus history or email are sent. Turning weather off or hiding the view stops requests. Other charm interactions stay local.
 
 Cali wears denim on Monday, a hoodie on Tuesday, a vest on Wednesday, flannel on Thursday, a relaxed coastal shirt on Friday, trail fleece on Saturday and a soft knit on Sunday. The local date chooses the outfit. His face stays consistent, with live glances, waves and thumbs-up celebrations. Painted colour figures remain available under Culture & Traditions, including seated Shiva and Nataraja.
 
@@ -116,7 +138,7 @@ a planted species cannot reroll on reload, and the eleventh valid watering adds 
 **Grown by you** before the UI confirms it. A new seed does not reset that day's allowance. Water and move
 reminders are off by default, bounded to 15–180 minutes, and show one quiet cue with Done/Snooze/Skip without stealing focus or stacking catch-up notices. Done and Skip schedule the next full interval; Snooze waits ten minutes. **Wait for a break** defers the cue during a running focus session.
 
-The footer shows **Website — coming soon**, **Made in Silicon Valley** and the actual installed host version. The artwork-review gallery contains a smaller curated selection and free review packs; importing those adds separate items rather than replacing bundled art or saved progress. The original Terminal stays.
+The footer links to the [CharmBits website](https://charmbits.pages.dev/) and shows **Made in Silicon Valley** with the installed version. Imported packs add items without replacing saved progress. The original Terminal stays.
 
 The Stress Ball and Squishy Star review charms squeeze when held with the pointer or Space/Enter. Their cord attachment stays fixed as the artwork compresses. Reduced Motion removes the transition and the release bounce.
 
@@ -124,12 +146,12 @@ The Stress Ball and Squishy Star review charms squeeze when held with the pointe
 
 ## Free and local
 
-All extension features and the 31 starter charms are free. Other charms are optional purchases;
-Desktop Pro includes the full charm collection. Core tools work offline without login, runtime AI,
-telemetry or audio. Imported signed access may refresh with the configured service, as described in
-the privacy notice. Optional imported packs contain validated static PNG data and do not add executable code.
+All extension features and included charms are free. There is no paid activation or trial timer
+in VS Code or compatible extension hosts. Core tools work offline without login, runtime AI, telemetry
+or audio. Previously saved access files are retained for compatibility; the free extension does not
+poll the purchase service. Imported packs contain validated static PNG data and do not add executable code.
 [Artwork provenance](https://github.com/gautham-nvidia/charmbits/blob/main/extension/ARTWORK.md)
-records asset origins, while the project source/art license remains pending and separate from price.
+records asset origins. The included software and artwork licences describe their permitted use.
 
 Existing installations keep the `gautham-nvidia.charmlet` extension identity and their saved settings,
 photos, imported packs and progress. The `.charmlet.json` pack format and command IDs remain compatible;

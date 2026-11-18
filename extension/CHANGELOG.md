@@ -3,6 +3,18 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
+## 0.16.0 - Unreleased
+
+- Make every released editor charm and feature free without activation. Desktop retains its starter, 30-day Pro trial and purchases.
+- Connect flexible cord animation in the app. Front-facing flowers attach underneath to curved leafy stems, with shaded leaves and softly animated petals.
+- Add an optional bracelet with two or three independently movable charms, saved slots, reordering and removal. Keep the single charm as the default.
+- Add quiet material effects and tap-triggered pet responses. Shiba Inu, Maine Coon and Lop Rabbit blink and settle without stretching their faces. Hidden views and Reduced Motion stop decorative effects.
+- Preserve room for left and right pulls, including large desktop charms near screen edges.
+- Use the preferred ivory Robot Assistant with thinking, cheering and encouraging expressions.
+- Add ten pets, including Shiba Inu, and seven parks/landmarks; separate Plants & Trees and move City Auto to Culture & Traditions.
+- Add opt-in Nimbus weather from US National Weather Service airport observations, with temperature units, observation timestamps, stale/offline states and quiet updates while visible.
+- Preserve extension identities, settings, personal packs, purchases, photos, focus and garden progress.
+
 ## 0.15.1 - 2026-11-16
 
 - Use the new CharmBits website address and add the approved proprietary software and separate artwork terms.

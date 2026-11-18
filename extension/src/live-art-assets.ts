@@ -3,7 +3,7 @@ import {
 } from './live-art-core';
 import { regionalArt } from './california-companions';
 import { weatherCodeArt } from './weather-code-companions';
-import { paintBinaryDisplay, paintWeather } from './weather-code-effects';
+import { paintRobotDisplay, paintWeather } from './weather-code-effects';
 
 export interface ArtLayer {
 	part: ArtPart;
@@ -78,7 +78,7 @@ export function paintArtFace(layer: ArtLayer, pose: ArtPose): void {
 		context.save();
 		context.setTransform(PIXEL_SCALE, 0, 0, PIXEL_SCALE, -layer.bounds.x * PIXEL_SCALE, -layer.bounds.y * PIXEL_SCALE);
 		if (layer.part.effect) { paintWeather(context, pose, layer.part.effect); }
-		if (layer.part.display) { paintBinaryDisplay(context, pose, layer.part.display); }
+		if (layer.part.display) { paintRobotDisplay(context, pose, layer.part.display); }
 		context.restore();
 	}
 	for (const [index, eye] of (layer.part.eyes ?? []).entries()) {

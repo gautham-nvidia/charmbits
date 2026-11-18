@@ -1,6 +1,7 @@
 import type { LiveCharacter } from './interactive-motion';
 import type { ArtGesture } from './live-art-core';
 import type { CaliOutfitChoice } from './cali-wardrobe';
+import type { WeatherCondition } from './weather-core';
 
 export interface SmileyPose {
 	character: LiveCharacter;
@@ -16,6 +17,7 @@ export interface SmileyPose {
 	reducedMotion?: boolean;
 	gesture?: ArtGesture;
 	caliOutfit?: CaliOutfitChoice;
+	weather?: WeatherCondition;
 }
 export interface SmileyRenderer {
 	kind: 'webgl' | 'canvas';

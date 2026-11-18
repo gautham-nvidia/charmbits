@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "shiba-inu", "name": "Shiba Inu", "group": "Animals", "accent": "#c79058",
+      "description": "A bright-eyed Shiba with a curled tail and warm sesame fur.",
+      "subject": "A complete adult red Shiba Inu dog seated in a relaxed three-quarter view, with anatomically believable compact proportions, upright triangular ears, a fox-like face, warm rust-orange fur, creamy white urajiro cheeks and chest, dark intelligent eyes, black nose and its distinctly curled fluffy tail visible beside its hindquarters. Soft realistic fur detail and a quietly curious expression. No collar, clothing, props, meme references or exaggerated cartoon smile."
+    },
+    {
+      "id": "french-bulldog", "name": "French Bulldog", "group": "Animals", "accent": "#a49182",
+      "description": "A compact Frenchie with bat ears and a gentle head tilt.",
+      "subject": "A complete healthy fawn French Bulldog seated with a small natural head tilt. Recognizable large upright bat ears, compact muscular body, short fawn coat, darker muzzle, expressive dark eyes, a small white chest patch and four believable paws. Anatomically natural, softly lit with realistic short fur and gentle facial folds. Keep the ears and paws entirely within the image. No clothing, props, collar or cartoon exaggeration."
+    },
+    {
+      "id": "dachshund", "name": "Dachshund", "group": "Animals", "accent": "#a36443",
+      "description": "A little long-bodied companion with glossy chestnut fur.",
+      "subject": "A complete smooth-haired chestnut Dachshund in a side-biased three-quarter standing pose. Show its recognizable long low body, very short sturdy legs, gently tapered muzzle, long soft folded ears and slim curved tail. All four paws and the entire tail visible, anatomically credible and comfortably posed. Rich brown fur, warm eyes and restrained studio highlights. No clothing, collar, costume, extra limbs or cartoon proportions."
+    },
+    {
+      "id": "pomeranian", "name": "Pomeranian", "group": "Animals", "accent": "#d4a56d",
+      "description": "A small golden puff of fur with a lively, friendly face.",
+      "subject": "A complete golden cream Pomeranian sitting upright with a believable small dog body beneath its abundant double coat. A fox-like face, alert small triangular ears, dark eyes, black nose, a full neck ruff, tiny visible front paws and a fluffy plume tail curling over its back. Naturally layered detailed fur, not a perfect sphere or plush toy. No clothes, accessories or oversized cartoon eyes."
+    },
+    {
+      "id": "maine-coon", "name": "Maine Coon", "group": "Animals", "accent": "#8b7965",
+      "description": "A majestic long-haired cat with tufted ears and a soft ruff.",
+      "subject": "A complete adult brown tabby Maine Coon cat sitting in a relaxed three-quarter pose. Show its distinctive large rectangular body, broad square muzzle, tufted lynx-like ears, thick neck ruff, substantial tufted paws and a long bushy tail curled visibly beside the body. Warm brown and charcoal striped fur with a pale chest, natural green-gold eyes and a calm expression. Realistic fur and feline anatomy; no props, collar or cartoon features."
+    },
+    {
+      "id": "ragdoll", "name": "Ragdoll", "group": "Animals", "accent": "#a8b8cc",
+      "description": "A soft blue-eyed Ragdoll with cream fur and a calm gaze.",
+      "subject": "A complete blue-point bicolor Ragdoll cat sitting with relaxed shoulders and its fluffy tail laid alongside it. Silky cream-white semi-long fur, cool grey ears and tail, a gentle inverted white V on its face, soft blue eyes, a pink nose and white paws. Believable medium-large cat proportions, delicate fur texture and a placid affectionate expression. No accessories, stylized facial symbols or oversized eyes."
+    },
+    {
+      "id": "siamese", "name": "Siamese", "group": "Animals", "accent": "#9caac1",
+      "description": "A sleek seal-point Siamese with bright blue eyes.",
+      "subject": "A complete elegant traditional Siamese cat in a seated three-quarter pose. A lean cream body, dark seal-brown mask, ears, paws and long slender tail, vivid but natural almond-shaped blue eyes and a graceful moderately wedge-shaped head. Short glossy fur, realistic anatomy and a gently attentive expression. Entire tail and ears visible. No clothing, collar, extreme elongated features or cartoon styling."
+    },
+    {
+      "id": "lop-rabbit", "name": "Lop Rabbit", "group": "Animals", "accent": "#c7ad95",
+      "description": "A velvet-soft little rabbit with gently folded ears.",
+      "subject": "A complete small Holland Lop rabbit resting in a naturally compact sitting pose. Warm broken-fawn and cream fur, two soft floppy ears hanging beside its cheeks, realistic dark eyes, a tiny nose, fine whiskers, visible front paws and a little rounded tail. Keep a believable rabbit skeleton and gentle breathing-room between ears and body. Soft detailed fur, no clothing, carrot, basket or cartoon exaggeration."
+    },
+    {
+      "id": "hamster", "name": "Golden Hamster", "group": "Animals", "accent": "#cc9b66",
+      "description": "A tiny golden hamster with busy paws and soft cheeks.",
+      "subject": "A complete golden Syrian hamster seated on its hindquarters, tiny front paws held naturally near its chest. Realistic warm golden fur over the back and head, pale cream belly, small rounded ears, dark glossy eyes, delicate whiskers and small visible hind feet. A gently curious expression, true small-animal proportions rather than a spherical plush toy. No food, cage, accessories or cartoon features."
+    },
+    {
+      "id": "cockatiel", "name": "Cockatiel", "group": "Animals", "accent": "#d8b86f",
+      "description": "A cheerful crested bird with orange cheeks and a long tail.",
+      "subject": "A complete normal-grey cockatiel perched naturally on a short narrow unbranded wooden branch, with the entire long tapered tail visible. Soft grey body, pale wing patches, yellow face and lifted crest, distinct orange cheek patches, dark eyes, small curved beak and two anatomically correct gripping feet. Realistic layered feathers, restrained colour and a friendly head tilt. No cage, stand, clothing, text or decorative objects."
+    },
+    {
+      "id": "yellowstone-geyser", "name": "Yellowstone Geyser", "group": "National Parks", "accent": "#bca471", "greenDespill": "all",
+      "description": "An Old Faithful-inspired geyser rising above a mineral basin.",
+      "subject": "A compact photographic-style illustrated Yellowstone landscape inspired by Old Faithful: a recognizable pale mineral geyser cone erupting with a clear vertical plume of white water and steam, warm cream sinter terraces, a small touch of turquoise runoff and a few dark lodgepole pines behind. Use natural irregular terrain contours and a readable layered silhouette. No enclosing sky rectangle, circular souvenir base, pedestal, frame, boardwalk signs, visitors or park logos. Preserve the complete plume with generous margins."
+    },
+    {
+      "id": "zion-canyon", "name": "Zion Canyon", "group": "National Parks", "accent": "#b16e51",
+      "description": "Warm sandstone cliffs and a quiet river bend, inspired by Zion.",
+      "subject": "A compact photographic-style illustrated landscape inspired by Zion National Park: tall richly layered red and cream sandstone canyon walls, one broad monumental cliff rising behind another, a narrow green cottonwood-lined Virgin River bend at their feet. Express realistic rock texture, warm late-afternoon light and depth in an irregular freeform scenic silhouette. No enclosing rectangular sky, plaque, pedestal, souvenir disk, buildings, signs, visitors or logos."
+    },
+    {
+      "id": "crater-lake", "name": "Crater Lake", "group": "National Parks", "accent": "#5f91bc",
+      "description": "A deep-blue caldera lake with a small volcanic island.",
+      "subject": "A compact photographic-style illustrated view of Oregon's Crater Lake from an elevated angle: deep clear cobalt-blue water enclosed by a curved rugged caldera rim, small conical Wizard Island clearly visible, scattered dark evergreen trees and a few restrained snow patches on the upper rim. An organic irregular landscape silhouette with real geological texture and believable depth. No rectangular backdrop, souvenir base, plinth, badges, text, buildings or logos."
+    },
+    {
+      "id": "mount-fuji", "name": "Mount Fuji", "group": "National Parks", "accent": "#92a7bd",
+      "description": "A calm snow-capped volcano above a small lakeside landscape.",
+      "subject": "A compact photographic-style illustrated landscape inspired by Mount Fuji: the recognizable symmetrical volcanic cone with a clean snow cap and nuanced slate-blue slopes, a small curved lakeshore at its base and a restrained spray of pale pink cherry blossoms near one lower edge. Natural irregular contours, elegant realistic depth and a crisp readable mountain silhouette. No postcard rectangle, souvenir plaque, pedestal, torii gate, text, logos or surrounding sky panel."
+    },
+    {
+      "id": "machu-picchu", "name": "Machu Picchu", "group": "World Wonders", "accent": "#82936d", "revision": 2,
+      "description": "Ancient stone terraces tucked into a dramatic green mountain ridge.",
+      "subject": "A small isolated three-dimensional Machu Picchu landscape charm, fully contained in the central 60 percent of the canvas. It has a complete irregular rocky underside, layered grey stone Inca terraces on a small saddle ridge, and the steep distinctive Huayna Picchu mountain behind. Render a self-contained scenic object, not a rectangular photograph or a cropped panorama. Weathered stone and deep olive grass, a readable miniature silhouette, elevated three-quarter view. Leave a wide uninterrupted flat PURE #00FF00 green margin above, below, left and right of the entire object. Every background pixel has exactly the same green colour, including all four corners and beneath the rocky underside. No background rectangle, green inner frame, gradient, floor, shadow, plaque, pedestal, visitors, signs or text."
+    },
+    {
+      "id": "taj-mahal", "name": "Taj Mahal", "group": "World Wonders", "accent": "#b7bbc8",
+      "description": "White marble domes and a quiet reflection, inspired by Agra.",
+      "subject": "A compact photographic-style CGI illustration of the Taj Mahal in a slightly elevated three-quarter frontal view: luminous ivory marble central onion dome, four slender minarets correctly separated around the main structure, smaller domed pavilions and a short narrow reflecting pool with restrained garden greenery. Realistic architectural detail and soft warm daylight. The complete building, minarets and natural ground contour must fit with clear margins. No enclosing picture frame, souvenir disk, pedestal, inscription, crowd, flags or logo."
+    },
+    {
+      "id": "great-wall", "name": "Great Wall", "group": "World Wonders", "accent": "#a49b79", "revision": 2,
+      "description": "A winding stone wall following a rugged green mountain ridge.",
+      "subject": "A small isolated three-dimensional Great Wall of China landscape charm, fully contained in the central 60 percent of the canvas: one weathered stone watchtower and a short crenellated wall winding in an elegant S curve across two small rugged mountain ridges. Include the complete naturally irregular rocky underside, restrained dark olive foliage and realistic stonework. It must be a self-contained scenic object with generous clear space on EVERY side. The ENTIRE background must be perfectly flat PURE RGB(0,255,0), #00FF00, including the four corners and beneath the object. Absolutely no white or pale background, sky, coloured outline, floor, cast shadow, rectangular picture, pedestal, text, people, flags or logos."
+    }
+  ]
+}

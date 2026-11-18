@@ -26,9 +26,13 @@ import { cordForCharm } from '../cord-design';
 import { followGaze, liveCharacter, nearestBubble, stepSpinner, turnSpinner } from '../interactive-motion';
 import { mascotEncouragement, mascotTransition } from '../mascot-core';
 import { CALI_WEEK, caliOutfitAt } from '../cali-wardrobe';
-import { artPoint, artToStage, BYTE_GESTURES, CALI_TAP_GESTURES, caliArt, isArtCharacter, NIMBUS_GESTURES, partOpacity, type ArtPose } from '../live-art-core';
+import { artPoint, artToStage, ROBOT_GESTURES, CALI_TAP_GESTURES, caliArt, isArtCharacter, NIMBUS_GESTURES, partOpacity, type ArtPose } from '../live-art-core';
 import { CALIFORNIA_COMPANIONS, regionalArt } from '../california-companions';
-import { BYTE_ART, NIMBUS_ART } from '../weather-code-companions';
+import { ROBOT_ART, NIMBUS_ART } from '../weather-code-companions';
+import { DEFAULT_WEATHER, parseWeatherObservation, parseWeatherSettings, WEATHER_REFRESH_MS, WEATHER_STALE_MS,
+	type WeatherReading, type WeatherSettings, type WeatherStationId } from '../weather-core';
+import { WeatherController } from '../weather-controller';
+import { fetchWeatherObservation } from '../weather-client';
 
 test('Cali wears distinct local weekday outfits and changes at local midnight', () => {
 	const output = execFileSync(process.execPath, ['-e', `
@@ -55,7 +59,7 @@ test('live illustrated characters have complete bundled frames and cords touchin
 	const definitions = [
 		...CALI_WEEK.map((_, day) => caliArt(new Date(2026, 10, 1 + day, 12).getTime())),
 		...CALIFORNIA_COMPANIONS.map(companion => regionalArt(companion.character)!),
-		NIMBUS_ART, BYTE_ART,
+		NIMBUS_ART, ROBOT_ART,
 	];
 	const files = new Set(definitions.flatMap(definition => definition.parts.map(part => part.file)));
 	assert.equal(files.size, 22, 'Seven outfits, two donor gestures, eleven regional figures and two weather/code figures are bundled.');
@@ -75,8 +79,8 @@ test('live illustrated characters have complete bundled frames and cords touchin
 		assert.equal(isSoftCharm(charm.id), charm.id === 'live:cloud', 'Nimbus keeps its soft squeeze; solid figures do not squash.');
 		assert.equal(cordForCharm(charm, { [charm.id]: 'ribbon' }), 'ribbon', 'A saved manual cord choice takes precedence.');
 	}
-	for (const definition of [NIMBUS_ART, BYTE_ART]) {
-		for (const gesture of definition === NIMBUS_ART ? NIMBUS_GESTURES : BYTE_GESTURES) {
+	for (const definition of [NIMBUS_ART, ROBOT_ART]) {
+		for (const gesture of definition === NIMBUS_ART ? NIMBUS_GESTURES : ROBOT_GESTURES) {
 			for (const progress of [0, .2, .5, .8, 1]) {
 				for (const gazeX of [-1, 0, 1]) {
 					const pose: ArtPose = { character: definition.character, gesture, reactionProgress: progress,
@@ -445,6 +449,167 @@ class MemoryStorage implements CompanionStorage {
 	}
 	async read() { return structuredClone(this.value); }
 }
+
+function weatherStorage(saved: unknown = undefined) {
+	return {
+		value: saved, writes: 0, failNext: false, staleNext: false,
+		async read() { return structuredClone(this.value); },
+		async write(value: WeatherSettings) {
+			this.writes++;
+			if (this.failNext) { this.failNext = false; throw new Error('Storage unavailable'); }
+			if (this.staleNext) { this.staleNext = false; return; }
+			this.value = structuredClone(value);
+		},
+	};
+}
+
+const settleWeather = () => new Promise<void>(resolve => setImmediate(resolve));
+const weatherReading = (clock: FakeClock, stationId: WeatherStationId = 'KSFO'): WeatherReading => ({
+	stationId, observedAt: clock.now() - 20 * MINUTE_MS, checkedAt: clock.now(), temperatureC: 14,
+	description: 'Partly Cloudy', condition: 'night',
+});
+
+test('weather requests require a confirmed opt-in; failed saves leave the prior configuration active', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	let requests = 0;
+	const controller = new WeatherController({ saved: undefined, storage, clock,
+		request: async station => { requests++; return weatherReading(clock, station); } });
+	controller.setVisible(true);
+	clock.advance(WEATHER_REFRESH_MS);
+	assert.equal(requests, 0);
+	assert.equal(storage.writes, 0);
+	assert.equal(controller.snapshot().status, 'disabled');
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, stationId: 'https://invalid.test' }), false);
+	for (const failure of ['failNext', 'staleNext'] as const) {
+		storage[failure] = true;
+		assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), false);
+		clock.advance(0);
+		assert.equal(requests, 0);
+		assert.equal(controller.snapshot().settings.enabled, false);
+	}
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), true);
+	clock.advance(0); await settleWeather();
+	assert.equal(requests, 1);
+	assert.equal(controller.snapshot().status, 'ready');
+	assert.equal(controller.snapshot().reading?.temperatureC, 14);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, unit: 'c' }), true);
+	clock.advance(WEATHER_REFRESH_MS - 1); await settleWeather();
+	assert.equal(requests, 1);
+	clock.advance(1); await settleWeather();
+	assert.equal(requests, 2);
+	controller.setVisible(false);
+	assert.equal(clock.pending.size, 0);
+	clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(requests, 2);
+	assert.equal(controller.snapshot().status, 'paused');
+	clock.time -= 2 * 24 * 60 * MINUTE_MS;
+	controller.setVisible(true); clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(requests, 3, 'a clock rollback must not postpone the next check for days');
+	await controller.dispose();
+});
+
+test('weather city changes and disposal abort requests and discard responses from an obsolete request', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	const pending: { station: WeatherStationId; signal: AbortSignal; resolve: (reading: WeatherReading) => void }[] = [];
+	const controller = new WeatherController({ saved: { ...DEFAULT_WEATHER, enabled: true }, storage, clock,
+		request: (station, signal) => new Promise(resolve => { pending.push({ station, signal, resolve }); }) });
+	let emissions = 0;
+	controller.subscribe(() => { emissions++; });
+	controller.setVisible(true); clock.advance(0);
+	assert.equal(pending.length, 1);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, stationId: 'KJFK' }), true);
+	assert.equal(pending[0]!.signal.aborted, true);
+	clock.advance(0);
+	assert.equal(pending.length, 2);
+	pending[0]!.resolve(weatherReading(clock)); await settleWeather();
+	assert.equal(controller.snapshot().reading, undefined);
+	pending[1]!.resolve(weatherReading(clock, 'KJFK')); await settleWeather();
+	assert.equal(controller.snapshot().reading?.stationId, 'KJFK');
+	clock.advance(WEATHER_REFRESH_MS);
+	assert.equal(pending.length, 3);
+	await controller.dispose();
+	const lastEmission = emissions;
+	assert.equal(pending[2]!.signal.aborted, true);
+	pending[2]!.resolve(weatherReading(clock, 'KJFK')); await settleWeather();
+	assert.equal(emissions, lastEmission);
+	assert.equal(clock.pending.size, 0);
+});
+
+test('weather outages preserve the observation timestamp, expose stale data and survive unit changes honestly', async () => {
+	const clock = new FakeClock(), storage = weatherStorage();
+	let fail = false;
+	const controller = new WeatherController({ saved: { ...DEFAULT_WEATHER, enabled: true }, storage, clock,
+		request: async station => { if (fail) { throw new Error('Offline'); } return weatherReading(clock, station); } });
+	controller.setVisible(true); clock.advance(0); await settleWeather();
+	const original = controller.snapshot().reading;
+	assert.ok(original);
+	assert.notEqual(original.checkedAt, original.observedAt);
+	fail = true; clock.advance(WEATHER_REFRESH_MS); await settleWeather();
+	assert.equal(controller.snapshot().status, 'unavailable');
+	assert.deepEqual(controller.snapshot().reading, original);
+	assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true, unit: 'c' }), true);
+	assert.equal(controller.snapshot().status, 'unavailable');
+	clock.advance(WEATHER_STALE_MS); await settleWeather();
+	assert.equal(controller.snapshot().stale, true);
+	assert.deepEqual(controller.snapshot().reading, original);
+	await controller.dispose();
+});
+
+test('weather data from a newer version or an unreadable file is preserved without network requests', async () => {
+	for (const saved of [{ ...DEFAULT_WEATHER, version: 2, enabled: true }, undefined]) {
+		const clock = new FakeClock(), storage = weatherStorage(saved);
+		const controller = new WeatherController({ saved, storage, clock, unreadable: saved === undefined,
+			request: async () => { assert.fail('Protected weather settings must never make a request.'); } });
+		controller.setVisible(true); clock.advance(WEATHER_REFRESH_MS);
+		assert.equal(controller.snapshot().readOnly, true);
+		assert.equal(await controller.configure({ ...DEFAULT_WEATHER, enabled: true }), false);
+		assert.equal(storage.writes, 0);
+		assert.deepEqual(storage.value, saved);
+		await controller.dispose();
+	}
+	assert.equal(parseWeatherSettings({ ...DEFAULT_WEATHER, enabled: 'yes' }), undefined);
+});
+
+test('NWS observations reject missing temperatures, incorrect stations and misleading timestamps', () => {
+	const now = Date.now(), properties = {
+		station: 'https://api.weather.gov/stations/KSFO', timestamp: new Date(now - 20 * MINUTE_MS).toISOString(),
+		temperature: { unitCode: 'wmoUnit:degC', value: 14 }, textDescription: 'Partly Cloudy',
+		icon: 'https://api.weather.gov/icons/land/night/sct?size=medium',
+	};
+	const observation = parseWeatherObservation({ properties }, 'KSFO', now);
+	assert.equal(observation.condition, 'night');
+	assert.equal(observation.temperatureC, 14);
+	assert.equal(observation.checkedAt - observation.observedAt, 20 * MINUTE_MS);
+	for (const invalid of [
+		{ temperature: { unitCode: 'wmoUnit:degC', value: null } },
+		{ temperature: { unitCode: 'wmoUnit:degC', value: Infinity } },
+		{ temperature: { unitCode: 'wmoUnit:degF', value: 57 } },
+		{ station: 'https://api.weather.gov/stations/KJFK' },
+		{ timestamp: new Date(now + 6 * MINUTE_MS).toISOString() },
+		{ timestamp: new Date(now - 3 * 24 * 60 * MINUTE_MS).toISOString() },
+	]) { assert.throws(() => parseWeatherObservation({ properties: { ...properties, ...invalid } }, 'KSFO', now)); }
+});
+
+test('weather HTTP is restricted to a known station, rejects redirects and bounds streamed responses', async () => {
+	let requests = 0, cancelled = false;
+	const request: typeof fetch = async (url, options) => {
+		requests++;
+		assert.equal(url, 'https://api.weather.gov/stations/KSFO/observations/latest');
+		assert.equal(options?.redirect, 'error');
+		assert.equal(new Headers(options?.headers).has('Authorization'), false);
+		assert.match(new Headers(options?.headers).get('User-Agent')!, /^CharmBits\//);
+		return new Response(new ReadableStream({
+			start(stream) { stream.enqueue(new Uint8Array(128 * 1024 + 1)); },
+			cancel() { cancelled = true; },
+		}));
+	};
+	await assert.rejects(fetchWeatherObservation('../private' as WeatherStationId, new AbortController().signal, request), /Unknown weather station/);
+	assert.equal(requests, 0);
+	await assert.rejects(fetchWeatherObservation('KSFO', new AbortController().signal, request), /size limit/);
+	assert.equal(cancelled, true);
+	await assert.rejects(fetchWeatherObservation('KSFO', new AbortController().signal,
+		async () => new Response(null, { status: 302 })), /302/);
+});
 
 test('learning catalogue has sourced facts and answerable trivia with unique stable identities', () => {
 	assert.equal(FACT_CARDS.length, 60);

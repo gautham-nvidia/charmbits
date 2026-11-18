@@ -366,7 +366,7 @@
   {
     "id": "trial:flower-sunflower",
     "name": "Sunflower",
-    "file": "trial-flower-sunflower-r1-p2.png",
+    "file": "trial-flower-sunflower-r1-p8.png",
     "description": "Sunflower artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#e9b951",
     "group": "Garden Flowers",
@@ -374,13 +374,29 @@
     "artworkHash": "645d0abad214aa5011e79074b4dcf5809a6ae0cf02812c237ad9900e486a8086",
     "attachment": {
       "x": 0.5,
-      "y": 0.06349206349206349
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5254629629629629,
+      "y": 0.9464285714285714
+    },
+    "stemWidth": 0.046296296296296294,
+    "stemColour": [
+      62,
+      70,
+      48
+    ],
+    "bloom": {
+      "x": 0.4954,
+      "y": 0.4841,
+      "radiusX": 0.4421,
+      "radiusY": 0.4345
     }
   },
   {
     "id": "trial:flower-marigold",
     "name": "Marigold",
-    "file": "trial-flower-marigold-r1-p2.png",
+    "file": "trial-flower-marigold-r1-p8.png",
     "description": "Marigold artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#e7a050",
     "group": "Garden Flowers",
@@ -388,83 +404,180 @@
     "artworkHash": "013995eb978c31171927d7667f5f29d0d19a5c2e395e7f392a902c44f53a9d6e",
     "attachment": {
       "x": 0.5,
-      "y": 0.07936507936507936
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5,
+      "y": 0.72
+    },
+    "stemColour": [
+      61,
+      85,
+      44
+    ],
+    "stemWidth": 0.028,
+    "stemCalyx": true,
+    "bloom": {
+      "x": 0.4838,
+      "y": 0.3909,
+      "radiusX": 0.3935,
+      "radiusY": 0.3294
     }
   },
   {
     "id": "trial:flower-hibiscus",
     "name": "Hibiscus",
-    "file": "trial-flower-hibiscus-r1-p2.png",
+    "file": "trial-flower-hibiscus-r1-p8.png",
     "description": "Hibiscus artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#db828c",
     "group": "Garden Flowers",
     "artworkKey": "flower-hibiscus",
     "artworkHash": "064da35b93f2da6aa252a351c542bbdf463546064aab5f03f7f6f12727274c91",
     "attachment": {
-      "x": 0.4976851851851852,
-      "y": 0.10714285714285714
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.7708333333333334,
+      "y": 0.7837301587301587
+    },
+    "stemWidth": 0.032407407407407406,
+    "stemColour": [
+      66,
+      80,
+      63
+    ],
+    "bloom": {
+      "x": 0.4954,
+      "y": 0.3571,
+      "radiusX": 0.4329,
+      "radiusY": 0.3036
     }
   },
   {
     "id": "trial:flower-bluebell",
     "name": "Bluebell",
-    "file": "trial-flower-bluebell-r1-p2.png",
+    "file": "trial-flower-bluebell-r1-p8.png",
     "description": "Bluebell artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#91b6db",
     "group": "Garden Flowers",
     "artworkKey": "flower-bluebell",
     "artworkHash": "78de55c12b8282ac887b0dc37ced746e338572131e3b964d49dbef65e742903e",
     "attachment": {
-      "x": 0.5023148148148148,
-      "y": 0.12698412698412698
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5347222222222222,
+      "y": 0.9464285714285714
+    },
+    "stemWidth": 0.023148148148148147,
+    "stemColour": [
+      42,
+      60,
+      54
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.3889,
+      "radiusX": 0.4259,
+      "radiusY": 0.3393
     }
   },
   {
     "id": "trial:flower-iris",
     "name": "Iris",
-    "file": "trial-flower-iris-r1-p2.png",
+    "file": "trial-flower-iris-r1-p8.png",
     "description": "Iris artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#ac95cf",
     "group": "Garden Flowers",
     "artworkKey": "flower-iris",
     "artworkHash": "be54445c31fe648c256f9360885c26cd2cc958dcda5688296ab52042b46beeba",
     "attachment": {
-      "x": 0.4976851851851852,
-      "y": 0.05952380952380952
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.46064814814814814,
+      "y": 0.9464285714285714
+    },
+    "stemWidth": 0.06481481481481481,
+    "stemColour": [
+      57,
+      75,
+      69
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.494,
+      "radiusX": 0.4398,
+      "radiusY": 0.4484
     }
   },
   {
     "id": "trial:flower-poppy",
     "name": "Poppy",
-    "file": "trial-flower-poppy-r1-p2.png",
+    "file": "trial-flower-poppy-r1-p8.png",
     "description": "Poppy artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#dd8172",
     "group": "Garden Flowers",
     "artworkKey": "flower-poppy",
-    "artworkHash": "a838d12a7d1dbde0e3d2e66206aa770d90a9b75ec10afbaad286d601cef89a25",
+    "artworkHash": "eaea91536b2f9ea8e69001418758bd0cb4031fbb80aee7ae07fa4f428969c770",
     "attachment": {
       "x": 0.5,
-      "y": 0.05952380952380952
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.4976851851851852,
+      "y": 0.9424603174603174
+    },
+    "stemWidth": 0.023148148148148147,
+    "stemColour": [
+      67,
+      83,
+      62
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.5317,
+      "radiusX": 0.3009,
+      "radiusY": 0.2639
     }
   },
   {
     "id": "trial:flower-orchid",
     "name": "Orchid",
-    "file": "trial-flower-orchid-r1-p2.png",
+    "file": "trial-flower-orchid-r1-p8.png",
     "description": "Orchid artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#c79bd0",
     "group": "Garden Flowers",
     "artworkKey": "flower-orchid",
     "artworkHash": "6eb90aad404d1e4d449b1829dca2b3855d8124ca154ce45c9efad3a6339757d7",
     "attachment": {
-      "x": 0.4976851851851852,
-      "y": 0.11507936507936507
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.7476851851851852,
+      "y": 0.8511904761904762
+    },
+    "stemWidth": 0.12962962962962962,
+    "stemColour": [
+      98,
+      123,
+      106
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.4444,
+      "radiusX": 0.4259,
+      "radiusY": 0.3869
     }
   },
   {
     "id": "trial:flower-daisy",
     "name": "Daisy",
-    "file": "trial-flower-daisy-r1-p2.png",
+    "file": "trial-flower-daisy-r1-p8.png",
     "description": "Daisy artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#d7cd9c",
     "group": "Garden Flowers",
@@ -472,27 +585,59 @@
     "artworkHash": "935d5e7a53eb6dd6794fef3a29cc7308de752fb001227cbe1791060032f9ba5a",
     "attachment": {
       "x": 0.5,
-      "y": 0.05952380952380952
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.4976851851851852,
+      "y": 0.7718253968253969
+    },
+    "stemWidth": 0.0787037037037037,
+    "stemColour": [
+      182,
+      167,
+      132
+    ],
+    "bloom": {
+      "x": 0.4954,
+      "y": 0.4087,
+      "radiusX": 0.4329,
+      "radiusY": 0.3631
     }
   },
   {
     "id": "trial:flower-lavender",
     "name": "Lavender",
-    "file": "trial-flower-lavender-r1-p2.png",
+    "file": "trial-flower-lavender-r1-p8.png",
     "description": "Lavender artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#b5a0d2",
     "group": "Garden Flowers",
     "artworkKey": "flower-lavender",
     "artworkHash": "59926891f0718326f361efc175cdcae56df63f4bd3d06711dabe352ee2e9bc02",
     "attachment": {
-      "x": 0.4976851851851852,
-      "y": 0.05952380952380952
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.4930555555555556,
+      "y": 0.9464285714285714
+    },
+    "stemWidth": 0.05555555555555555,
+    "stemColour": [
+      66,
+      86,
+      66
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.4881,
+      "radiusX": 0.2963,
+      "radiusY": 0.4425
     }
   },
   {
     "id": "trial:flower-cosmos",
     "name": "Cosmos",
-    "file": "trial-flower-cosmos-r1-p2.png",
+    "file": "trial-flower-cosmos-r1-p8.png",
     "description": "Cosmos artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#d997b8",
     "group": "Garden Flowers",
@@ -500,55 +645,119 @@
     "artworkHash": "26a8963da6c0e165428e0a4468f0bdd0a9457a4bf270e63c0e1678b79c567b25",
     "attachment": {
       "x": 0.5,
-      "y": 0.20634920634920634
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.4976851851851852,
+      "y": 0.8115079365079365
+    },
+    "stemWidth": 0.013888888888888888,
+    "stemColour": [
+      98,
+      142,
+      111
+    ],
+    "bloom": {
+      "x": 0.4792,
+      "y": 0.4067,
+      "radiusX": 0.3102,
+      "radiusY": 0.2262
     }
   },
   {
     "id": "trial:flower-sakura",
     "name": "Sakura",
-    "file": "trial-flower-sakura-r1-p2.png",
+    "file": "trial-flower-sakura-r1-p8.png",
     "description": "Sakura artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#dfafbe",
     "group": "Garden Flowers",
     "artworkKey": "flower-sakura",
     "artworkHash": "9769dd29ac72c561d3475d264e2c22a46e07018f0584a11ff142c7411ccc69d3",
     "attachment": {
-      "x": 0.48842592592592593,
-      "y": 0.1388888888888889
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.6319444444444444,
+      "y": 0.7996031746031746
+    },
+    "stemWidth": 0.046296296296296294,
+    "stemColour": [
+      88,
+      76,
+      57
+    ],
+    "bloom": {
+      "x": 0.4606,
+      "y": 0.4286,
+      "radiusX": 0.3843,
+      "radiusY": 0.3671
     }
   },
   {
     "id": "trial:flower-wild-rose",
     "name": "Wild Rose",
-    "file": "trial-flower-wild-rose-r1-p2.png",
+    "file": "trial-flower-wild-rose-r1-p8.png",
     "description": "Wild Rose artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#d98d9d",
     "group": "Garden Flowers",
     "artworkKey": "flower-wild-rose",
-    "artworkHash": "9116b9e73a9c144a5f213c179a2cd24f1ffb7ed0cf415ffc354d260121096b50",
+    "artworkHash": "a992f8f67e028faf6bcfb92f685451e5e83d6ff94947f492053fdeebe032428f",
     "attachment": {
       "x": 0.5,
-      "y": 0.06349206349206349
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5347222222222222,
+      "y": 0.9464285714285714
+    },
+    "stemWidth": 0.018518518518518517,
+    "stemColour": [
+      90,
+      100,
+      85
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.498,
+      "radiusX": 0.3148,
+      "radiusY": 0.3294
     }
   },
   {
     "id": "trial:flower-red-rose",
     "name": "Red Rose",
-    "file": "trial-flower-red-rose-r2-p2.png",
+    "file": "trial-flower-red-rose-r2-p8.png",
     "description": "Red Rose artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#c95160",
     "group": "Garden Flowers",
     "artworkKey": "flower-red-rose",
     "artworkHash": "734d14c74cb7bf80b99dc8c6b22b5f15989f8b484450d5cbaf7d22c9f277b1d7",
     "attachment": {
-      "x": 0.5023148148148148,
-      "y": 0.06746031746031746
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5162037037037037,
+      "y": 0.8234126984126984
+    },
+    "stemWidth": 0.018518518518518517,
+    "stemColour": [
+      40,
+      51,
+      28
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.3671,
+      "radiusX": 0.4444,
+      "radiusY": 0.3214
     }
   },
   {
     "id": "trial:flower-pink-rose",
     "name": "Pink Rose",
-    "file": "trial-flower-pink-rose-r1-p2.png",
+    "file": "trial-flower-pink-rose-r1-p8.png",
     "description": "Pink Rose artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#e5a0ba",
     "group": "Garden Flowers",
@@ -556,13 +765,29 @@
     "artworkHash": "223b8adc0dea4c669512486e7c1b3117f676769d7e7ae8095dbd9eadfa2d962d",
     "attachment": {
       "x": 0.5,
-      "y": 0.08333333333333333
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5347222222222222,
+      "y": 0.9265873015873016
+    },
+    "stemWidth": 0.023148148148148147,
+    "stemColour": [
+      35,
+      45,
+      25
+    ],
+    "bloom": {
+      "x": 0.4954,
+      "y": 0.375,
+      "radiusX": 0.4421,
+      "radiusY": 0.3294
     }
   },
   {
     "id": "trial:flower-white-rose",
     "name": "White Rose",
-    "file": "trial-flower-white-rose-r1-p2.png",
+    "file": "trial-flower-white-rose-r1-p8.png",
     "description": "White Rose artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#dedbc5",
     "group": "Garden Flowers",
@@ -570,13 +795,29 @@
     "artworkHash": "9b30b40ecfe50958fcd91a4adf243a531d2ecf077b4e7c5422ca91a7c7ff43d2",
     "attachment": {
       "x": 0.5,
-      "y": 0.09126984126984126
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.42824074074074076,
+      "y": 0.8194444444444444
+    },
+    "stemWidth": 0.032407407407407406,
+    "stemColour": [
+      51,
+      60,
+      33
+    ],
+    "bloom": {
+      "x": 0.4884,
+      "y": 0.3611,
+      "radiusX": 0.4352,
+      "radiusY": 0.3115
     }
   },
   {
     "id": "trial:flower-yellow-rose",
     "name": "Yellow Rose",
-    "file": "trial-flower-yellow-rose-r1-p2.png",
+    "file": "trial-flower-yellow-rose-r1-p8.png",
     "description": "Yellow Rose artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#e9c35e",
     "group": "Garden Flowers",
@@ -584,27 +825,59 @@
     "artworkHash": "8954ad19213d487db9a8a0cabb0caed5cedf51677eafdcd6c5e08c48fec5a738",
     "attachment": {
       "x": 0.5,
-      "y": 0.07936507936507936
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.4375,
+      "y": 0.8075396825396826
+    },
+    "stemWidth": 0.032407407407407406,
+    "stemColour": [
+      44,
+      55,
+      22
+    ],
+    "bloom": {
+      "x": 0.4676,
+      "y": 0.3492,
+      "radiusX": 0.4005,
+      "radiusY": 0.2996
     }
   },
   {
     "id": "trial:flower-jasmine",
     "name": "Jasmine",
-    "file": "trial-flower-jasmine-r2-p2.png",
+    "file": "trial-flower-jasmine-r2-p8.png",
     "description": "Jasmine artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#c5d4bb",
     "group": "Garden Flowers",
     "artworkKey": "flower-jasmine",
     "artworkHash": "50492f205fbb9442177be1e97885722cb65875987ea8eba0638cc9964c31a664",
     "attachment": {
-      "x": 0.4976851851851852,
-      "y": 0.13095238095238096
+      "x": 0.5,
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.3773148148148148,
+      "y": 0.7400793650793651
+    },
+    "stemWidth": 0.023148148148148147,
+    "stemColour": [
+      98,
+      114,
+      53
+    ],
+    "bloom": {
+      "x": 0.4838,
+      "y": 0.3552,
+      "radiusX": 0.4213,
+      "radiusY": 0.3095
     }
   },
   {
     "id": "trial:flower-lily",
     "name": "Lily",
-    "file": "trial-flower-lily-r1-p2.png",
+    "file": "trial-flower-lily-r1-p8.png",
     "description": "Lily artwork. Try it here; your garden still records the flowers you grow.",
     "accent": "#e8bccb",
     "group": "Garden Flowers",
@@ -612,7 +885,23 @@
     "artworkHash": "8d6eb45209654c16f1cd700546115e60ff3c35765c31238ccf1201ef9076507e",
     "attachment": {
       "x": 0.5,
-      "y": 0.06349206349206349
+      "y": 0.005
+    },
+    "baseAttachment": {
+      "x": 0.5347222222222222,
+      "y": 0.7678571428571429
+    },
+    "stemWidth": 0.018518518518518517,
+    "stemColour": [
+      89,
+      93,
+      54
+    ],
+    "bloom": {
+      "x": 0.4977,
+      "y": 0.371,
+      "radiusX": 0.4444,
+      "radiusY": 0.3254
     }
   },
   {
@@ -3301,6 +3590,244 @@
     "attachment": {
       "x": 0.5081018518518519,
       "y": 0.07738095238095238
+    }
+  },
+  {
+    "id": "trial:new-shiba-inu",
+    "name": "Shiba Inu",
+    "file": "trial-new-shiba-inu-r1-p5.png",
+    "description": "A bright-eyed Shiba with a curled tail and warm sesame fur.",
+    "accent": "#c79058",
+    "group": "Animals",
+    "artworkKey": "new-shiba-inu",
+    "artworkHash": "b744071b1dd60fee96b3c0dfce0da7460d22ce4b6e6b494e23e979f2ec50da98",
+    "attachment": {
+      "x": 0.5439814814814815,
+      "y": 0.09126984126984126
+    }
+  },
+  {
+    "id": "trial:new-french-bulldog",
+    "name": "French Bulldog",
+    "file": "trial-new-french-bulldog-r1-p5.png",
+    "description": "A compact Frenchie with bat ears and a gentle head tilt.",
+    "accent": "#a49182",
+    "group": "Animals",
+    "artworkKey": "new-french-bulldog",
+    "artworkHash": "1a109b811bbe2f1d40894b2735bb4115c670d8c2486d44699e0c77ec35f93a14",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.21428571428571427
+    }
+  },
+  {
+    "id": "trial:new-dachshund",
+    "name": "Dachshund",
+    "file": "trial-new-dachshund-r1-p5.png",
+    "description": "A little long-bodied companion with glossy chestnut fur.",
+    "accent": "#a36443",
+    "group": "Animals",
+    "artworkKey": "new-dachshund",
+    "artworkHash": "721cf881a197b81c083abd963d056c2ec1c0f1b60e6c7ed217a08c5ff3ce13c2",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.2857142857142857
+    }
+  },
+  {
+    "id": "trial:new-pomeranian",
+    "name": "Pomeranian",
+    "file": "trial-new-pomeranian-r1-p5.png",
+    "description": "A small golden puff of fur with a lively, friendly face.",
+    "accent": "#d4a56d",
+    "group": "Animals",
+    "artworkKey": "new-pomeranian",
+    "artworkHash": "5bf438120fd4ea7c5dbd8bb89a34ace1a973332c6fb78748bd586324fd57c152",
+    "attachment": {
+      "x": 0.4976851851851852,
+      "y": 0.1111111111111111
+    }
+  },
+  {
+    "id": "trial:new-maine-coon",
+    "name": "Maine Coon",
+    "file": "trial-new-maine-coon-r1-p5.png",
+    "description": "A majestic long-haired cat with tufted ears and a soft ruff.",
+    "accent": "#8b7965",
+    "group": "Animals",
+    "artworkKey": "new-maine-coon",
+    "artworkHash": "2227301350a37447ea53c49e10d40fcd5b5b1b71d28b8c3b2fd270bd0c3c9227",
+    "attachment": {
+      "x": 0.3773148148148148,
+      "y": 0.057539682539682536
+    }
+  },
+  {
+    "id": "trial:new-ragdoll",
+    "name": "Ragdoll",
+    "file": "trial-new-ragdoll-r1-p5.png",
+    "description": "A soft blue-eyed Ragdoll with cream fur and a calm gaze.",
+    "accent": "#a8b8cc",
+    "group": "Animals",
+    "artworkKey": "new-ragdoll",
+    "artworkHash": "fa2b70db79f02ccd287e15e4d479c341970a93cd9ecd68175b10d93aed0a8ca3",
+    "attachment": {
+      "x": 0.5763888888888888,
+      "y": 0.06349206349206349
+    }
+  },
+  {
+    "id": "trial:new-siamese",
+    "name": "Siamese",
+    "file": "trial-new-siamese-r1-p5.png",
+    "description": "A sleek seal-point Siamese with bright blue eyes.",
+    "accent": "#9caac1",
+    "group": "Animals",
+    "artworkKey": "new-siamese",
+    "artworkHash": "fe47d309f1fc20b4531f8add25efe8a922b51e76deaea33a0807146c9d3ddcff",
+    "attachment": {
+      "x": 0.5254629629629629,
+      "y": 0.07539682539682539
+    }
+  },
+  {
+    "id": "trial:new-lop-rabbit",
+    "name": "Lop Rabbit",
+    "file": "trial-new-lop-rabbit-r1-p5.png",
+    "description": "A velvet-soft little rabbit with gently folded ears.",
+    "accent": "#c7ad95",
+    "group": "Animals",
+    "artworkKey": "new-lop-rabbit",
+    "artworkHash": "e1858cc1326f6d7ec303a262b74f726c3ced4ab4b5fc7433aa010149bc2d98a5",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.15476190476190477
+    }
+  },
+  {
+    "id": "trial:new-hamster",
+    "name": "Golden Hamster",
+    "file": "trial-new-hamster-r1-p5.png",
+    "description": "A tiny golden hamster with busy paws and soft cheeks.",
+    "accent": "#cc9b66",
+    "group": "Animals",
+    "artworkKey": "new-hamster",
+    "artworkHash": "6ace6803ee8140acfcc33603c294d6ea2a7c3a135cf76c1193a6585785f3dafc",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.07539682539682539
+    }
+  },
+  {
+    "id": "trial:new-cockatiel",
+    "name": "Cockatiel",
+    "file": "trial-new-cockatiel-r1-p5.png",
+    "description": "A cheerful crested bird with orange cheeks and a long tail.",
+    "accent": "#d8b86f",
+    "group": "Animals",
+    "artworkKey": "new-cockatiel",
+    "artworkHash": "56303c19fa92c785afbb2e4feb97032845e5358502e86a7ff74599e942f5fa5a",
+    "attachment": {
+      "x": 0.5023148148148148,
+      "y": 0.30158730158730157
+    }
+  },
+  {
+    "id": "trial:new-yellowstone-geyser",
+    "name": "Yellowstone Geyser",
+    "file": "trial-new-yellowstone-geyser-r1-p5.png",
+    "description": "An Old Faithful-inspired geyser rising above a mineral basin.",
+    "accent": "#bca471",
+    "group": "National Parks",
+    "artworkKey": "new-yellowstone-geyser",
+    "artworkHash": "6db7fc275546a8009f372b3eaa578774d61bc67403523a51da82649ac1045666",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-zion-canyon",
+    "name": "Zion Canyon",
+    "file": "trial-new-zion-canyon-r1-p3.png",
+    "description": "Warm sandstone cliffs and a quiet river bend, inspired by Zion.",
+    "accent": "#b16e51",
+    "group": "National Parks",
+    "artworkKey": "new-zion-canyon",
+    "artworkHash": "aecf54fd6073a017734d9efeba846864fe31aff354786c76eafc66e672bdc62a",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-crater-lake",
+    "name": "Crater Lake",
+    "file": "trial-new-crater-lake-r1-p3.png",
+    "description": "A deep-blue caldera lake with a small volcanic island.",
+    "accent": "#5f91bc",
+    "group": "National Parks",
+    "artworkKey": "new-crater-lake",
+    "artworkHash": "73103a015c336f70115def6a3f8540e7dded4da4d35068ee4e8d2594720074f7",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.07539682539682539
+    }
+  },
+  {
+    "id": "trial:new-mount-fuji",
+    "name": "Mount Fuji",
+    "file": "trial-new-mount-fuji-r1-p3.png",
+    "description": "A calm snow-capped volcano above a small lakeside landscape.",
+    "accent": "#92a7bd",
+    "group": "National Parks",
+    "artworkKey": "new-mount-fuji",
+    "artworkHash": "8e47181b7b2036bafb0dda4868ea2a2b543c28e61a6a3a96c649f15c24bc77f7",
+    "attachment": {
+      "x": 0.5,
+      "y": 0.05952380952380952
+    }
+  },
+  {
+    "id": "trial:new-machu-picchu",
+    "name": "Machu Picchu",
+    "file": "trial-new-machu-picchu-r2-p3.png",
+    "description": "Ancient stone terraces tucked into a dramatic green mountain ridge.",
+    "accent": "#82936d",
+    "group": "World Wonders",
+    "artworkKey": "new-machu-picchu",
+    "artworkHash": "99235ebc0b0bf8628199d4b98f8fa755a999aa54e77e7a2b6507e02c29f5627d",
+    "attachment": {
+      "x": 0.4976851851851852,
+      "y": 0.07142857142857142
+    }
+  },
+  {
+    "id": "trial:new-taj-mahal",
+    "name": "Taj Mahal",
+    "file": "trial-new-taj-mahal-r1-p3.png",
+    "description": "White marble domes and a quiet reflection, inspired by Agra.",
+    "accent": "#b7bbc8",
+    "group": "World Wonders",
+    "artworkKey": "new-taj-mahal",
+    "artworkHash": "45d5e6d9cb5892460b26d083d593bc367ec4a1568d20c7baca9d1909c9ba81cf",
+    "attachment": {
+      "x": 0.5254629629629629,
+      "y": 0.07142857142857142
+    }
+  },
+  {
+    "id": "trial:new-great-wall",
+    "name": "Great Wall",
+    "file": "trial-new-great-wall-r2-p3.png",
+    "description": "A winding stone wall following a rugged green mountain ridge.",
+    "accent": "#a49b79",
+    "group": "World Wonders",
+    "artworkKey": "new-great-wall",
+    "artworkHash": "03ea8e9e57ea98f6a588cf212513ffc5bb1e339031c8a26e4475d5b0b14bf8fa",
+    "attachment": {
+      "x": 0.5023148148148148,
+      "y": 0.17063492063492064
     }
   }
 ]

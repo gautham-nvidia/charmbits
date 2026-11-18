@@ -19,6 +19,9 @@ import { StateWriter } from '../../extension/src/state-writer';
 import { isPhotoPack, photoPackInput } from '../../extension/src/photo-packs';
 import { pauseForAway } from './power-behavior';
 import { AccessController } from '../../extension/src/access-controller';
+import { WeatherController } from '../../extension/src/weather-controller';
+import type { WeatherSettings } from '../../extension/src/weather-core';
+import { PERSONAL_EDITION } from '../../extension/src/build-edition';
 import {
 	DEFAULT_DESKTOP_SIZE, desktopGeometry, fitDesktopAnchor, legacyDesktopAnchor, matchesDesktopAnchor,
 	type DesktopAnchor, type DesktopBounds,
@@ -29,9 +32,10 @@ protocol.registerSchemesAsPrivileged([{
 	scheme: 'charmlet', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: false },
 }]);
 // Compatibility identity: existing profiles and macOS safeStorage keys depend on this name.
-app.setName('Charmlet');
+app.setName(PERSONAL_EDITION ? 'CharmBits Personal' : 'Charmlet');
 const ownedProfile = process.env.CHARMLET_DESKTOP_PROFILE;
 if (ownedProfile) { app.setPath('userData', resolve(ownedProfile)); }
+else if (PERSONAL_EDITION) { app.setPath('userData', join(app.getPath('appData'), 'CharmBits Personal')); }
 const singleInstance = app.requestSingleInstanceLock();
 if (!singleInstance) { app.quit(); }
 
@@ -40,6 +44,7 @@ const profile = app.getPath('userData');
 let mainWindow: BrowserWindow | undefined;
 let tray: Tray | undefined;
 let companion: CompanionController | undefined;
+let weather: WeatherController | undefined;
 let access: AccessController | undefined;
 let preferenceWriter: StateWriter<CharmState> | undefined;
 let placementWriter: StateWriter<DesktopAnchor> | undefined;
@@ -51,8 +56,10 @@ let windowDrag: { cursor: { x: number; y: number }; anchor: DesktopAnchor } | un
 let pendingTools = false;
 let placementTimer: ReturnType<typeof setTimeout> | undefined;
 let unsubscribeCompanion: (() => void) | undefined;
+let unsubscribeWeather: (() => void) | undefined;
 let quitting = false;
 let rendererReady = false;
+let pageVisible = true;
 let rendererGeneration = 0;
 let mouseIgnored = true;
 let backgroundNotice: string | undefined;
@@ -95,6 +102,7 @@ function latchBackgroundNotice(message: string) {
 function notifyVisibility() {
 	if (!rendererReady || !mainWindow || mainWindow.isDestroyed()) { return; }
 	const visible = mainWindow.isVisible();
+	weather?.setVisible(visible && pageVisible && !state.hidden);
 	send({ type: 'visibility', visible });
 	if (visible && companion) { send({ type: 'companion', snapshot: companion.snapshot() }); }
 }
@@ -219,7 +227,7 @@ async function registerResources() {
 				const html = template
 					.replaceAll('__NONCE__', nonce)
 					.replaceAll('__CSP__', 'charmlet:')
-					.replaceAll('__APP_VERSION__', app.getVersion().replace(/[^a-zA-Z0-9.+-]/g, ''))
+					.replaceAll('__APP_VERSION__', app.getVersion().replace(/[^a-zA-Z0-9.+-]/g, '') + (PERSONAL_EDITION ? '+personal' : ''))
 					.replaceAll('__SCRIPT__', 'charmlet://app/renderer.js')
 					.replaceAll('__STYLE__', 'charmlet://app/view.css')
 					.replaceAll('__CHARM__', 'charmlet://app/media/keycap.svg')
@@ -232,7 +240,8 @@ async function registerResources() {
 				['/renderer.js', join(root, 'renderer.js')], ['/overlay.js', join(root, 'overlay.js')],
 		['/view.css', join(root, 'view.css')], ['/desktop.css', join(root, 'desktop.css')],
 		['/puzzle.css', join(root, 'puzzle.css')],
-		['/celebration.css', join(root, 'celebration.css')],
+	['/celebration.css', join(root, 'celebration.css')],
+	['/bracelet.css', join(root, 'bracelet.css')],
 			]);
 			let file = fixed.get(path);
 			if (!file && path.startsWith('/media/')) {
@@ -310,19 +319,22 @@ async function handleAction(event: IpcMainEvent, message: unknown) {
 	const value = message as Record<string, unknown>;
 	if (access!.catalogue(catalogue).length !== catalogue.length) { await saveCatalogue(); }
 	if (value.type === 'ready') {
-		await Promise.all([preferenceWriter!.flush(), companion!.flush(), placementWriter!.flush(), desktopViewWriter!.flush()]);
+		pageVisible = !('pageVisible' in value) || value.pageVisible === true;
+		await Promise.all([preferenceWriter!.flush(), companion!.flush(), placementWriter!.flush(), desktopViewWriter!.flush(), weather!.flush()]);
 		if (generation !== rendererGeneration) { return; }
 		rendererReady = true;
 		const tab = pendingTab;
 		applyWindowSize();
 		send({ type: 'desktop-view', value: desktopView });
-		send({ type: 'state', state, catalogue, companion: companion!.snapshot(), access: access!.snapshot,
+		send({ type: 'state', state, catalogue, companion: companion!.snapshot(), access: access!.snapshot, weather: weather!.snapshot(),
 			visible: mainWindow!.isVisible(), ...(tab ? { companionTab: tab } : {}) });
 		if (pendingTools) { send({ type: 'desktop-tools-open' }); pendingTools = false; }
 		if (pendingTab === tab) { pendingTab = undefined; }
+		weather!.setVisible(mainWindow!.isVisible() && pageVisible && !state.hidden);
 	} else if (value.type === 'save' && 'state' in value) {
 		const revision = Number.isSafeInteger(value.revision) && Number(value.revision) >= 0 ? Number(value.revision) : undefined;
 		state = restoreState(value.state, catalogue);
+		weather?.setVisible(!!mainWindow?.isVisible() && pageVisible && !state.hidden);
 		try {
 			await preferenceWriter!.save({ ...state });
 			if (revision !== undefined) { sendForGeneration(generation, { type: 'saved', revision }); }
@@ -369,6 +381,15 @@ async function handleAction(event: IpcMainEvent, message: unknown) {
 			await saveCatalogue(selected.id, generation);
 			sendForGeneration(generation, { type: 'companion-result', requestId });
 		} catch { sendForGeneration(generation, { type: 'companion-result', requestId, error: 'CharmBits could not hang that flower.' }); }
+	} else if (value.type === 'weather-visibility' && typeof value.visible === 'boolean') {
+		pageVisible = value.visible;
+		weather?.setVisible(!!mainWindow?.isVisible() && pageVisible && !state.hidden);
+	} else if (value.type === 'weather-settings' && Number.isSafeInteger(value.requestId) && Number(value.requestId) >= 0) {
+		const saved = await weather!.configure(value.settings);
+		sendForGeneration(generation, { type: 'weather-result', requestId: value.requestId,
+			...(!saved ? { error: 'Weather settings could not be saved. Try again.' } : {}) });
+	} else if (value.type === 'weather-source') {
+		await shell.openExternal('https://www.weather.gov/');
 	} else if (value.type === 'learning-source' && typeof value.cardId === 'string') {
 		const card = learningCard(value.cardId);
 		if (card?.source) { await shell.openExternal(card.source.url); }
@@ -453,8 +474,10 @@ async function shutdown() {
 	access?.dispose();
 	if (placementTimer) { clearTimeout(placementTimer); placementTimer = undefined; }
 	unsubscribeCompanion?.();
+	unsubscribeWeather?.();
 	const tasks: Promise<unknown>[] = [];
 	if (companion) { tasks.push(companion.dispose()); }
+	if (weather) { tasks.push(weather.dispose()); }
 	if (mainWindow && !mainWindow.isDestroyed() && placementWriter) { tasks.push(placementWriter.save({ ...desktopAnchor })); }
 	if (preferenceWriter) { tasks.push(preferenceWriter.flush()); }
 	if (placementWriter) { tasks.push(placementWriter.flush()); }
@@ -469,7 +492,8 @@ async function failInitialization(error: unknown) {
 	quitting = true;
 	if (placementTimer) { clearTimeout(placementTimer); placementTimer = undefined; }
 	unsubscribeCompanion?.();
-	await Promise.allSettled([companion?.dispose(), preferenceWriter?.flush(), placementWriter?.flush(), desktopViewWriter?.flush()].filter((value): value is Promise<void> => value !== undefined));
+	unsubscribeWeather?.();
+	await Promise.allSettled([companion?.dispose(), weather?.dispose(), preferenceWriter?.flush(), placementWriter?.flush(), desktopViewWriter?.flush()].filter((value): value is Promise<void> => value !== undefined));
 	tray?.destroy();
 	if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.destroy(); }
 	dialog.showErrorBox('CharmBits could not start', error instanceof Error ? error.message : 'Unknown startup error.');
@@ -512,6 +536,9 @@ async function initialize() {
 	if (loadedCompanion.error) { throw new Error('Saved desktop companion data is unreadable. The file was preserved; repair or move it before retrying.'); }
 	companion = new CompanionController(loadedCompanion.value, companionStore, legacyIndex);
 	await companion.initialize();
+	const weatherStore = new StateStore<WeatherSettings>(profile, 'weather.json');
+	const loadedWeather = await weatherStore.load(undefined);
+	weather = new WeatherController({ saved: loadedWeather.value, storage: weatherStore, unreadable: !!loadedWeather.error });
 	catalogue = [...baseCatalogue, ...gardenCharms(companion.snapshot().state.garden)];
 	state = restoreState(loadedPreference.value, catalogue);
 	preferenceWriter = new StateWriter(value => preferenceStore.write(value), () => preferenceStore.read(), matchesSavedState);
@@ -568,6 +595,9 @@ async function initialize() {
 		updateTrayStatus();
 		if (rendererReady && mainWindow?.isVisible()) { send({ type: 'companion', snapshot }); }
 		refreshGardenCatalogue();
+	});
+	unsubscribeWeather = weather.subscribe(snapshot => {
+		if (rendererReady && mainWindow?.isVisible()) { send({ type: 'weather', snapshot }); }
 	});
 	const handleAway = () => { void pauseForAway(companion!).catch(() => latchBackgroundNotice('Focus could not be paused for away mode.')); };
 	powerMonitor.on('suspend', handleAway);

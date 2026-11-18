@@ -1,5 +1,10 @@
 # Phase 5 — extension-store release
 
+For the current **CharmBits 0.16** policy, publisher setup and editor versions, use
+[Editor distribution](editor-distribution.md). The dated results below are historical.
+
+The current owner review is the [0.16 Marketplace and Open VSX draft](marketplace-0.16-draft.md), with the actual listing copy, current screenshots and remaining publisher account steps. Software and artwork terms were approved before this candidate; publisher ownership and store publication remain separate steps.
+
 Phase 4 merged through [PR #19](https://github.com/gautham-nvidia/charmlet/pull/19) at `69e067474f057fdd7d66948bc34f9a4fcb017909`. All six editor checks and both desktop archive checks passed at the accepted `c652107` head. Phase 5 uses `feat/phase-5-store-release` and [issue #18](https://github.com/gautham-nvidia/charmlet/issues/18).
 
 ## Candidate and release path

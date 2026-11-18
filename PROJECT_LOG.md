@@ -1,4 +1,4 @@
-# Charmlet project log
+# CharmBits project log
 
 Dates use YYYY-MM-DD; Git preserves exact timestamps and authors. Append dated entries for new work
 and corrections rather than erasing history. Record the linked issue/PR, commit description, evidence
@@ -638,3 +638,39 @@ App links use `https://charmbits.pages.dev/`. The old Cloudflare project's build
 generates a permanent redirect to the new hostname. [Phase19 validation](docs/phase-19-licensing-and-site.md)
 records the scope, data compatibility, local checks and remaining publisher and
 provider requirements. Deployment and hosted results are recorded after observation.
+
+## 2026-11-17 — CharmBits 0.16 motion and free editor candidate
+
+The editor includes all 227 released designs and all features without activation
+or a trial. Desktop keeps its starter, 30-day Pro trial and purchases. New pets,
+parks and wonders join the collection; Robot Assistant uses the approved ivory
+design, and Nimbus offers optional timestamped US weather observations.
+
+Approved motion now shares one renderer across the editor, desktop and website:
+front-facing blooms join a curved stem underneath, selected pets react calmly
+to a tap, and material effects remain subtle. An optional bracelet holds two or
+three independently movable charms with saved choices, reordering and removal.
+Left and right pulls, settling, hidden views and Reduced Motion are covered.
+
+Local validation passed 114 app units, 11 release checks, 36 service/artwork/Photo
+Studio checks, all 15 editor scenarios and the full website suite. The private
+Windows archive passed its extracted-app test, including three bracelet slots
+moving both ways. The private installed VSIX passed all 278 designs, no activation,
+pet/flower/bracelet motion, saved preferences and reload.
+
+Editor tests now discard inherited editor IPC, entry-point and compile-cache
+variables when launching disposable hosts. A VS Code test had inherited Devin's
+runtime paths, producing unknown agent-host channels and a blocked shutdown;
+the same personal package passed in 30.5 seconds with an isolated environment.
+Reload and teardown waits are bounded so future host failures retain diagnostics.
+
+The [Marketplace/Open VSX draft](docs/marketplace-0.16-draft.md), current editor
+screenshots and public VSIX are prepared. Personal artifacts stay in ignored local
+output and cannot pass the public packaging gate. Store account verification and
+publication remain separate; deployment and hosted results must be observed.
+
+The public Windows archive subsequently passed its extracted-app smoke, including
+all three bracelet slots moving left and right. All nine public installed-VSIX
+checks passed in a serial run. Cursor 3.26.16 and Devin 3.14.30819 accepted the VSIX;
+fresh-profile account screens prevented full functional checks. Their current
+versions and the precise verification limits are recorded in editor distribution.

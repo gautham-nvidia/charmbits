@@ -100,6 +100,11 @@ test('the largest desktop charm stays visible when a saved peg is near the lower
       const layout = placeDesktopAnchor(getLayout(primary.width, primary.height, 700, size, mode),
         { x: primary.width - 5, y: primary.height - 5 });
       assert.ok(layout.anchorX + layout.visualRadius + layout.edgePadding <= layout.width);
+      assert.ok(layout.width - layout.anchorX - layout.visualRadius - layout.edgePadding >= 39.99,
+        'A large charm at the right edge still needs a visible rightward swing.');
+      const left = placeDesktopAnchor(getLayout(primary.width, primary.height, 700, size, mode), { x: 5, y: 3 });
+      assert.ok(left.anchorX - left.visualRadius - left.edgePadding >= 39.99,
+        'The left edge needs the same swing clearance.');
       assert.ok(layout.anchorY + layout.cordLength + layout.attachmentOffset
         + layout.visualRadius + layout.edgePadding <= layout.height);
       assert.ok(layout.maximumDragCord - layout.cordLength >= layout.pullAllowance - .001);

@@ -2,9 +2,10 @@ import { createCanvasSmiley, createWebGLSmiley, type SmileyRenderer } from './sm
 import { followGaze, liveCharacter, type LiveCharacter } from './interactive-motion';
 import { createArtLibrary } from './live-art-assets';
 import { createCanvasArt, createWebGLArt } from './live-art-renderer';
-import { BYTE_GESTURES, CALI_TAP_GESTURES, NIMBUS_GESTURES, isArtCharacter, type ArtGesture } from './live-art-core';
+import { ROBOT_GESTURES, CALI_TAP_GESTURES, NIMBUS_GESTURES, isArtCharacter, type ArtGesture } from './live-art-core';
 import { nextLocalMidnight } from './garden-core';
 import type { CaliOutfitChoice } from './cali-wardrobe';
+import type { WeatherCondition } from './weather-core';
 
 export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, resource: (file: string) => string) {
 	let canvas: HTMLCanvasElement | undefined;
@@ -24,6 +25,7 @@ export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, re
 	let nextOutfitAt = 0;
 	let outfit: CaliOutfitChoice = 'daily';
 	let artEngine = false;
+	let weather: WeatherCondition | undefined;
 	let lastPointerAt = 0;
 	let lastPaintAt = 0;
 	let nextBlinkAt = 0;
@@ -82,6 +84,7 @@ export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, re
 		canvas.dataset.renderer = renderer?.kind ?? 'static';
 		canvas.dataset.motion = active && !reduced ? 'live' : 'still';
 		canvas.dataset.character = character ?? '';
+		canvas.dataset.weather = character === 'cloud' ? weather ?? '' : '';
 		charm.dataset.liveRendered = String(Boolean(character && rendered));
 		canvas.dataset.artError = artEngine ? art.error ?? '' : '';
 	}
@@ -105,6 +108,7 @@ export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, re
 			happy: expression === 'happy' || expression === 'shimmy', wink: expression === 'wink', greeting: expression === 'hello',
 			gesture: expression !== 'hello' && expression !== 'happy' ? expression : undefined,
 			caliOutfit: outfit,
+			weather: character === 'cloud' ? weather : undefined,
 			now: localNow, reducedMotion: reduced,
 			reactionProgress: (now - reactionStartedAt) / Math.max(1, reactionUntil - reactionStartedAt) });
 		syncSurface();
@@ -120,6 +124,11 @@ export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, re
 			|| character === 'cloud' && lastPressed;
 		if (!reduced && moving) {
 			frame = requestAnimationFrame(() => { frame = undefined; paint(); schedule(); });
+			return;
+		}
+		if (!reduced && character === 'cloud' && (weather === 'rain' || weather === 'snow' || weather === 'storm')) {
+			// Small falling particles need fewer frames than direct pointer movement.
+			wake = window.setTimeout(() => { wake = undefined; paint(); schedule(); }, 80);
 			return;
 		}
 		// A deadline can pass while drawing. Keep it until a paint consumes it,
@@ -208,10 +217,15 @@ export function createLiveSmiley(charm: HTMLElement, image: HTMLImageElement, re
 	});
 	return {
 		update,
+		setWeather(value: WeatherCondition | undefined) {
+			if (weather === value) { return; }
+			weather = value; syncSurface();
+			if (active && character === 'cloud') { refresh(); }
+		},
 		playful() {
 			if (!active || !character) { return; }
 			const gestures = character === 'cali' ? [...CALI_TAP_GESTURES, 'hello', 'happy'] as const
-				: character === 'cloud' ? NIMBUS_GESTURES : character === 'robot' ? BYTE_GESTURES
+				: character === 'cloud' && !weather ? NIMBUS_GESTURES : character === 'robot' ? ROBOT_GESTURES
 					: ['hello', 'wink', 'happy'] as const;
 			const gesture = gestures[tapSequence];
 			tapSequence = (tapSequence + 1) % gestures.length;

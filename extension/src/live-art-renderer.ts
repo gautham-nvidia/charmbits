@@ -98,7 +98,15 @@ export function createWebGLArt(canvas: HTMLCanvasElement, library: ArtLibrary): 
 	}
 }
 
-function drawTriangle(context: CanvasRenderingContext2D, layer: ArtLayer, a: number, b: number, c: number) {
+export type TextureMesh = Pick<ArtLayer, 'image' | 'positions' | 'uv' | 'indices'>;
+
+export function drawTextureMesh(context: CanvasRenderingContext2D, layer: TextureMesh): void {
+	for (let index = 0; index < layer.indices.length; index += 3) {
+		drawTriangle(context, layer, layer.indices[index], layer.indices[index + 1], layer.indices[index + 2]);
+	}
+}
+
+function drawTriangle(context: CanvasRenderingContext2D, layer: TextureMesh, a: number, b: number, c: number) {
 	const p = [a,b,c].map(index => [layer.positions[index * 2], layer.positions[index * 2 + 1]]);
 	const t = [a,b,c].map(index => [layer.uv[index * 2] * layer.image.width, layer.uv[index * 2 + 1] * layer.image.height]);
 	const sx1 = t[1][0] - t[0][0], sy1 = t[1][1] - t[0][1], sx2 = t[2][0] - t[0][0], sy2 = t[2][1] - t[0][1];
@@ -108,7 +116,8 @@ function drawTriangle(context: CanvasRenderingContext2D, layer: ArtLayer, a: num
 	const aa = (dx1 * sy2 - dx2 * sy1) / determinant, bb = (dy1 * sy2 - dy2 * sy1) / determinant;
 	const cc = (dx2 * sx1 - dx1 * sx2) / determinant, dd = (dy2 * sx1 - dy1 * sx2) / determinant;
 	const ee = p[0][0] - aa * t[0][0] - cc * t[0][1], ff = p[0][1] - bb * t[0][0] - dd * t[0][1];
-	context.save(); context.setTransform(3, 0, 0, 3, 0, 0);
+	const scale = context.canvas.width / 72;
+	context.save(); context.setTransform(scale, 0, 0, scale, 0, 0);
 	// Slightly overlap triangle edges to avoid hairline cracks from canvas clipping antialiasing.
 	const center = [(p[0][0]+p[1][0]+p[2][0])/3, (p[0][1]+p[1][1]+p[2][1])/3];
 	context.beginPath();
@@ -118,7 +127,7 @@ function drawTriangle(context: CanvasRenderingContext2D, layer: ArtLayer, a: num
 		if (index) { context.lineTo(xx, yy); } else { context.moveTo(xx, yy); }
 	});
 	context.closePath(); context.clip();
-	context.setTransform(aa*3, bb*3, cc*3, dd*3, ee*3, ff*3); context.drawImage(layer.image, 0, 0);
+	context.setTransform(aa*scale, bb*scale, cc*scale, dd*scale, ee*scale, ff*scale); context.drawImage(layer.image, 0, 0);
 	context.restore();
 }
 
@@ -161,9 +170,7 @@ export function createCanvasArt(canvas: HTMLCanvasElement, library: ArtLibrary):
 				paintArtFace(layer, pose as ArtPose); positions(layer, prepared, pose as ArtPose);
 				context.globalAlpha = alpha;
 				if (drawAffineLayer(context, layer)) { continue; }
-				for (let index = 0; index < layer.indices.length; index += 3) {
-					drawTriangle(context, layer, layer.indices[index], layer.indices[index+1], layer.indices[index+2]);
-				}
+				drawTextureMesh(context, layer);
 			}
 			context.globalAlpha = 1; canvas.dataset.outfit = prepared.definition.outfit ?? '';
 			canvas.dataset.artReady = prepared.key;

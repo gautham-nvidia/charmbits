@@ -132,6 +132,7 @@ for (const name of ['manrope-variable.ttf', 'OFL.txt']) {
 }
 await copyFile(join(repo, 'extension', 'media', 'puzzle.css'), join(dist, 'puzzle.css'));
 await copyFile(join(repo, 'extension', 'media', 'celebration.css'), join(dist, 'celebration.css'));
+await copyFile(join(repo, 'extension', 'media', 'bracelet.css'), join(dist, 'bracelet.css'));
 for (const builtin of builtins) {
   await copyFile(join(repo, 'extension', 'media', builtin.file), join(dist, 'assets', 'default', builtin.file));
 }
@@ -140,6 +141,10 @@ for (const live of [...LIVE_CHARMS, ...FIDGET_CHARMS]) {
 }
 for (const charm of CHARMS) {
   await copyFile(join(repo, 'extension/media', charm.file), join(dist, 'assets/default', charm.file));
+}
+const { PET_BLINK_FILES } = require('../extension/out/charm-motion.js');
+for (const file of Object.values(PET_BLINK_FILES)) {
+  await copyFile(join(repo, 'extension/media', file), join(dist, 'assets/default', file));
 }
 const liveArt = JSON.parse(await readFile(join(root, 'live-art-assets.json'), 'utf8'));
 if (liveArt.version !== 1 || !Array.isArray(liveArt.assets) || liveArt.assets.length !== 36
@@ -218,8 +223,10 @@ if (review) {
       if (homepage) {
         const preview = `./assets/home-previews/${basename(item.preview)}`;
         await copyFile(join(root, item.preview), join(dist, preview));
+        const artwork = WITHHELD_CHARMS.find(charm => charm.artworkKey === item.key);
         homepagePreviews.push({ id: item.key, name: item.name, slot: homepage.slot,
-          collectionLabel: homepage.label, preview, homepageOnly: true });
+          collectionLabel: homepage.label, preview, homepageOnly: true,
+          group: artwork.group, attachment: artwork.attachment });
       }
       if (privateReview) {
         await copyFile(join(root, item.image), join(dist, item.image));
@@ -255,7 +262,10 @@ if (review) {
       charms.push({ id: item.key, name: item.name, description: bundled.description, accent: item.accent,
         kind: 'extra', review: true, includedInTrial: true, group: bundled.group,
         collectionId: world.id, collectionLabel: world.name, preview: item.preview,
-        download: privateReview ? item.download : null, attachment: bundled.attachment });
+      download: privateReview ? item.download : null, attachment: bundled.attachment,
+      ...(bundled.baseAttachment ? { baseAttachment: bundled.baseAttachment,
+        stemColour: bundled.stemColour, stemWidth: bundled.stemWidth, stemCalyx: bundled.stemCalyx } : {}),
+        ...(bundled.bloom ? { bloom: bundled.bloom } : {}) });
     }
   }
   for (const bundle of review.bundles ?? []) {

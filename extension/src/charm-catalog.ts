@@ -2,9 +2,12 @@ import builtinCharms from './builtin-charms.json';
 import trialCharms from './trial-charms.json';
 import artworkPolicy from './artwork-policy.json';
 import { CALIFORNIA_COMPANIONS } from './california-companions';
+import { ROBOT_ART } from './weather-code-companions';
 import { artToStage } from './live-art-core';
 import { orderByCollection } from './charm-collections';
 import type { CharmAttachment } from './charm-attachment';
+import type { BloomShape } from './bloom-motion';
+import { PERSONAL_EDITION } from './build-edition';
 export interface CharmDefinition {
 	id: string;
 	name: string;
@@ -16,6 +19,11 @@ export interface CharmDefinition {
 	attachment?: CharmAttachment;
 	artworkKey?: string;
 	artworkHash?: string;
+	bloom?: BloomShape;
+	baseAttachment?: CharmAttachment;
+	stemColour?: number[];
+	stemWidth?: number;
+	stemCalyx?: boolean;
 }
 export const ORIGINAL_CHARMS: readonly CharmDefinition[] = builtinCharms.filter(charm => charm.id === 'terminal');
 export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
@@ -36,7 +44,7 @@ export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
 });
 export const WITHHELD_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => artworkPolicy.withheldGroups.includes(charm.group));
 export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => !Object.hasOwn(RETIRED_CHARMS, charm.id)
-	&& !artworkPolicy.withheldGroups.includes(charm.group));
+	&& (PERSONAL_EDITION || !artworkPolicy.withheldGroups.includes(charm.group)));
 export const LIVE_CHARMS: readonly CharmDefinition[] = [{
 	id: 'live:cali', name: 'Cali - Live Mascot', file: 'live-cali.png', group: 'Live Companions', accent: '#dcaa65',
 	description: 'A California grizzly with a coder wardrobe, a new outfit each day and a relaxed Friday look. Live glances, waves and thumbs-up; click for encouragement. Focus prompts and celebrations are optional.',
@@ -47,12 +55,12 @@ export const LIVE_CHARMS: readonly CharmDefinition[] = [{
 	attachment: { x: .5, y: 2.5 / 84 },
 }, {
 	id: 'live:cloud', name: 'Nimbus - Live Cloud', file: 'live-cloud.png', group: 'Live Companions', accent: '#a6ddef',
-	description: 'A textured cloud with its own tiny cloud-fold face. Tap for sunrise, rain and a gentle lightning bolt; hold for a little shower.',
+	description: 'A friendly cloud with optional current US weather in Appearance. With weather off, tap for playful sun, rain and lightning.',
 	attachment: { x: .5, y: 2.5 / 84 },
 }, {
-	id: 'live:robot', name: 'Byte - Live Robot', file: 'live-robot.png', group: 'Live Companions', accent: '#78d8c1',
-	description: 'A brushed-metal coding robot with articulated arms and a binary display. Tap for flowing bits, a compile check and a terminal prompt.',
-	attachment: { x: .5, y: 2.5 / 84 },
+	id: 'live:robot', name: 'Robot Assistant - Live Robot', file: 'live-robot-assistant.png', group: 'Live Companions', accent: '#93b8c8',
+	description: 'A calm ivory robot with soft blue eyes and a friendly wave. Tap for thinking, a little cheer and encouragement while you code.',
+	attachment: { x: artToStage(ROBOT_ART, ROBOT_ART.anchor)[0] / 72, y: 2.5 / 84 },
 }, ...CALIFORNIA_COMPANIONS.map(companion => ({
 	id: `live:${companion.character}`, name: `${companion.name} - Live Companion`,
 	file: `live-${companion.character}.png`, group: 'Live Companions', accent: companion.accent,
@@ -103,6 +111,11 @@ export function buildCatalogue(custom: readonly CharmDefinition[]): CharmDefinit
 			|| !imported.has(`${charm.artworkKey}:${charm.artworkHash}`)),
 		...custom.map(charm => {
 			const current = TRIAL_CHARMS.find(trial => trial.artworkKey === charm.artworkKey);
+			if (current && current.artworkHash === charm.artworkHash) {
+				return { ...charm, attachment: current.attachment, bloom: current.bloom,
+					baseAttachment: current.baseAttachment, stemColour: current.stemColour,
+					stemWidth: current.stemWidth, stemCalyx: current.stemCalyx };
+			}
 			return current && current.artworkHash !== charm.artworkHash
 				? { ...charm, name: `${charm.name} (Imported)` } : charm;
 		}),

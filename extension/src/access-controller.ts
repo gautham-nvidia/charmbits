@@ -7,6 +7,7 @@ import type { CharmDefinition } from './charm-catalog';
 import betaCatalogue from './beta-catalogue.json';
 import config from './access-config.json';
 import { refreshAccessToken } from './access-network';
+import { PERSONAL_EDITION } from './build-edition';
 
 interface SecretStore {
 	get(): Promise<string | undefined>;
@@ -23,6 +24,7 @@ interface AccessOptions {
 interface StoredGrant { token: string; grant: AccessGrant }
 
 export interface AccessSnapshot {
+	application: 'vscode' | 'desktop';
 	label: string;
 	detail: string;
 	activationLabel: string;
@@ -50,12 +52,15 @@ export class AccessController {
 	}
 
 	async initialize(previousPreferences: unknown): Promise<void> {
+		if (PERSONAL_EDITION) { return; }
 		const saved = await this.store.load(undefined);
 		const record = saved.value as Partial<AccessRecord> | undefined;
 		if (saved.error || saved.value !== undefined && (record?.version !== 1
 			|| typeof record.betaLegacy !== 'boolean' || !Number.isFinite(record.lastSeenAt))) {
 			this.readOnly = true;
-			this.notice = 'Saved access settings could not be read. Your free starter and personal packs remain available.';
+			this.notice = this.options.application === 'vscode'
+				? 'Saved access settings could not be read. Your free VS Code collection and personal packs remain available.'
+				: 'Saved access settings could not be read. Your free starter and personal packs remain available.';
 		} else if (record) {
 			this.record = { version: 1, betaLegacy: record.betaLegacy === true,
 				lastSeenAt: Math.max(this.now(), record.lastSeenAt ?? 0) };
@@ -75,11 +80,16 @@ export class AccessController {
 					}
 				}
 			}
-		} catch { this.notice = 'Saved activation could not be opened. Import your access file again to restore it.'; }
+		} catch {
+			this.notice = this.options.application === 'vscode'
+				? 'Saved activation could not be opened. All included VS Code charms remain free and available.'
+				: 'Saved activation could not be opened. Import your access file again to restore it.';
+		}
 		if (!this.readOnly) { await this.store.write(this.record); }
 	}
 
 	catalogue(all: readonly CharmDefinition[]): CharmDefinition[] {
+		if (PERSONAL_EDITION || this.options.application === 'vscode') { return [...all]; }
 		const legacyIds = this.record.betaLegacy ? betaCatalogue : [];
 		const allowed = new Set(accessibleCatalogue(all, { legacyIds }).map(charm => charm.id));
 		for (const { grant } of this.grants) {
@@ -91,28 +101,36 @@ export class AccessController {
 	}
 
 	get snapshot(): AccessSnapshot {
+		if (PERSONAL_EDITION) {
+			return { application: this.options.application, label: 'Personal edition',
+				detail: 'All charms and features unlocked for your personal use. No trial or activation.',
+				activationLabel: 'Already unlocked', canActivate: false, canBrowse: false };
+		}
+		if (this.options.application === 'vscode') {
+			return {
+				application: 'vscode',
+				label: 'Free for VS Code',
+				detail: 'All included charms and features are free. No trial or purchase needed.',
+				activationLabel: 'Activate access',
+				canActivate: false,
+				canBrowse: this.website() !== undefined,
+			};
+		}
 		const pro = this.grants.some(({ grant }) => grant.kind === 'pro');
 		const trial = this.grants.find(({ grant }) => grant.kind === 'trial'
 			&& currentAccess(grant, this.now(), this.record.lastSeenAt))?.grant;
 		const owned = this.grants.some(({ grant }) => grant.items.length > 0);
 		const expired = this.grants.some(({ grant }) => grant.kind === 'trial');
-		const vscode = this.options.application === 'vscode';
-		const charmDetail = pro ? 'Your full charm collection is unlocked.'
-			: trial ? `Extra charm preview until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
-				: this.record.betaLegacy ? 'Your saved beta access and choices are retained.'
-					: expired ? 'Your charm preview has ended. Purchases, photos and progress remain.'
-						: owned ? 'Your purchased charms are available.'
-							: 'Starter charms are included; paid charms are optional.';
 		return {
-			label: vscode ? 'Free for VS Code' : pro ? 'CharmBits Pro' : trial ? 'Pro trial' : this.record.betaLegacy ? 'Beta collection'
+			application: 'desktop',
+			label: pro ? 'CharmBits Pro' : trial ? 'Pro trial' : this.record.betaLegacy ? 'Beta collection'
 				: owned ? 'Free + your items' : 'Free starter',
-			detail: vscode ? `All VS Code features are free. ${charmDetail}`
-				: pro ? 'All in-app charms. One permanent purchase for your current apps.'
+			detail: pro ? 'All in-app charms. One permanent purchase for your current apps.'
 				: trial ? `Full access until ${new Date(trial.exp! * 1000).toLocaleDateString()}.`
 					: this.record.betaLegacy ? 'Your saved beta access and choices are retained.'
 						: expired ? 'Your trial has ended. Free charms, purchases, photos and progress remain.'
 							: 'Choose a starter companion. Your photos, garden and imported packs stay yours.',
-			activationLabel: vscode ? 'Import charm access' : 'Activate access',
+			activationLabel: 'Activate access',
 			canActivate: Object.keys(this.keys).length > 0,
 			canBrowse: this.website() !== undefined,
 		};
@@ -135,6 +153,7 @@ export class AccessController {
 		catch { return false; }
 		const value = document as { format?: unknown; version?: unknown; token?: unknown } | null;
 		if (value?.format !== 'charmlet-access') { return false; }
+		if (PERSONAL_EDITION) { return true; }
 		if (this.readOnly) { throw new Error('Repair the saved access settings before importing an activation file.'); }
 		if (value.version !== 1) { throw new Error('This access file version is not supported.'); }
 		const grant = await verifyAccessGrant(value.token, this.keys, { engine: webcrypto as Crypto });
@@ -157,7 +176,7 @@ export class AccessController {
 	}
 
 	async observeClock(): Promise<void> {
-		if (this.readOnly) { return; }
+		if (PERSONAL_EDITION || this.readOnly) { return; }
 		this.record.lastSeenAt = Math.max(this.record.lastSeenAt, this.now());
 		await this.store.write(this.record);
 	}
@@ -180,6 +199,8 @@ export class AccessController {
 	}
 
 	watch(changed: () => Promise<void>, failed: () => void): void {
+		// The free VS Code edition does not need trial timers or entitlement requests.
+		if (PERSONAL_EDITION || this.options.application === 'vscode') { return; }
 		const schedule = () => {
 			const next = this.grants.map(item => (item.grant.exp ?? 0) * 1000)
 				.filter(expiry => expiry > this.now()).sort((a, b) => a - b)[0];

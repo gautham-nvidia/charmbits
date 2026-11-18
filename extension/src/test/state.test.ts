@@ -12,13 +12,16 @@ import { Pendulum } from '../pendulum';
 import { StateStore } from '../state-store';
 import { StateWriter } from '../state-writer';
 import { displayedCharm, festiveCharm, festiveDay } from '../festive-charms';
-import { chainLinks, cordForCharm, cordPath } from '../cord-design';
+import { chainLinks, cordForCharm, cordPath, stemLeaves, stemFoliage } from '../cord-design';
+import { bloomPoint } from '../bloom-motion';
 import { CordMotion } from '../cord-motion';
 import { AccessController } from '../access-controller';
 import { signAccessGrant, type AccessGrant } from '../access-grant';
 import { starterSelection, freeDownloadSelection } from '../catalogue-access';
 import { charmCollection } from '../charm-collections';
 import betaCatalogue from '../beta-catalogue.json';
+import { PNG } from 'pngjs';
+import { flowerBaseFromPixels } from '../charm-attachment';
 
 test('the starter remains fixed across gallery reordering and beta migration never grants future content', async context => {
 	const directory = mkdtempSync(join(tmpdir(), 'charmlet-access-migration-'));
@@ -31,17 +34,17 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 	for (const group of new Set(CHARMS.map(charmCollection))) {
 		const count = CHARMS.filter(charm => starter.includes(charm.id) && charmCollection(charm) === group).length;
 		const exceptions: Record<string, number> = {
-			Terminal: 1, California: 3, 'Nature & Places': 1, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
+			Terminal: 1, California: 3, 'Nature & Places': 1, 'Plants & Trees': 0, 'Space & Stars': 0, 'US Tech Hubs & Skylines': 4,
 		};
 		assert.equal(count, exceptions[group] ?? 2, group);
 	}
 	const future = { ...CHARMS[0], id: 'trial:future-paid-design' };
-	const fresh = new AccessController({ application: 'vscode', directory: join(directory, 'fresh'), secrets });
+	const fresh = new AccessController({ application: 'desktop', directory: join(directory, 'fresh'), secrets });
 	await fresh.initialize(undefined);
 	assert.equal(fresh.catalogue([...CHARMS, future]).length, 31);
-	assert.equal(fresh.snapshot.label, 'Free for VS Code');
-	assert.equal(fresh.snapshot.activationLabel, 'Import charm access');
-	const reopen = new AccessController({ application: 'vscode', directory: join(directory, 'fresh'), secrets });
+	assert.equal(fresh.snapshot.label, 'Free starter');
+	assert.equal(fresh.snapshot.activationLabel, 'Activate access');
+	const reopen = new AccessController({ application: 'desktop', directory: join(directory, 'fresh'), secrets });
 	await reopen.initialize({ version: 1 }); // Existing metadata wins even if an old-looking preference is later supplied.
 	assert.equal(reopen.catalogue([...CHARMS, future]).length, 31);
 	const beta = new AccessController({ application: 'desktop', directory: join(directory, 'beta'), secrets });
@@ -51,9 +54,15 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 	assert.deepEqual(new Set(beta.catalogue([...CHARMS, future]).map(charm => charm.id)),
 		new Set([...betaCatalogue, ...starter].filter(id => CHARMS.some(charm => charm.id === id))));
 	assert.equal(beta.catalogue(CHARMS).some(charm => charm.group === 'Sports Icons'), false);
-	const newPreferences = new AccessController({ application: 'vscode', directory: join(directory, 'new-preferences'), secrets });
+	const newPreferences = new AccessController({ application: 'desktop', directory: join(directory, 'new-preferences'), secrets });
 	await newPreferences.initialize(DEFAULT_STATE);
 	assert.equal(newPreferences.catalogue(CHARMS).length, 31);
+	const freeVscode = new AccessController({ application: 'vscode', directory: join(directory, 'free-vscode'), secrets });
+	await freeVscode.initialize(DEFAULT_STATE);
+	assert.deepEqual(freeVscode.catalogue([...CHARMS, future]), [...CHARMS, future]);
+	assert.equal(freeVscode.snapshot.application, 'vscode');
+	assert.equal(freeVscode.snapshot.canActivate, false);
+	assert.match(freeVscode.snapshot.detail, /All included charms and features are free/);
 });
 
 (['vscode', 'desktop'] as const).forEach(application => test(`native ${application} signed access expires without losing purchases, photos or earned flowers and rejects forged activation`, async context => {
@@ -66,8 +75,9 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 		secrets: { get: async () => stored, set: async (value: string) => { stored = value; } } };
 	const controller = new AccessController(options);
 	await controller.initialize(DEFAULT_STATE);
-	assert.equal(controller.catalogue(CHARMS).length, 31);
+	assert.equal(controller.catalogue(CHARMS).length, application === 'vscode' ? CHARMS.length : 31);
 	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free starter');
+	assert.equal(controller.snapshot.canActivate, application === 'desktop');
 	const base: AccessGrant = { iss: 'charmlet', aud: 'charmlet-apps', sub: 'a'.repeat(64),
 		iat: now / 1000, kind: 'trial', items: ['trial:new-electric-guitar'],
 		trialStartedAt: now / 1000, exp: now / 1000 + 30 * 86400 };
@@ -84,23 +94,24 @@ test('the starter remains fixed across gallery reordering and beta migration nev
 	for (const id of ['terminal', 'live:cali', 'trial:new-electric-guitar', photo.id, flower.id]) {
 		assert(ids.includes(id));
 	}
-	assert.equal(ids.includes('live:robot'), false);
+	assert.equal(ids.includes('live:robot'), application === 'vscode');
 	assert.equal(controller.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'Free + your items');
-	if (application === 'vscode') { assert.match(controller.snapshot.detail, /All VS Code features are free/); }
+	if (application === 'vscode') { assert.match(controller.snapshot.detail, /All included charms and features are free/); }
 	const reopened = new AccessController(options);
 	await reopened.initialize(DEFAULT_STATE);
+	assert.deepEqual(JSON.parse(stored!), [token], 'Opening a free edition must retain the saved signed grant.');
 	assert.deepEqual(reopened.catalogue([...CHARMS, photo, flower]).map(charm => charm.id), ids);
 	const pieces = token.split('.');
 	pieces[1] = Buffer.from(JSON.stringify({ ...base, kind: 'pro', exp: undefined, trialStartedAt: undefined })).toString('base64url');
 	await assert.rejects(reopened.importDocument(file(pieces.join('.'))), /invalid|not recognized/);
-	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), false);
+	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), application === 'vscode');
 	const { exp: _expiry, trialStartedAt: _start, ...paid } = base;
 	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'pro', iat: now / 1000 }, keys.privateKey, 'test')));
 	assert.equal(reopened.catalogue(CHARMS).length, CHARMS.length);
 	assert.equal(reopened.snapshot.label, application === 'vscode' ? 'Free for VS Code' : 'CharmBits Pro');
 	now += 1000;
 	await reopened.importDocument(file(await signAccessGrant({ ...paid, kind: 'items', iat: now / 1000 }, keys.privateKey, 'test')));
-	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), false);
+	assert.equal(reopened.catalogue(CHARMS).some(charm => charm.id === 'live:robot'), application === 'vscode');
 	await assert.rejects(reopened.importDocument(file(token)), /older/);
 }));
 
@@ -117,6 +128,7 @@ test('missing or invalid saved values restore a usable charm', () => {
 test('hide and motion preferences survive a reload without trusting unknown fields', () => {
 	assert.deepEqual(restoreState({ cordLength: 180, hidden: true, reducedMotion: true, extra: 'ignored' }), {
 		version: 1, editionVersion: 1, charmId: 'terminal', layoutMode: 'hanging', showMessages: true, rotateMessages: true, messageIndex: 0,
+		arrangement: 'single', bracelet: { charms: [], selected: 0 },
 		cordLength: 180, size: 100, hidden: true, reducedMotion: true,
 		festiveEnabled: true, charmPinned: false, cordChoices: {}, caliOutfit: 'daily', puzzles: DEFAULT_STATE.puzzles,
 	});
@@ -126,9 +138,12 @@ test('cords follow the visible charm and preserve independent manual choices', (
 	const ruby = CHARMS.find(charm => charm.id === 'trial:new-ruby')!;
 	const soft = CHARMS.find(charm => charm.id === 'trial:new-smiley-happy')!;
 	const murugan = CHARMS.find(charm => charm.id === 'trial:new-murugan')!;
+	const flower = CHARMS.find(charm => charm.group === 'Garden Flowers')!;
 	assert.equal(cordForCharm(ruby), 'gold-chain');
 	assert.equal(cordForCharm(soft), 'soft');
 	assert.equal(cordForCharm(murugan), 'braid');
+	assert.equal(cordForCharm(flower), 'stem');
+	assert.equal(cordForCharm(flower, { [flower.id]: 'ribbon' }), 'ribbon');
 	const saved = restoreState({ ...DEFAULT_STATE, cordChoices: {
 		[ruby.id]: 'silver-chain', [soft.id]: 'ribbon', missing: 'braid', terminal: 'script',
 	} });
@@ -191,6 +206,66 @@ test('flexible cords keep both attachment points and carry their metal links aro
 	}
 });
 
+test('flower leaves follow a flexible stem with bounded geometry and no foliage on a collapsed cord', () => {
+	assert.deepEqual(stemLeaves({ x: 0, y: 0 }, { x: 0, y: 0 }), { leaves: '', veins: '' });
+	for (const hook of [{ x: 0, y: 48 }, { x: -160, y: -200 }, { x: 400, y: 1200 }]) {
+		const shape = stemLeaves({ x: 0, y: 0 }, hook, 40);
+		assert.doesNotMatch(shape.leaves + shape.veins, /NaN|Infinity/);
+		assert.ok((shape.leaves.match(/ Z/g) ?? []).length >= 2);
+		assert.ok((shape.leaves.match(/ Z/g) ?? []).length <= 7);
+		assert.notEqual(shape.leaves, stemLeaves({ x: 0, y: 0 }, hook, -40).leaves);
+		assert.ok(cordPath({ x: 0, y: 0 }, hook, 40).endsWith(`${hook.x} ${hook.y}`));
+		const breeze = stemFoliage({ x: 0, y: 0 }, hook, 40, 4);
+		assert.equal(breeze.length, stemFoliage({ x: 0, y: 0 }, hook, 40).length);
+		assert.notEqual(breeze.map(leaf => leaf.blade).join(' '), shape.leaves);
+		assert.doesNotMatch(breeze.map(leaf => leaf.blade + leaf.fold + leaf.veins).join(' '), /NaN|Infinity/);
+	}
+});
+
+test('living blooms keep the stem join fixed while their petals open and remain bounded', () => {
+	const shape = { x: .5, y: .65, radiusX: .42, radiusY: .3 }, hook = { x: .5, y: .12 };
+	for (const seconds of [0, 1, 12, 1000]) {
+		for (const opening of [0, .5, 1]) {
+			const pose = { seconds, opening, sway: 1 };
+			assert.deepEqual(bloomPoint([hook.x, hook.y], shape, hook, pose), [hook.x, hook.y]);
+			assert.deepEqual(bloomPoint([.6, .1], shape, hook, pose), [.6, .1]);
+			for (let x = 0; x <= 1; x += .1) {
+				for (let y = 0; y <= 1; y += .1) {
+					const moved = bloomPoint([x, y], shape, hook, pose);
+					assert.ok(moved.every(Number.isFinite));
+					assert.ok(Math.abs(moved[0] - x) < .08 && Math.abs(moved[1] - y) < .08);
+				}
+			}
+		}
+	}
+	assert.notDeepEqual(bloomPoint([.8, .65], shape, hook, { seconds: 0, opening: 0, sway: 0 }),
+		bloomPoint([.8, .65], shape, hook, { seconds: 0, opening: 1, sway: 0 }));
+	const lowerHook = { x: .5, y: .96 };
+	const open = { seconds: 1, opening: 1, sway: .5 };
+	assert.deepEqual(bloomPoint([lowerHook.x, lowerHook.y], shape, lowerHook, open), [lowerHook.x, lowerHook.y]);
+	assert.deepEqual(bloomPoint([.55, 1], shape, lowerHook, open), [.55, 1]);
+	assert.notDeepEqual(bloomPoint([.8, .5], shape, lowerHook, open), [.8, .5],
+		'A lower stem must pin the stalk without freezing every petal above it.');
+});
+
+test('frontal flower joins enter opaque stalk pixels and matching old imports receive the same connection', async () => {
+	for (const key of ['flower-red-rose', 'flower-sunflower', 'flower-lily']) {
+		assert.ok(TRIAL_CHARMS.find(charm => charm.artworkKey === key)?.baseAttachment, `${key} needs its approved lower join.`);
+	}
+	for (const charm of TRIAL_CHARMS.filter(charm => charm.baseAttachment)) {
+		const pixels = PNG.sync.read(await readFile(join(__dirname, '../../media', charm.file)));
+		const connection = flowerBaseFromPixels(pixels.width, pixels.height, pixels.data,
+			charm.artworkKey === 'flower-sakura' ? 'wood' : 'green');
+		if (!charm.stemCalyx) { assert.deepEqual(connection?.baseAttachment, charm.baseAttachment); }
+		const { x, y: baseY } = charm.baseAttachment!;
+		const y = baseY - (charm.stemCalyx ? .045 : 0);
+		assert.ok(pixels.data[(Math.floor(y * pixels.height) * pixels.width + Math.floor(x * pixels.width)) * 4 + 3] >= 128,
+			`${charm.name} must not join across a transparent gap.`);
+		const imported = { ...charm, id: `pack:old:${charm.artworkKey}`, baseAttachment: undefined };
+		assert.deepEqual(buildCatalogue([imported]).find(item => item.id === imported.id)?.baseAttachment, charm.baseAttachment);
+	}
+});
+
 test('legacy and unknown charm selections retain the other preferences', () => {
 	for (const charmId of [undefined, 'missing', '../outside.svg', null]) {
 		const state = restoreState({ charmId, layoutMode: 'orbit', showMessages: false, rotateMessages: false, messageIndex: MESSAGES.length - 1, cordLength: 210, size: 80, hidden: true, reducedMotion: true });
@@ -204,6 +279,24 @@ test('legacy and unknown charm selections retain the other preferences', () => {
 		assert.equal(state.hidden, true);
 		assert.equal(state.reducedMotion, true);
 	}
+});
+
+test('bracelet slots survive storage, missing packs and position reset without changing the single default', () => {
+	assert.equal(restoreState(undefined).arrangement, 'single');
+	const bracelet = { charms: ['live:cali', 'trial:flower-red-rose', 'pack:missing:keepsake'], selected: 2 };
+	const saved = restoreState({ ...DEFAULT_STATE, arrangement: 'bracelet', bracelet, reducedMotion: true });
+	const serialized = JSON.parse(JSON.stringify(saved));
+	assert.equal(matchesSavedState(saved, serialized), true);
+	assert.deepEqual(restoreState(serialized).bracelet, bracelet);
+	assert.deepEqual(resetState(saved).bracelet, bracelet);
+	assert.equal(resetState(saved).arrangement, 'bracelet');
+	serialized.bracelet.charms[2] = 'terminal';
+	assert.equal(matchesSavedState(saved, serialized), false);
+	const damaged = restoreState({ arrangement: 'bracelet', bracelet: { charms: ['terminal', null, 'live:cali', 'live:cloud', 'extra'], selected: 99 } });
+	assert.equal(damaged.bracelet.charms.length, 3);
+	assert.equal(damaged.bracelet.selected, 2);
+	assert.equal(damaged.bracelet.charms.includes('pack:missing:keepsake'), false);
+	assert.deepEqual(saved.bracelet, bracelet);
 });
 
 test('every bundled selection survives saved-state restoration', () => {

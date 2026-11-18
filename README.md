@@ -1,8 +1,8 @@
 # CharmBits
 
-**CharmBits: Coding Charms** is a free coding companion in a dockable VS Code view, with optional paid charms.
+**CharmBits: Coding Charms** is a completely free coding companion in a dockable VS Code view, including its full public charm collection.
 
-**CharmBits candidate:** extension **0.15.1** makes all VS Code features free, without an account or expiring app trial. New profiles start with **31 fixed free charms**; extra paid charms are optional. The **210-design public selection** remains bundled for offline use. The online catalogue offers 15 additional free claims and optional 49¢ / 99¢ / $1.99 extras; 49¢ items require another paid item at checkout. **Desktop** keeps its 30-day trial and **CharmBits Pro at $7.49 launch / $17.49 regular, once**. Pro's current charm collection also works in the free extension.
+**CharmBits candidate:** extension **0.16.0** includes all software features and all released charms for free, without an account, paid activation or expiring trial. The public artwork stays bundled for offline use. **Desktop** keeps its 31 fixed free starter charms, 15 optional free claims, 30-day Pro trial and **Pro at $7.49 launch / $17.49 regular, once**. Desktop extras use the existing 49¢ / 99¢ / $1.99 tiers; 49¢ items require another paid item at checkout. These purchases are not required in VS Code or compatible extension hosts.
 
 The rename preserves the extension identity, desktop storage/encryption identity, saved data and legacy `.charmlet.json` packs. User-facing names and download filenames say CharmBits; compatibility identifiers intentionally retain the earlier name.
 
@@ -18,9 +18,9 @@ The [current collections and offers guide](docs/phase-16-collections-and-offers.
 
 **Cali** keeps the approved grizzly face, seven outfits, saved wardrobe choice and four playful tap reactions. Four spinner designs turn under your pointer; Twisty Cube, Sliding Tiles and Lights Out have optional boards and saved progress. Every charm has a brief tap wiggle. The default 100% is 15% larger, and Appearance offers 60-200% sizing. Encouragement, pets, matched cords, small wins, local photos and the eighteen-flower garden carry forward. [Current verification and release gates](docs/phase-13-artists-website.md) distinguish this candidate from earlier checks.
 
-Open **Charms** to browse your available collection. The historical private **Art review** compares 237 featured designs; the public website and packages use the smaller release selection. Flower previews do not unlock garden rewards or change watering progress. Creating local photo charms inside the app is free. The approved proprietary [software licence](extension/LICENSE) and separate [artwork terms](extension/ARTWORK-LICENSE.md) define permitted use.
+Open **Charms** to browse your available collection. The private **Art review** compares 254 featured designs; the public website and packages use the smaller release selection. Flower previews do not unlock garden rewards or change watering progress. Creating local photo charms inside the app is free. The approved proprietary [software licence](extension/LICENSE) and separate [artwork terms](extension/ARTWORK-LICENSE.md) define permitted use.
 
-**Desktop 0.12.1 candidate:** retains the starter, 30-day trial and purchased-access rules and starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
+**Desktop 0.13.0 candidate:** retains the starter, 30-day trial and purchased-access rules and starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
 
 The website is hosted at **https://charmbits.pages.dev/**, with the Terminal logo, a compact Auto/Light/Dark control, a dismissible offer-signup popup and About/Press pages. The [current service guide](service/README.md) uses Cloudflare, Brevo and Lemon Squeezy for the digital launch. Account setup and purchase/refund testing are required before email delivery or checkout opens. Earlier [provider comparisons](docs/monetization-and-payments.md) remain background; Shopify is deferred until merchandise.
 
@@ -43,13 +43,15 @@ preference, while the visible cord may temporarily shorten to fit the current pa
 
 Hold a Stress Buster to squeeze, or hold Space/Enter with the charm focused. Choose happy, determined, calm or winking smiley balls, a soft heart, thumbs-up or rocket, or the original Stress Ball and Squishy Star. Release to let it recover. The cord stays attached; Reduced Motion removes the transition and bounce.
 
-**Charms > Live Companions** offers Cali, Sunny, Nimbus and Byte alongside Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. They react to nearby input and rest between interactions. Reduced Motion stops idle animation; software rendering retains the detailed artwork and reactions when WebGL is unavailable.
+**Charms > Live Companions** offers Cali, Sunny, Nimbus and Robot Assistant alongside Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. They react to nearby input and rest between interactions. Reduced Motion stops idle animation; software rendering retains the detailed artwork and reactions when WebGL is unavailable.
+
+Nimbus can optionally show current US weather. Select Nimbus, open **Settings > Appearance > Nimbus weather**, choose an airport station and save with weather enabled. The National Weather Service supplies timestamped observations; checks run every ten minutes while the app is visible. Weather starts off, uses no GPS or account, and sends only the selected station in an ordinary HTTPS request. Temperature, observation time and stale/offline state appear below the message; live rain or snow remains still with Reduced Motion.
 
 Cali's week goes from **Monday denim** to a **Tuesday hoodie**, **Wednesday vest**, **Thursday flannel**, **Friday coastal shirt**, **Saturday trail fleece** and **Sunday knit**. Outfits follow the local date, including daylight-saving changes. Cali's face stays consistent, and encouragement adds a clear thumbs-up or wave.
 
 **Cali** cheers for your next small step with brief text bubbles. Click or press Enter for encouragement; focus sessions add start, halfway and completion cues. **Focus > Cali's encouragement** lets you add an optional name, turn bubbles off or disable focus prompts. Words and preferences stay on the device. Escape dismisses a bubble; bubbles never take focus or block a desktop click. Enable **Celebrate milestones** under Small wins for Cali's win confetti. Everything is silent, and celebrations stay still with Reduced Motion.
 
-The new pets are **Giant Panda**, **Golden Retriever**, **Labrador**, **German Shepherd**, **Husky**, **Corgi**, **Beagle** and **Goldendoodle**, with just two new cats: **Silver Tabby** and **Tuxedo Cat**. They join the existing pets under **Animals**.
+**Pets & Wildlife** now adds **Shiba Inu**, **French Bulldog**, **Dachshund**, **Pomeranian**, **Maine Coon**, **Ragdoll**, **Siamese**, **Lop Rabbit**, **Hamster** and **Cockatiel** to the existing breeds and wildlife. The new pets are free in the editor and paid desktop extras. **Nature & Places** focuses on parks, landscapes and world wonders; **Plants & Trees** keeps bonsai and trees together, and City Auto is in Culture & Traditions.
 
 **Charms > Stress Busters** offers four spinner designs, reusable Bubble Pop, Worry Stone and three puzzles. Drag a spinner's rotor to turn it and release to coast; pull the centre for the cord. Select Twisty Cube, Sliding Tiles or Lights Out and open **Play** for the board, shuffle, undo and reset. Puzzle progress saves locally. The tools are silent, with no timers or scores.
 
@@ -95,7 +97,7 @@ unchanged. After rebuilding, reload that demo window to load the updated code.
 
 | Try | Examples |
 |---|---|
-| Live 3D | Cali, Sunny, Nimbus and Byte |
+| Live 3D | Cali, Sunny, Nimbus and Robot Assistant |
 | Stress Busters | Four spinners, Bubble Pop, Worry Stone, Twisty Cube, Sliding Tiles, Lights Out, smiley balls and squishies |
 | Animals | Giant Panda, Goldendoodle, Husky and the other new and existing pets |
 | Test Bench | ATE Tester, Oscilloscope, Tweezers and other lab tools |
@@ -220,6 +222,6 @@ Each phase keeps its own branch and merges before the next.
 
 Personal repository under `gautham-nvidia`, **not** the NVIDIA organization or an endorsed product.
 No NVIDIA-branded assets are included. The core and bundled starter items are intended to remain free.
-The proprietary [software licence](extension/LICENSE) allows free use of all VS Code features.
+The proprietary [software licence](extension/LICENSE) allows free use of all VS Code features and the included public charm collection.
 First-party artwork has [separate terms](extension/ARTWORK-LICENSE.md). Public source visibility is not an open-source licence.
 [Third-party notices](extension/THIRD_PARTY_NOTICES.md) cover Matter.js and Lucide/Feather assets.

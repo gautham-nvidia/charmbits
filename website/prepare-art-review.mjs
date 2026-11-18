@@ -37,6 +37,19 @@ async function previewFromPng(page, encoded) {
   }, encoded);
 }
 
+async function saveImmutable(file, content) {
+  const bytes = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  const prior = await readFile(file).catch(error => {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  });
+  if (prior) {
+    if (!prior.equals(bytes)) throw new Error(`Use a new revision or preparation profile instead of replacing ${file}.`);
+    return;
+  }
+  await writeFile(file, bytes, { flag: 'wx' });
+}
+
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(join(repo, 'extension/package.json'));
 const { PNG } = require('pngjs');
@@ -56,14 +69,17 @@ const existing = await readFile(manifestPath, 'utf8').then(JSON.parse, error => 
   throw error;
 });
 const items = new Map(existing.items.map(item => [item.key, item]));
+let savedCount = 0;
 async function saveManifest() {
   const ordered = allJobs.flatMap(job => {
     const item = items.get(job.key);
-    return [2, 3, 4].includes(item?.profile) && item.revision <= job.revision ? [item] : [];
+    return Number.isInteger(item?.profile) && item.profile >= 2 && item.profile <= 9
+      && item.revision <= job.revision ? [item] : [];
   });
   await writeFile(manifestPath, `${JSON.stringify({ ...existing, status: 'review-only', expected: allJobs.length, prepared: ordered.length,
     note: 'Illustrated Gemini artwork candidates. Publication and commercial rights require review. Flowers remain earned rewards.',
     items: ordered }, null, 2)}\n`);
+  savedCount = ordered.length;
 }
 await mkdir(imageRoot, { recursive: true });
 await mkdir(packRoot, { recursive: true });
@@ -72,7 +88,8 @@ const failures = [];
 try {
   const page = await browser.newPage();
   for (const job of jobs) {
-    const profile = job.approvedPack ? 4 : job.greenDespill ? 3 : 2;
+    const profile = job.preparationProfile ?? (job.approvedPack ? 4 : job.greenDespill ? 3 : 2);
+    if (!Number.isInteger(profile) || profile < 2 || profile > 9) throw new Error(`Invalid preparation profile: ${job.key}`);
     const renderId = `${job.variant}-p${profile}`;
     let raw, receipt;
     try {
@@ -88,6 +105,10 @@ try {
     const previous = items.get(job.key);
     if (previous?.profile === profile && previous.revision === job.revision && previous.greenDespill === job.greenDespill) {
       if (previous.rawSha256 !== receipt.sha256) throw new Error(`Use a new revision instead of replacing ${job.key}.`);
+      if (job.hangingRotation !== undefined && (previous.hangingSource?.rotation !== job.hangingRotation
+        || previous.hangingSource?.removedLoopRows !== job.removeTopLoop)) {
+        throw new Error(`Use a new preparation profile for a changed flower orientation: ${job.key}`);
+      }
       if (job.approvedPack && (previous.approvedPack !== job.approvedPack || previous.pngSha256 !== job.approvedPngSha256)) {
         throw new Error(`Use a new revision instead of replacing approved artwork: ${job.key}`);
       }
@@ -148,6 +169,38 @@ try {
         // Preview the same canonical pixels, including recorded preparation transforms.
         rendered.preview = await previewFromPng(page, charm.png);
       }
+      let hangingSource;
+      if (job.family === 'flowers' && job.hangingRotation !== undefined) {
+        const sourceName = `${job.variant}-p2.png`;
+        const sourceBytes = await readFile(join(imageRoot, sourceName));
+        const originalHash = previous?.profile === 2 ? previous.pngSha256 : previous?.hangingSource?.sha256;
+        if (digest(sourceBytes) !== originalHash) {
+          throw new Error(`The reviewed upright flower must be preserved before preparing ${job.key}.`);
+        }
+        const source = PNG.sync.read(sourceBytes);
+        const flower = new PNG({ width: source.width, height: source.height });
+        for (let pixel = 0; pixel < source.width * source.height; pixel++) {
+          const from = job.hangingRotation === 180 ? source.width * source.height - pixel - 1 : pixel;
+          source.data.copy(flower.data, pixel * 4, from * 4, from * 4 + 4);
+          if (Math.floor(from / source.width) < job.removeTopLoop) flower.data[pixel * 4 + 3] = 0;
+        }
+        rendered.png = (job.hangingRotation === 0 && !job.removeTopLoop ? sourceBytes : PNG.sync.write(flower)).toString('base64');
+        const previewName = `${job.variant}-p2.webp`;
+        const previewBytes = await readFile(join(imageRoot, previewName));
+        rendered.preview = job.hangingRotation === 0 && !job.removeTopLoop ? previewBytes.toString('base64')
+          : await page.evaluate(async ({ encoded, rotation, rows }) => {
+            const image = new Image(); image.src = `data:image/webp;base64,${encoded}`; await image.decode();
+            if (image.naturalWidth !== 432 || image.naturalHeight !== 504) throw new Error('Invalid original flower preview size.');
+            const canvas = document.createElement('canvas'); canvas.width = 432; canvas.height = 504;
+            const context = canvas.getContext('2d');
+            if (rotation === 180) { context.translate(432, 504); context.rotate(Math.PI); }
+            context.drawImage(image, 0, rows * 2, 432, 504 - rows * 2, 0, rows * 2, 432, 504 - rows * 2);
+            return canvas.toDataURL('image/webp', .95).split(',')[1];
+          }, { encoded: previewBytes.toString('base64'), rotation: job.hangingRotation, rows: job.removeTopLoop });
+        hangingSource = { image: `./assets/review/${sourceName}`, sha256: digest(sourceBytes),
+          preview: `./assets/review/${previewName}`, previewSha256: digest(previewBytes),
+          rotation: job.hangingRotation, removedLoopRows: job.removeTopLoop };
+      }
       const png = Buffer.from(rendered.png, 'base64');
       if (png.length > MAX_PNG_BYTES) throw new Error('Cutout exceeds the existing PNG cap.');
       const packId = `review-${renderId}`;
@@ -155,14 +208,15 @@ try {
         format: 'charmlet-pack', version: 1, id: packId, name: `Review: ${job.name}`, author: 'Charmlet art review',
         charms: [{ id: job.id, name: job.name, group: job.group, description: `${job.name}: illustrated art-review candidate.`, accent: job.accent, png: rendered.png }],
       }));
-      await writeFile(join(imageRoot, `${renderId}.png`), png, { flag: 'wx' });
-      await writeFile(join(imageRoot, `${renderId}.webp`), Buffer.from(rendered.preview, 'base64'), { flag: 'wx' });
-      if (job.family !== 'flowers') await writeFile(join(packRoot, `${packId}.charmlet.json`), `${JSON.stringify(pack)}\n`, { flag: 'wx' });
+      await saveImmutable(join(imageRoot, `${renderId}.png`), png);
+      await saveImmutable(join(imageRoot, `${renderId}.webp`), Buffer.from(rendered.preview, 'base64'));
+      if (job.family !== 'flowers') await saveImmutable(join(packRoot, `${packId}.charmlet.json`), `${JSON.stringify(pack)}\n`);
       const item = {
         key: job.key, id: job.id, name: job.name, group: job.group, family: job.family, accent: job.accent,
         description: job.description,
         original: job.original, preview: `./assets/review/${renderId}.webp`, image: `./assets/review/${renderId}.png`,
         revision: job.revision, profile,
+        ...(hangingSource ? { hangingSource } : {}),
         ...(job.sourceVariant ? { sourceVariant: job.sourceVariant } : {}),
         ...(job.sourceTransform ? { sourceTransform: job.sourceTransform } : {}),
         ...(job.greenSpillCleanup ? { greenSpillCleanup: true } : {}),
@@ -182,5 +236,5 @@ try {
   }
   await saveManifest();
 } finally { await browser.close(); }
-console.log(JSON.stringify({ prepared: items.size, expected: allJobs.length, failures }));
+console.log(JSON.stringify({ prepared: savedCount, expected: allJobs.length, failures }));
 if (failures.length) process.exitCode = 1;

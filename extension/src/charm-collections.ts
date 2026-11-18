@@ -3,7 +3,7 @@ import type { CharmDefinition } from './charm-catalog';
 export const COLLECTION_ORDER: readonly string[] = [
 	'Terminal', 'Live 3D', 'Stress Busters', 'Music', 'Music Icons', 'Sports Icons',
 	'California', 'US Tech Hubs & Skylines', 'Pets & Wildlife',
-	'Tech & Lab', 'Nature & Places', 'Space & Stars', 'Zodiac', 'Gemstones',
+	'Tech & Lab', 'Nature & Places', 'Plants & Trees', 'Space & Stars', 'Zodiac', 'Gemstones',
 	'Culture & Traditions', 'Sports', 'Celebrations', 'Flowers', 'Grown by you',
 ];
 const GROUP_COLLECTIONS: Readonly<Record<string, string>> = {
@@ -13,9 +13,10 @@ const GROUP_COLLECTIONS: Readonly<Record<string, string>> = {
 	Coding: 'Tech & Lab',
 	'Compute & Silicon': 'Tech & Lab',
 	'Test Bench': 'Tech & Lab',
-	Cities: 'Nature & Places',
+	Cities: 'Culture & Traditions',
 	'National Parks': 'Nature & Places',
-	'Trees & Forests': 'Nature & Places',
+	'World Wonders': 'Nature & Places',
+	'Trees & Forests': 'Plants & Trees',
 	'Solar System': 'Space & Stars',
 	'Stars & Galaxies': 'Space & Stars',
 	'Local Culture': 'Culture & Traditions',

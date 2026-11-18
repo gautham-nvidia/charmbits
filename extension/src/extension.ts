@@ -13,6 +13,9 @@ import { StateStore, type LoadedState } from './state-store';
 import { StateWriter } from './state-writer';
 import { isPhotoPack, photoPackInput } from './photo-packs';
 import { AccessController } from './access-controller';
+import { WeatherController } from './weather-controller';
+import type { WeatherSettings, WeatherSnapshot } from './weather-core';
+import { PERSONAL_EDITION } from './build-edition';
 
 let deactivateExtension: (() => Promise<void>) | undefined;
 
@@ -57,6 +60,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	const companion = new CompanionController(loadedCompanion.value, companionStore, legacyMessageIndex);
 	await companion.initialize();
+	const weatherStore = new StateStore<WeatherSettings>(context.globalStorageUri.fsPath, 'weather.json');
+	const loadedWeather = await weatherStore.load(undefined);
+	const weather = new WeatherController({ saved: loadedWeather.value, storage: weatherStore, unreadable: !!loadedWeather.error });
 	const catalogue = [...baseCatalogue, ...gardenCharms(companion.snapshot().state.garden)];
 	const initialCharm = restoreState(loadedState.value, catalogue);
 
@@ -101,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (selected) { await removePack(packDirectory, value); packs = packs.filter(pack => pack.id !== value); }
 			await refreshCatalogue();
 		}
-	}, access);
+	}, access, weather);
 	const refreshCatalogue = async (selectedId?: string) => {
 		await provider.setCatalogue(access.catalogue(buildCatalogue([
 			...packCharms(packs), ...gardenCharms(companion.snapshot().state.garden),
@@ -134,10 +140,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		provider.postCompanion(snapshot);
 		refreshGardenCatalogue();
 	});
+	const unsubscribeWeather = weather.subscribe(snapshot => provider.postWeather(snapshot));
 	let disposePromise: Promise<void> | undefined;
 	const disposeCompanion = () => disposePromise ??= (async () => {
 		access.dispose();
 		unsubscribeCompanion();
+		unsubscribeWeather();
+		await weather.dispose();
 		await companion.dispose();
 		await provider.flush();
 	})();
@@ -230,6 +239,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 	private viewGeneration = 0;
 	private traceOutput?: vscode.LogOutputChannel;
 	private viewReady = false;
+	private pageVisible = true;
 	private pendingCompanionTab: 'focus' | 'learn' | 'garden' | undefined;
 
 	private trace(label: string, details: Record<string, unknown> = {}) {
@@ -258,6 +268,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 		private readonly companion: CompanionController,
 		private readonly photoAction: (action: 'save' | 'remove', value: unknown) => Promise<void>,
 		private readonly access: AccessController,
+		private readonly weather: WeatherController,
 	) {
 		this.stateWriter = new StateWriter(
 			async value => {
@@ -285,7 +296,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 	}
 
 	async flush() {
-		await Promise.all([this.stateWriter.flush(), this.companion.flush()]);
+		await Promise.all([this.stateWriter.flush(), this.companion.flush(), this.weather.flush()]);
 		this.trace('drained');
 	}
 
@@ -307,7 +318,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 		view.webview.html = template
 			.replaceAll('__NONCE__', randomBytes(16).toString('hex'))
 			.replaceAll('__CSP__', view.webview.cspSource)
-			.replaceAll('__APP_VERSION__', String(this.context.extension.packageJSON.version).replace(/[^a-zA-Z0-9.+-]/g, ''))
+			.replaceAll('__APP_VERSION__', String(this.context.extension.packageJSON.version).replace(/[^a-zA-Z0-9.+-]/g, '') + (PERSONAL_EDITION ? '+personal' : ''))
 			.replaceAll('__SCRIPT__', view.webview.asWebviewUri(resource('dist/webview.js')).toString())
 			.replaceAll('__STYLE__', view.webview.asWebviewUri(resource('media/view.css')).toString())
 			.replaceAll('__CHARM__', view.webview.asWebviewUri(resource('media/keycap.svg')).toString());
@@ -318,17 +329,19 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 			const allowed = this.access.catalogue(this.catalogue);
 			if (allowed.length !== this.catalogue.length) { await this.setCatalogue(allowed); }
 			if (message.type === 'ready') {
+				this.pageVisible = !('pageVisible' in message) || message.pageVisible === true;
 				await this.flush();
 				this.trace('ready-state', { generation });
 				const includedTab = this.pendingCompanionTab;
 				await view.webview.postMessage({
 					type: 'state', state: this.state, catalogue: this.catalogue, drop: this.dropOnReady, visible: view.visible,
-					companion: this.companion.snapshot(), access: this.access.snapshot,
+					companion: this.companion.snapshot(), access: this.access.snapshot, weather: this.weather.snapshot(),
 					...(includedTab ? { companionTab: includedTab } : {}),
 				});
 				if (this.view !== view) { return; }
 				if (this.pendingCompanionTab === includedTab) { this.pendingCompanionTab = undefined; }
 				this.viewReady = true;
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 				this.dropOnReady = false;
 				const nextTab = this.pendingCompanionTab;
 				if (nextTab) {
@@ -339,6 +352,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 				const revision = 'revision' in message && Number.isSafeInteger(message.revision) && Number(message.revision) >= 0
 					? Number(message.revision) : undefined;
 				this.state = restoreState(message.state, this.catalogue);
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 				this.changed(this.state);
 				this.trace('save-received', { generation, revision, requested: this.state.charmId });
 				try {
@@ -389,6 +403,16 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 				} catch {
 					await view.webview.postMessage({ type: 'companion-result', requestId, error: 'CharmBits could not hang that flower. Try again.' });
 				}
+			} else if (message.type === 'weather-visibility' && 'visible' in message && typeof message.visible === 'boolean') {
+				this.pageVisible = message.visible;
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
+			} else if (message.type === 'weather-settings' && 'settings' in message && 'requestId' in message
+				&& Number.isSafeInteger(message.requestId) && Number(message.requestId) >= 0) {
+				const saved = await this.weather.configure(message.settings);
+				await view.webview.postMessage({ type: 'weather-result', requestId: message.requestId,
+					...(!saved ? { error: 'Weather settings could not be saved. Try again.' } : {}) });
+			} else if (message.type === 'weather-source') {
+				await vscode.env.openExternal(vscode.Uri.parse('https://www.weather.gov/'));
 			} else if (message.type === 'learning-source' && 'cardId' in message) {
 				const card = typeof message.cardId === 'string' ? learningCard(message.cardId) : undefined;
 				if (card?.source) { await vscode.env.openExternal(vscode.Uri.parse(card.source.url)); }
@@ -401,6 +425,7 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 			}
 		});
 		const visibility = view.onDidChangeVisibility(() => {
+			this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 			void view.webview.postMessage({ type: 'visibility', visible: view.visible });
 			if (view.visible) { this.postCompanion(this.companion.snapshot()); }
 		});
@@ -409,10 +434,17 @@ class CharmBitsView implements vscode.WebviewViewProvider {
 			messages.dispose();
 			visibility.dispose();
 			if (this.view === view) {
+				this.weather.setVisible(false);
 				this.viewReady = false;
 				this.view = undefined;
 			}
 		});
+	}
+
+	postWeather(snapshot: WeatherSnapshot) {
+		if (this.view?.visible && this.viewReady) {
+			void this.view.webview.postMessage({ type: 'weather', snapshot });
+		}
 	}
 
 	postCompanion(snapshot: CompanionSnapshot) {

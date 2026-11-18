@@ -10,6 +10,7 @@ desktop/release/
 desktop/distribution/
 desktop/test-results/
 release/dist/
+private-builds/
 **/*.vsix
 **/.env
 **/.env.*

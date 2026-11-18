@@ -6,6 +6,7 @@ export const CORD_STYLES = {
 	braid: 'Braided cord',
 	leather: 'Leather cord',
 	ribbon: 'Satin ribbon',
+	stem: 'Leafy stem',
 	'silver-chain': 'Silver chain',
 	'gold-chain': 'Gold chain',
 	'ball-chain': 'Ball chain',
@@ -58,6 +59,8 @@ export function cordForCharm(charm: CharmDefinition, choices: CordChoices = {}):
 			return 'ball-chain';
 		case 'Garden Flowers':
 		case 'Grown by you':
+		case 'Flowers':
+			return 'stem';
 		case 'Seasonal':
 		case 'Celebrations':
 			return 'ribbon';
@@ -118,4 +121,49 @@ export function chainLinks(anchor: CordPoint, hook: CordPoint, balls = false, be
 		paths.push(`M ${a} A ${arc} ${b} A ${arc} ${a}`);
 	}
 	return paths.join(' ');
+}
+
+export interface StemLeaf { blade: string; fold: string; veins: string; }
+
+/** Curved leaf surfaces keep their root on the stem while their tips flutter independently. */
+export function stemFoliage(anchor: CordPoint, hook: CordPoint, bend = 0, seconds = 0): readonly StemLeaf[] {
+	const distance = Math.hypot(hook.x - anchor.x, hook.y - anchor.y);
+	if (!Number.isFinite(distance) || distance < 24) { return []; }
+	const count = Math.min(7, Math.max(2, Math.floor(distance / 38)));
+	const size = Math.min(22, Math.max(12, distance * .12));
+	const control = cordControl(anchor, hook, bend);
+	const leaves: StemLeaf[] = [];
+	const time = Number.isFinite(seconds) ? seconds : 0;
+	for (let index = 0; index < count; index++) {
+		const t = .2 + index / Math.max(1, count - 1) * .63, u = 1 - t;
+		const x = u * u * anchor.x + 2 * u * t * control.x + t * t * hook.x;
+		const y = u * u * anchor.y + 2 * u * t * control.y + t * t * hook.y;
+		const dx = u * (control.x - anchor.x) + t * (hook.x - control.x);
+		const dy = u * (control.y - anchor.y) + t * (hook.y - control.y);
+		const length = Math.hypot(dx, dy) || 1, side = index % 2 ? 1 : -1;
+		const flutter = time ? Math.sin(time * .78 + index * 1.7) * .08 : 0;
+		const tx = dx / length, ty = dy / length, nx = -ty * side, ny = tx * side;
+		const point = (out: number, along: number) => {
+			const width = out * (1 + flutter), slope = along + out * flutter * .65;
+			return `${number(x + size * (nx * width + tx * slope))} ${number(y + size * (ny * width + ty * slope))}`;
+		};
+		const root = point(0, 0), tip = point(.98, -.6);
+		const blade = `M ${root} C ${point(.13, -.52)} ${point(.49, -.77)} ${tip}`
+			+ ` C ${point(.91, -.06)} ${point(.38, .16)} ${root} Z`;
+		const fold = `M ${root} Q ${point(.48, -.22)} ${tip}`
+			+ ` C ${point(.91, -.06)} ${point(.38, .16)} ${root} Z`;
+		const veins = [`M ${root} Q ${point(.48, -.22)} ${tip}`];
+		for (const part of [.22, .4, .58]) {
+			veins.push(`M ${point(part, -part * .5)} Q ${point(part + .03, -part * .5 - .1)} ${point(part + .09, -part * .5 - .18)}`);
+			veins.push(`M ${point(part, -part * .5)} Q ${point(part + .1, -part * .5 + .03)} ${point(part + .16, -part * .5 + .05)}`);
+		}
+		leaves.push({ blade, fold, veins: veins.join(' ') });
+	}
+	return leaves;
+}
+
+/** The static silhouette remains useful for bounds and attachment checks. */
+export function stemLeaves(anchor: CordPoint, hook: CordPoint, bend = 0): { leaves: string; veins: string } {
+	const leaves = stemFoliage(anchor, hook, bend);
+	return { leaves: leaves.map(leaf => leaf.blade).join(' '), veins: leaves.map(leaf => leaf.veins).join(' ') };
 }

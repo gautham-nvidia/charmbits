@@ -1,15 +1,16 @@
 # CharmBits artwork terms
 
-Version 1.0 - 16 November 2026
+Version 1.1 - 16 November 2026
 
 The maintainer is Gautham Anebajagane. These terms cover first-party artwork supplied
 with a public CharmBits release or an authorized charm pack, to the extent the
 maintainer owns or is authorized to license the relevant rights.
 
-You may display and use included free artwork inside CharmBits, including while
-working or studying. Paid artwork may be used with the entitlement supplied at
-purchase. Reasonable personal installation and backup copies are permitted.
-Free VS Code features do not require an artwork purchase.
+You may display and use all public artwork included with this VS Code release
+inside the extension at no charge, including while working or studying. Desktop
+artwork follows its free starter, trial or purchased entitlement. Reasonable
+personal installation and backup copies are permitted. The VS Code edition does
+not require an artwork purchase or paid activation.
 
 No permission is granted to sell the artwork itself, redistribute extracted
 images or packs, or use them as assets in another product without separate

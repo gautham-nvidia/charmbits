@@ -39,7 +39,7 @@ function downloadCard(product) {
   const card = element('article', 'download-card');
   card.append(element('h3', '', product.name));
   card.append(element('p', '', product.kind === 'installer'
-    ? product.sku === 'app-vscode' ? 'Free extension and features. Optional paid charms.' : 'Desktop free starter. Optional Desktop Pro trial.'
+    ? product.sku === 'app-vscode' ? 'Completely free extension, including all released charms.' : 'Desktop free starter. Optional Desktop Pro trial.'
     : product.proOnly ? 'Included with CharmBits Pro' : product.priceCents === 0 ? 'Free to keep' : 'Included in your purchases'));
   const button = element('button', 'pill pill-dark', product.delivery === 'activation' ? 'Save access file ↓' : 'Download ↓');
   button.type = 'button'; button.addEventListener('click', () => downloadProduct(product, button));
@@ -80,14 +80,14 @@ function renderLibrary() {
   document.querySelector('#confirm-email').hidden = true;
   document.querySelector('#your-downloads').hidden = false;
   const active = library.edition === 'trial';
-  document.querySelector('#edition-name').textContent = (library.edition === 'pro' ? 'CharmBits Pro'
+  document.querySelector('#edition-name').textContent = (library.edition === 'pro' ? 'CharmBits Desktop Pro'
     : active ? 'Your 30-day Desktop Pro trial' : 'Your free apps & charm extras') + (service.testMode ? ' · Test mode' : '');
   document.querySelector('#save-access').textContent = service.testMode ? 'Save test access file ↓' : 'Save my access file ↓';
   document.querySelector('#edition-detail').textContent = library.edition === 'pro'
-    ? 'Desktop Pro and the full in-app charm collection. The charms also work in the free VS Code extension.'
-    : active ? `Your desktop trial ends ${new Date(library.trial.expiresAt).toLocaleString()}. No automatic charge follows. VS Code features stay free.`
-      : library.trial.used ? 'Your desktop trial has ended. VS Code features stay free. Free charms, purchases, photos and progress remain.'
-        : 'VS Code features are free to keep. Your 30-day Desktop Pro trial has not started.';
+    ? 'Desktop Pro and the full in-app charm collection. The editor extension already includes all released charms for free.'
+    : active ? `Your desktop trial ends ${new Date(library.trial.expiresAt).toLocaleString()}. No automatic charge follows. The editor extension remains completely free.`
+      : library.trial.used ? 'Your desktop trial has ended. Free desktop charms, purchases, photos and progress remain. All released charms stay free in the editor extension.'
+        : 'All released charms and features are free in the editor extension. Your 30-day Desktop Pro trial has not started.';
   document.querySelector('#start-trial').hidden = library.trial.used || library.edition === 'pro';
   document.querySelector('#test-mode-note').hidden = !service.testMode;
   document.querySelector('#app-downloads').replaceChildren(...settings.products
@@ -181,7 +181,7 @@ async function initialize() {
   if (params.has('trial')) {
     form.dataset.purpose = 'trial';
     document.querySelector('#confirm-title').textContent = 'Try Desktop Pro for 30 days';
-    document.querySelector('#request-description').textContent = 'Your desktop trial starts when you confirm your email. One trial per email, no card and no automatic charge. Re-downloading does not restart it. VS Code features do not need a trial.';
+    document.querySelector('#request-description').textContent = 'Your standalone desktop trial starts when you confirm your email. One trial per email, no card and no automatic charge. Re-downloading does not restart it. All released charms and features are already free in the editor extension.';
   }
   await setupSignup(form);
   if (verification) {

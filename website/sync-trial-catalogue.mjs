@@ -12,6 +12,9 @@ const require = createRequire(join(repo, 'extension/package.json'));
 const { parseCharmPack, packCharms } = require('./out/charm-packs.js');
 const { FIDGET_CHARMS, LIVE_CHARMS, ORIGINAL_CHARMS } = require('./out/charm-catalog.js');
 const { FLOWERS } = require('./out/garden-core.js');
+const { bloomFromPixels } = require('./out/bloom-motion.js');
+const { flowerBaseFromPixels } = require('./out/charm-attachment.js');
+const { PNG } = require('pngjs');
 const check = process.argv.includes('--check');
 const site = join(repo, 'website');
 const media = join(repo, 'extension/media');
@@ -45,6 +48,16 @@ for (const item of selected) {
     charms: [{ id: item.key, name: item.name, group, description, accent: item.accent, png: bytes.toString('base64') }],
   }));
   const attachment = packCharms([pack])[0].attachment;
+  const flowerPixels = item.family === 'flowers' ? PNG.sync.read(bytes) : undefined;
+  let botanical = flowerPixels ? flowerBaseFromPixels(flowerPixels.width, flowerPixels.height, flowerPixels.data,
+    item.key === 'flower-sakura' ? 'wood' : 'green') : undefined;
+  // This original bloom has leaves but no exposed stalk. A small calyx beneath
+  // its lowest central petal supplies the join without changing the flower face.
+  if (item.key === 'flower-marigold') {
+    botanical = { attachment: { x: .5, y: .005 }, baseAttachment: { x: .5, y: .72 },
+      stemColour: [61, 85, 44], stemWidth: .028, stemCalyx: true };
+  }
+  if (flowerPixels) assert.ok(botanical, `Review the flower's visible base before shipping: ${item.key}`);
   const file = `trial-${item.key}-r${item.revision}-p${item.profile}.png`;
   assert.match(file, /^[a-z0-9-]+\.png$/);
   if (check) {
@@ -55,6 +68,8 @@ for (const item of selected) {
   catalogue.push({
     id: `trial:${item.key}`, name: item.name, file, description, accent: item.accent, group,
     artworkKey: item.key, artworkHash, attachment,
+    ...botanical,
+    ...(flowerPixels ? { bloom: bloomFromPixels(flowerPixels.width, flowerPixels.height, flowerPixels.data) } : {}),
   });
   bytesIncluded += bytes.length;
 }

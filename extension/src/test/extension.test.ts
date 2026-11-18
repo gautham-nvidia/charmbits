@@ -1,22 +1,33 @@
 import { test, expect, _electron as electron, type Frame, type Page } from '@playwright/test';
 import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { CHARMS, ORIGINAL_CHARMS } from '../charm-catalog';
-import betaCatalogue from '../beta-catalogue.json';
+import { charmCollection } from '../charm-collections';
 import { DEFAULT_STATE, getLayout } from '../charm-state';
+import { DEFAULT_WEATHER } from '../weather-core';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { command, commandInput, endOfDocument, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
+import { command, commandInput, endOfDocument, isolatedEditorEnvironment, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
 
-async function dismissPluginUpdateNotice(frame: Frame) {
+async function dismissResolvedHostNotice(frame: Frame) {
 	// This editor-owned marketplace warning can cover the secondary-side toolbar.
 	// Dismiss only the observed unrelated notice; retain application notifications.
 	const notice = frame.page().locator('.notification-toast')
 		.filter({ hasText: 'Failed to update: github/awesome-copilot#marketplace' }).first();
 	if (await notice.isVisible()) { await notice.getByRole('button', { name: /Clear Notification/ }).click(); }
+	const startup = frame.page().locator('.notification-toast')
+		.filter({ hasText: 'Extension host did not start in 10 seconds' }).first();
+	if (await startup.isVisible()) {
+		// Only dismiss the timed startup warning after both extension channels
+		// have actually replied; an unresponsive host must still fail readiness.
+		await expect(frame.locator('#stage')).toHaveAttribute('data-ready', 'true');
+		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-ready', 'true');
+		test.info().annotations.push({ type: 'host-startup', description: 'Host exceeded 10 seconds, then both extension channels became ready.' });
+		await startup.getByRole('button', { name: /Clear Notification/ }).click();
+	}
 }
 
 async function openAppearance(frame: Frame) {
-	await dismissPluginUpdateNotice(frame);
+	await dismissResolvedHostNotice(frame);
 	await frame.locator('#settings-toggle').click();
 	await expect(frame.locator('#settings-toggle')).toHaveAttribute('aria-expanded', 'true');
 	await frame.locator('#menu-appearance').click();
@@ -24,7 +35,7 @@ async function openAppearance(frame: Frame) {
 }
 
 async function menuAction(frame: Frame, id: string) {
-	await dismissPluginUpdateNotice(frame);
+	await dismissResolvedHostNotice(frame);
 	await frame.locator('#settings-toggle').click();
 	await frame.locator(`#${id}`).click();
 }
@@ -95,17 +106,12 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 	const storage = join(profile, 'user', 'User', 'globalStorage', 'gautham-nvidia.charmlet');
 	mkdirSync(storage, { recursive: true });
 	// This comprehensive artwork scenario follows a pre-0.13 beta profile.
-	// The companion UI suite separately verifies an empty profile's starter.
+	// The companion UI suite separately verifies an empty profile's free catalogue.
 	writeFileSync(join(storage, 'preferences.json'),
 		JSON.stringify({ ...DEFAULT_STATE, editionVersion: undefined }));
 	const scratchFile = join(profile, 'charmlet-trial.ts');
 	writeFileSync(scratchFile, "export const greeting = 'Hello, CharmBits!';\n");
-	const environment: Record<string, string> = {};
-	for (const [key, value] of Object.entries(process.env)) {
-		if (value !== undefined && key !== 'ELECTRON_RUN_AS_NODE') {
-			environment[key] = value;
-		}
-	}
+	const environment = isolatedEditorEnvironment();
 	environment.CHARMLET_TRACE_SAVES = '1';
 	const executablePath = process.env.VSCODE_EXECUTABLE
 		?? (process.platform === 'win32' ? 'C:\\Program Files\\Microsoft VS Code\\Code.exe' : undefined);
@@ -196,7 +202,14 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 		await expect(frame.locator('#stage')).toHaveAttribute('data-hidden', 'false');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false', { timeout: 20000 });
 		await window.screenshot({ path: testInfo.outputPath('right-dock.png') });
-		await dragCharm(window, frame, -55, 0);
+		await beginDrag(window, frame, -55, 0);
+		await frame.evaluate(settings => globalThis.window.postMessage({
+			type: 'weather', snapshot: { settings, status: 'disabled', stale: false, readOnly: false },
+		}, '*'), DEFAULT_WEATHER);
+		await browserFrames(window, 2);
+		await expect(frame.locator('#phase')).toHaveText('Held');
+		await expect.poll(async () => Math.abs(Number(await frame.locator('#stage').getAttribute('data-cord-bend')))).toBeGreaterThan(.1);
+		await window.mouse.up();
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'true');
 		await menuAction(frame, 'toggle');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
@@ -248,8 +261,8 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			frame = await readyFrame(window);
 			await openAppearance(frame);
 			let picker = frame.getByRole('combobox', { name: 'Charm', exact: true });
-			await expect(picker.locator('option')).toHaveCount(betaCatalogue.length);
-			await expect(picker.locator('optgroup')).toHaveCount(17);
+			await expect(picker.locator('option')).toHaveCount(CHARMS.length);
+			await expect(picker.locator('optgroup')).toHaveCount(new Set(CHARMS.map(charmCollection)).size);
 			await expect(picker.locator('optgroup[label="Space & Stars"]')).toHaveCount(1);
 			await expect(picker.locator('option[value="terminal"]')).toHaveText('Terminal');
 			// Category grouping can place a newly appended charm inside an earlier group.
@@ -830,7 +843,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			await openAppearance(frame);
 			const importedPicker = frame.getByRole('combobox', { name: 'Charm', exact: true });
 			await expect(importedPicker).toHaveValue('pack:probe-card:probe-card');
-			await expect(importedPicker.locator('option')).toHaveCount(betaCatalogue.length + 1);
+			await expect(importedPicker.locator('option')).toHaveCount(CHARMS.length + 1);
 			await importedPicker.press('Escape');
 			await expect(frame.locator('#settings')).toBeHidden();
 			await expect(frame.locator('#charm-name')).toHaveText('Probe Card');
@@ -858,7 +871,7 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			await window.screenshot({ path: testInfo.outputPath('imported-probe-card.png') });
 			await command(window, 'CharmBits: Remove Charm Pack');
 			await window.locator('.quick-input-list').getByText('Probe Card', { exact: true }).click();
-			await expect(frame.locator('#charm-select option')).toHaveCount(betaCatalogue.length);
+			await expect(frame.locator('#charm-select option')).toHaveCount(CHARMS.length);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');
 			await expect(frame.locator('#charm-name')).toHaveText('Terminal');
 		});

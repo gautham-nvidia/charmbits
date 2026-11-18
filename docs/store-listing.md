@@ -1,13 +1,13 @@
 # CharmBits listing and launch copy
 
-Prepared for the **0.15.1 review candidate**. Store publication and paid services are not live. The approved software and artwork terms are included, with the public selection limited to 210 designs. Publisher access and successful CI on the release commit remain required.
+Prepared for the **0.16.0 review candidate**. Store publication and paid services are not live. The approved software and artwork terms are included, with 227 public designs. Publisher access and successful CI on the release commit remain required.
 
 ## Store fields
 
 | Field | Prepared value |
 |---|---|
 | Name | CharmBits: Coding Charms |
-| Short description | A free coding companion with focus, a daily garden, photo keepsakes and playful breaks. Optional paid charms. |
+| Short description | Free coding companions, calm pet reactions, charm bracelets, focus sessions, a daily garden and local photo keepsakes. |
 | Price | Free |
 | Categories | Other |
 | Keywords | charms, focus, productivity, garden, motivation, silicon, accessibility |
@@ -19,6 +19,8 @@ Prepared for the **0.15.1 review candidate**. Store publication and paid service
 
 The authoritative long description is [extension/README.md](../extension/README.md), so the VSIX and store listing do not drift into different feature promises.
 
+The [final 0.16 review draft](marketplace-0.16-draft.md) collects the current fields, captures and remaining publisher account steps.
+
 Keep the existing extension identity `gautham-nvidia.charmlet`: it owns saved profiles and encrypted activations. The visible name is CharmBits. The Marketplace URL must use that identity after publisher ownership and the live listing have been verified.
 
 ## Product introduction
@@ -27,7 +29,7 @@ Keep the existing extension identity `gautham-nvidia.charmlet`: it owns saved pr
 
 CharmBits puts a small, interactive companion in your VS Code sidebar. Start a focus session, discover a coding fact, take a gentle water break, or grow a surprise flower one day at a time.
 
-The extension and all its features are free. Pick from 31 starter charms, import extra artwork and keep every flower you earn. Additional paid charms are optional. No account is needed for the extension, and its core tools work offline. Desktop retains its 30-day trial and optional Pro upgrade; Pro's charm collection can also be used in VS Code.
+The extension, all its features and every released charm are free in VS Code and compatible extension hosts. Pick any included companion, import your own artwork and keep every flower you earn. There is no account, paid activation or trial timer in the extension, and its core tools work offline. Desktop retains its free starter, 30-day Pro trial and optional paid Pro or individual charms.
 
 ## Feature copy
 
@@ -36,17 +38,20 @@ The extension and all its features are free. Pick from 31 starter charms, import
 - **A small spark of curiosity.** Start with motivation, or switch to sourced coding, AI, GPU and testing facts and trivia.
 - **Grow at your pace.** Plant a surprise seed and water once per local day. Your eleventh watering earns a permanent flower. Missing a day never removes progress.
 - **Gentle reminders.** Optional water and movement cues offer Done, Snooze and Skip, with an option to wait for a focus break.
-- **Free to import.** Bring a compatible charm pack into the extension. The importer and photo tools are free; additional charm purchases are optional.
+- **Free to personalize.** Every released editor charm, the importer and photo tools are free. New pets include Shiba Inu, and parks, wonders and plants have focused collections.
+- **Company while you code.** The ivory Robot Assistant thinks, cheers and encourages; Nimbus can optionally follow timestamped US weather observations.
+- **A few favourites together.** Hang two or three charms on a bracelet, reorder them and pull each one left or right.
+- **A quiet response.** Tap a pet or a front-facing flower. The effects settle again, pause when hidden and respect Reduced Motion.
 
 ## Screenshots and artwork
 
 Use only captures of the actual reviewed version, in a disposable profile containing generated sample text. Show the version footer and original bundled artwork. Crop away unrelated editor panes and local filesystem paths rather than exposing a personal workspace.
 
-The app, starter-picker and garden captures in `docs/store-assets/` show the installed 0.15.1 candidate in an isolated profile. The picker shows the actual 31-charm starter. Historical captures remain in the versioned review records. The existing 256-pixel store icon is `extension/media/marketplace-icon.png`. Homepage concept previews are not part of the app's distributable artwork or store screenshots.
+The main view, collection, bracelet and flower captures in `docs/store-assets/` come from the actual 0.16 editor checks. They show the free 227-design collection and approved attachment geometry. Historical captures remain in the versioned review records. The existing 256-pixel store icon is `extension/media/marketplace-icon.png`. Homepage concept previews are not part of the app's distributable artwork or store screenshots.
 
 <img src="store-assets/navigation.png" width="240" alt="Main navigation and learning card"> <img src="store-assets/picker.png" width="240" alt="Searchable charm picker">
 
-<img src="store-assets/garden.png" width="240" alt="Garden after the first watering, restored from the installed 0.15.1 VSIX in Restricted Mode">
+<img src="store-assets/bracelet.png" width="240" alt="Shiba Inu, front-facing rose and Cali on a shared bracelet">
 
 Use approved artwork in store materials. Do not claim NVIDIA sponsorship, imply that paid services are live, or advertise the unsigned desktop beta or website-only locket prototype as features delivered by the IDE listing.
 
@@ -78,12 +83,12 @@ The owner must sign in to [Marketplace publisher management](https://marketplace
 
 The visible listing name is **CharmBits: Coding Charms**. Keep the extension identity **`gautham-nvidia.charmlet`** so existing installations retain their settings and activations. A matching publisher name alone does not prove ownership; the authenticated Marketplace account must own it.
 
-After publisher ownership and the Trusted Publishing policy are verified, merge reviewed source to `main`, wait for CI at that exact commit, then use **Actions → Extension Release → Run workflow** with version `0.15.1` and destination `marketplace`. The default `artifact` destination only prepares a review download. The workflow validates the package, source state and terms before submitting the same VSIX. Open VSX is separate and still requires its own `OVSX_PAT` when selected.
+After publisher ownership and the Trusted Publishing policy are verified, merge reviewed source to `main`, wait for CI at that exact commit, then use **Actions → Extension Release → Run workflow** with version `0.16.0` and destination `marketplace`. The default `artifact` destination only prepares a review download. The workflow validates the package, source state and terms before submitting the same VSIX. Open VSX is separate and still requires its own `OVSX_PAT` when selected.
 
 As checked during preparation, the public extension lookup returned “Extension `gautham-nvidia.charmlet` not found,” GitHub had no repository Actions secrets, and the local publisher store was empty. Publisher ownership, the trusted policy and a live listing are still unverified. Do not set the website Marketplace link until the live listing installs successfully.
 
 ## Announcement draft — use only after the links exist
 
-**Meet CharmBits: a little company while you code.** Add an interactive companion to your VS Code sidebar, focus on one task and grow a surprise flower at your own pace. All extension features are free, with 31 starter charms and optional paid charms. Your photos and progress stay on your device.
+**Meet CharmBits: a little company while you code.** Add an interactive companion to your VS Code sidebar, focus on one task and grow a surprise flower at your own pace. Every released charm and all extension features are free, with no paid activation or trial timer. Your photos and progress stay on your device.
 
 The final announcement needs verified installation/gallery links and the approved artwork selection before it can be posted. No announcement has been sent.

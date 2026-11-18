@@ -1,5 +1,12 @@
 # Digital packs now, merchandise later
 
+**Current policy, 2026-11-16:** the editor edition and all released charms are free.
+Payments and the 30-day Pro trial apply to desktop. Use the
+[current desktop setup guide](desktop-commerce-setup.md) and
+[service instructions](../service/README.md) for launch. The dated provider
+comparison below records earlier proposals, including superseded cross-app pricing
+and artwork counts.
+
 **Updated launch recommendation, 2026-11-10: use a provider with no monthly ecommerce subscription.** The owner does not want Shopify's $39/month cost yet. Prefer **Lemon Squeezy**, subject to seller/country approval, for hosted digital delivery and an optional cross-app Pro licence. **Payhip Free** is an alternative. Reconsider Shopify when physical merchandise is ready.
 
 The [Phase 14 product and pricing plan](phase-14-product-and-pricing-plan.md) proposes a free starter and a 30-day Pro preview without a card. The owner selected **$7.49 launch / $17.49 regular for a one-time Pro purchase** across the current apps on 2026-11-10. The plan also defines visual changes, requested collections, existing-user protection and required implementation. Checkout is not activated. Cloudflare Pages Free is the proposed commercial static host within its limits; the existing Vercel setup remains documented.

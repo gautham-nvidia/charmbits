@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { publicationBlockers, requirePublicationReady, validateCandidate } from './check.mjs';
 import { legacyPagesRedirect } from '../website/distribution.mjs';
+import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { build } from '../extension/node_modules/esbuild/lib/main.js';
+import targetTools from './build-target.cjs';
 
 function fixture() {
   const manifest = { name: 'charmlet', displayName: 'CharmBits: Coding Charms', publisher: 'gautham-nvidia', version: '0.5.0', pricing: 'Free',
@@ -10,6 +16,7 @@ function fixture() {
     ['extension/package.json', Buffer.from(JSON.stringify(manifest))],
     ['extension/readme.md', Buffer.from('CharmBits 0.5.0')],
     ['extension/changelog.md', Buffer.from('## 0.5.0 - release preparation')],
+    ['extension/dist/edition.json', Buffer.from('{"edition":"public"}')],
     ...['privacy.md', 'third_party_notices.md', 'artwork.md', 'dist/extension.js', 'dist/webview.js',
       'media/view.html', 'media/view.css', 'media/marketplace-icon.png'].map(name => [`extension/${name}`, Buffer.from(name)]),
   ]);
@@ -119,4 +126,53 @@ test('the shared website build redirects only the old Pages project', () => {
     assert.equal(legacyPagesRedirect(url), '');
   }
   assert.throws(() => legacyPagesRedirect('https://user@charmlet.pages.dev'));
+});
+
+test('personal builds require isolated output and cannot pass public package checks', () => {
+  const root = join(tmpdir(), 'charmbits-build-target');
+  for (const args of [['--personal'], ['--personal', '--outdir', 'dist'],
+    ['--personal', '--outdir', 'dist/personal'], ['--outdir']]) {
+    assert.throws(() => targetTools.buildTarget(root, args));
+  }
+  assert.equal(targetTools.buildTarget(root, []).define.__CHARMBITS_PERSONAL__, 'false');
+  assert.equal(targetTools.buildTarget(root, ['--personal', '--outdir', '../private-build']).define.__CHARMBITS_PERSONAL__, 'true');
+  for (const change of [
+    data => { data.packaged.charmbitsEdition = 'personal'; },
+    data => { data.files.set('extension/dist/edition.json', Buffer.from('{"edition":"personal"}')); },
+  ]) {
+    const data = fixture(); change(data);
+    assert.throws(() => validateCandidate(data), /personal/);
+  }
+});
+
+test('the compiled personal edition unlocks the full collection offline without reading or writing activations', async () => {
+  async function edition(personal) {
+    const result = await build({
+      stdin: { contents: "export { AccessController } from './access-controller'; export { CHARMS, WITHHELD_CHARMS } from './charm-catalog';",
+        resolveDir: fileURLToPath(new URL('../extension/src/', import.meta.url)), loader: 'ts' },
+      bundle: true, platform: 'node', format: 'esm', write: false,
+      define: { __CHARMBITS_PERSONAL__: String(personal) },
+    });
+    return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].contents).toString('base64')}`);
+  }
+  const [personal, publicEdition] = await Promise.all([edition(true), edition(false)]);
+  assert.equal(personal.CHARMS.length, publicEdition.CHARMS.length + publicEdition.WITHHELD_CHARMS.length);
+  const directory = await mkdtemp(join(tmpdir(), 'charmbits-personal-access-'));
+  let touchedSecrets = false;
+  const secrets = { get: async () => { touchedSecrets = true; }, set: async () => { touchedSecrets = true; } };
+  const access = new personal.AccessController({ application: 'desktop', directory, secrets });
+  try {
+    await access.initialize({ version: 1, editionVersion: 1 });
+    await access.observeClock();
+    access.watch(() => { throw new Error('Personal builds must not run billing timers.'); }, () => {});
+    assert.equal(access.catalogue(personal.CHARMS).length, personal.CHARMS.length);
+    assert.equal(access.snapshot.label, 'Personal edition');
+    assert.equal(access.snapshot.canActivate, false);
+    assert.equal(access.snapshot.canBrowse, false);
+    assert.equal(touchedSecrets, false);
+    assert.deepEqual(await readdir(directory), []);
+    const publicAccess = new publicEdition.AccessController({ application: 'desktop', directory, secrets, personal: true });
+    assert.equal(publicAccess.catalogue(publicEdition.CHARMS).length, 31, 'A runtime option cannot unlock a public desktop build.');
+    publicAccess.dispose();
+  } finally { access.dispose(); await rm(directory, { recursive: true, force: true }); }
 });

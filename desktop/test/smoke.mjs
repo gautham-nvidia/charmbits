@@ -21,25 +21,27 @@ const winsToday = (wins, now) => {
   return wins.day === day ? wins.today : 0;
 };
 const packaged = process.argv.includes('--packaged');
+const personalEdition = process.argv.includes('--personal');
+const appName = personalEdition ? 'CharmBits Personal' : 'CharmBits';
 const nativeInput = process.env.CHARMLET_DESKTOP_NATIVE_INPUT === '1';
 if (nativeInput && (process.platform !== 'win32' || process.env.GITHUB_ACTIONS !== 'true')) {
   throw new Error('Native pointer checks require the isolated Windows CI desktop.');
 }
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const trial = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'))
-  .filter(charm => !isWithheldArtworkFile(charm.file));
+  .filter(charm => personalEdition || !isWithheldArtworkFile(charm.file));
 const beta = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'beta-catalogue.json'), 'utf8'));
 const starter = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'starter-selection.json'), 'utf8')).starter;
 const retainedIds = new Set([...beta, ...starter]);
 const bundleRoot = process.env.CHARMLET_DESKTOP_BUNDLE_ROOT
   ? resolve(process.env.CHARMLET_DESKTOP_BUNDLE_ROOT) : join(root, 'release', manifest.version);
-const mode = packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : 'packaged' : 'dev';
+const mode = `${personalEdition ? 'personal-' : ''}${packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : 'packaged' : 'dev'}`;
 const arch = process.arch;
 const executablePath = packaged
   ? process.platform === 'win32'
-    ? join(bundleRoot, `CharmBits-win32-${arch}`, 'CharmBits.exe')
+    ? join(bundleRoot, `${appName}-win32-${arch}`, `${appName}.exe`)
     : process.platform === 'darwin'
-      ? join(bundleRoot, `CharmBits-darwin-${arch}`, 'CharmBits.app', 'Contents', 'MacOS', 'CharmBits')
+      ? join(bundleRoot, `${appName}-darwin-${arch}`, `${appName}.app`, 'Contents', 'MacOS', appName)
       : (() => { throw new Error(`Packaged smoke supports only win32/darwin, not ${process.platform}.`); })()
   : require('electron');
 const launchArgs = packaged ? [] : [root];
@@ -93,7 +95,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       await window.locator('#stage[data-ready="true"][data-companion-ready="true"]').waitFor({ timeout: 30000 });
       const startup = await diagnostic(application);
       assert.equal(startup.measuredWindowState.alwaysOnTop, true, 'Every fresh desktop launch must be topmost.');
-      assert.equal(await application.evaluate(({ app }) => app.getName()), 'Charmlet', 'The profile and safe-storage identity stays compatible.');
+      assert.equal(await application.evaluate(({ app }) => app.getName()), personalEdition ? 'CharmBits Personal' : 'Charmlet', 'Each edition must use its intended profile identity.');
       const publicAssets = await application.evaluate(({ app }) => {
         const fs = process.getBuiltinModule('fs'), path = process.getBuiltinModule('path');
         const dist = path.join(app.getAppPath(), 'dist');
@@ -101,7 +103,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
           terms: Object.fromEntries(['LICENSE', 'ARTWORK-LICENSE.md'].map(name =>
             [name, fs.readFileSync(path.join(dist, name), 'utf8')])) };
       });
-      assert.equal(publicAssets.media.some(isWithheldArtworkFile), false, 'Desktop packages must exclude withheld images.');
+      assert.equal(publicAssets.media.some(isWithheldArtworkFile), personalEdition, 'Owner studies belong only in the private personal package.');
       for (const [name, contents] of Object.entries(publicAssets.terms)) {
         assert.equal(contents, readFileSync(join(repo, 'extension', name), 'utf8'), `Packaged ${name} must match the source.`);
       }
@@ -298,7 +300,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   let first = await launch();
   const { application, window } = first;
   const start = await diagnostic(application);
-  await expect(window.locator('#app-version')).toHaveText(`v${manifest.version}`);
+  await expect(window.locator('#app-version')).toHaveText(`v${manifest.version}${personalEdition ? '+personal' : ''}`);
   await expect(window.locator('#primary-nav > button:not([hidden])')).toHaveCount(5);
   await expect(window.locator('#primary-nav')).toBeHidden();
   await expect(window.locator('#message-card')).toBeHidden();
@@ -308,7 +310,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.deepEqual(start.desktopView, { background: false, toolbarPinned: false, messagesPinned: false });
   assert.equal(start.geometry.frame.height, 300, 'The controls remain compact.');
   assert.deepEqual(start.anchor, { x: 210, y: 80 }, 'The older window position migrates to a peg position.');
-  assert.equal(start.appName, 'Charmlet');
+  assert.equal(start.appName, personalEdition ? 'CharmBits Personal' : 'Charmlet');
   assert.equal(realpathSync(start.profile), realpathSync(profile));
   assert.equal(start.focusable, false);
   assert.equal(start.configuredWindowFlags.frame, false);
@@ -409,9 +411,14 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.deepEqual(savedDisplay, { background: true, toolbarPinned: true, messagesPinned: true });
 
   const gardenBeforeTrial = JSON.parse(readFileSync(companionPath, 'utf8')).garden;
-  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(trial.filter(charm => retainedIds.has(charm.id)).length);
-  await expect(window.locator('#charm-select option[value^="trial:athlete-"]')).toHaveCount(0);
-  await expect(window.locator('#charm-select option[value^="trial:artist-"]')).toHaveCount(0);
+  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(trial.filter(charm => personalEdition || retainedIds.has(charm.id)).length);
+  await expect(window.locator('#charm-select option[value^="trial:athlete-"]')).toHaveCount(personalEdition ? trial.filter(charm => charm.id.startsWith('trial:athlete-')).length : 0);
+  await expect(window.locator('#charm-select option[value^="trial:artist-"]')).toHaveCount(personalEdition ? trial.filter(charm => charm.id.startsWith('trial:artist-')).length : 0);
+  if (personalEdition) {
+    await expect(window.locator('#access-label')).toHaveText('Personal edition');
+    await expect(window.locator('#activate-access')).toBeHidden();
+    assert.equal(existsSync(join(profile, 'access')), false, 'Personal use must not create a trial or activation store.');
+  }
   for (const key of ['starter-drishti', 'new-smiley-happy', 'new-drishti-guardian',
     'new-us-san-francisco-skyline', 'new-cupertino-loop', 'new-earth']) {
     const entry = trial.find(charm => charm.artworkKey === key);
@@ -701,13 +708,13 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       await third.window.locator('#charm').focus();
       await third.window.keyboard.press('Enter');
       await expect(face).toHaveAttribute('data-expression', character === 'cloud'
-        ? /^(sunrise|rain|lightning)$/ : /^(binary|compile|cursor)$/);
+        ? /^(sunrise|rain|lightning)$/ : /^(think|cheer|encourage)$/);
       const expression = await face.getAttribute('data-expression');
       reactions.add(expression); pictures.add(await face.evaluate(canvas => canvas.toDataURL()));
       await third.window.locator('#charm').screenshot({ path: join(output, `live-${character}-${expression}.png`) });
     }
     assert.deepEqual([...reactions].sort(), character === 'cloud'
-      ? ['lightning', 'rain', 'sunrise'] : ['binary', 'compile', 'cursor']);
+      ? ['lightning', 'rain', 'sunrise'] : ['cheer', 'encourage', 'think']);
     assert.equal(pictures.size, 3);
   }
   await selectInteractive('fidget:bubbles');
@@ -877,6 +884,58 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(fourth.window.locator('body')).toHaveAttribute('data-desktop-pinned-toolbar', String(!nativeInput));
   assert.deepEqual((await diagnostic(fourth.application)).desktopView,
     { background: !nativeInput, toolbarPinned: !nativeInput, messagesPinned: !nativeInput });
+  console.log('Desktop bracelet: three independent charms move left/right and stop with Reduced Motion.');
+  const appearance = async () => {
+    await openTools(fourth.window);
+    await fourth.window.getByRole('button', { name: 'Charm settings', exact: true }).click();
+    await fourth.window.getByRole('menuitem', { name: 'Appearance', exact: true }).click();
+  };
+  await appearance();
+  if (await fourth.window.locator('#motion').getAttribute('aria-checked') === 'false') {
+    await fourth.window.locator('#motion').click();
+  }
+  await fourth.window.locator('#arrangement').selectOption('bracelet');
+  await expect(fourth.window.locator('#bracelet-controls select:visible')).toHaveCount(3);
+  await fourth.window.getByRole('button', { name: 'Remove charm 3', exact: true }).click();
+  await expect(fourth.window.locator('#bracelet-controls select:visible')).toHaveCount(2);
+  await fourth.window.locator('#bracelet-add').click();
+  await fourth.window.locator('#settings-close').click();
+  const bracelet = fourth.window.locator('#bracelet-stage');
+  const slots = bracelet.locator('.bracelet-charm:not([hidden])');
+  await expect(slots).toHaveCount(3);
+  await expect(fourth.window.locator('#charm')).toBeHidden();
+  for (let index = 0; index < 3; index++) {
+    const slot = slots.nth(index);
+    for (const direction of [-1, 1]) {
+      const box = await slot.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await fourth.window.mouse.move(x, y); await fourth.window.mouse.down();
+      try {
+        await fourth.window.mouse.move(x + direction * 45, y + 8, { steps: 12 });
+        await expect(slot).toHaveClass(/\bdragging\b/);
+        await expect.poll(async () => {
+          const moved = await slot.boundingBox();
+          return direction * (moved.x + moved.width / 2 - x);
+        }, { message: `Desktop bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
+      } finally { await fourth.window.mouse.up(); }
+    }
+  }
+  await appearance();
+  await fourth.window.locator('#motion').click();
+  await fourth.window.locator('#settings-close').click();
+  await expect(fourth.window.locator('#stage')).toHaveAttribute('data-persisted', 'true');
+  await expect(bracelet).toHaveAttribute('data-running', 'false');
+  const braceletFrames = await bracelet.getAttribute('data-frames');
+  await new Promise(resolve => setTimeout(resolve, 350));
+  await expect(bracelet).toHaveAttribute('data-frames', braceletFrames);
+  assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).bracelet.charms.length, 3);
+  await bracelet.screenshot({ path: join(output, 'desktop-bracelet.png') });
+  await appearance();
+  await fourth.window.locator('#arrangement').selectOption('single');
+  await fourth.window.locator('#settings-close').click();
+  await openTools(fourth.window);
+  await fourth.window.getByRole('button', { name: 'Browse charms', exact: true }).click();
+  await fourth.window.locator('.charm-tile[data-charm-id="live:cali"]').click();
+  await expect(bracelet).toBeHidden();
   await openTools(fourth.window);
   await fourth.window.getByRole('button', { name: 'Focus', exact: true }).click();
   await fourth.window.locator('#mascot-settings summary').click();

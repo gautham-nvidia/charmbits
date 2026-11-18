@@ -1,4 +1,4 @@
-import type { ArtDefinition, ArtPoint } from './live-art-core';
+import { artToStage, type ArtDefinition, type ArtPoint } from './live-art-core';
 
 const cloudFile = 'live-art-cloud.png';
 const cloudPlane: readonly ArtPoint[] = [[86,180],[931,180],[931,1024],[86,1024]];
@@ -13,25 +13,28 @@ export const NIMBUS_ART: ArtDefinition = {
 		{ id: 'weather', file: cloudFile, role: 'body', effect: 'weather-front', pivot: [512,500], polygon: cloudPlane },
 	],
 };
-const robotFile = 'live-art-robot.png';
-const leftArm: readonly ArtPoint[] = [[185,425],[346,425],[355,562],[328,653],[320,767],[315,900],[185,900]];
-export const BYTE_ART: ArtDefinition = {
-	character: 'robot', bounds: { x: 176, y: 53, width: 672, height: 920 }, anchor: [512,55],
+const robotFile = 'live-art-robot-assistant.png';
+const robotBounds = { x: 210, y: 165, width: 690, height: 740 };
+const robotAnchor: ArtPoint = [507,172];
+export const ROBOT_ART: ArtDefinition = {
+	character: 'robot', bounds: robotBounds, anchor: robotAnchor,
+	attachmentX: artToStage({ bounds: robotBounds }, robotAnchor)[0],
 	parts: [
-		{ id: 'left-servo', file: robotFile, role: 'servo', side: -1, pivot: [295,500], polygon: leftArm },
-		{ id: 'right-servo', file: robotFile, role: 'servo', side: 1, pivot: [729,500],
-			polygon: leftArm.map(([x,y]) => [1024-x,y] as ArtPoint) },
-		{ id: 'legs', file: robotFile, role: 'body', pivot: [512,700],
-			polygon: [[330,645],[699,645],[708,990],[330,990]] },
-		{ id: 'torso', file: robotFile, role: 'body', pivot: [512,500],
-			polygon: [[345,369],[676,369],[682,653],[603,680],[600,755],[424,755],[422,684],[344,654]] },
-		{ id: 'head', file: robotFile, role: 'head', pivot: [512,370],
-			polygon: [[165,45],[859,45],[859,375],[165,375]],
-			volume: { x: 512, y: 210, rx: 350, ry: 170, depth: 65 },
-			display: { x: 264, y: 151, width: 497, height: 155 } },
+		{ id: 'left-servo', file: robotFile, role: 'servo', side: -1, pivot: [348,560],
+			polygon: [[324,532],[373,525],[374,590],[345,635],[328,714],[318,776],[302,838],[229,838],[224,719],[255,607],[295,543]] },
+		{ id: 'right-servo', file: robotFile, role: 'servo', side: 1, pivot: [654,561],
+			polygon: [[644,535],[689,519],[711,491],[735,444],[777,420],[787,392],[854,386],[894,431],[884,488],[831,530],[780,563],[720,593],[669,598],[647,584]] },
+		{ id: 'legs', file: robotFile, role: 'body', pivot: [507,780],
+			polygon: [[347,755],[664,755],[664,905],[347,905]] },
+		{ id: 'torso', file: robotFile, role: 'body', pivot: [507,644],
+			polygon: [[442,490],[571,490],[622,516],[641,538],[654,575],[675,736],[667,764],[635,789],[385,789],[338,760],[342,651],[361,551],[383,519],[442,501]] },
+		{ id: 'head', file: robotFile, role: 'head', pivot: [507,491],
+			polygon: [[285,164],[729,164],[729,496],[285,496]],
+			volume: { x: 507, y: 333, rx: 218, ry: 164, depth: 46 },
+			display: { x: 338, y: 219, width: 338, height: 230 } },
 	],
 };
 
 export function weatherCodeArt(character: string): ArtDefinition | undefined {
-	return character === 'cloud' ? NIMBUS_ART : character === 'robot' ? BYTE_ART : undefined;
+	return character === 'cloud' ? NIMBUS_ART : character === 'robot' ? ROBOT_ART : undefined;
 }

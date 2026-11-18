@@ -1,6 +1,6 @@
 # CharmBits privacy
 
-Updated 2026-11-06.
+Updated 2026-11-16.
 
 CharmBits' extension runs locally. It does not send your source code, focus notes, garden progress or imported artwork to a CharmBits server. It does not include analytics, advertising or an account requirement.
 
@@ -10,7 +10,7 @@ The extension saves your chosen charm, cord choices, appearance and motion prefe
 
 The in-app **Photo charms** panel processes the image you choose in memory. It saves only the cropped, framed 216-by-252-pixel PNG and the keepsake name you enter, in a local charm pack. The original file and its embedded metadata are not retained. No photo is uploaded. Closing the editor before saving discards the draft.
 
-The live companions' gaze responds only to pointer coordinates in the CharmBits view. They do not use a camera, microphone, face recognition or a network service. Cali's text comes from installed messages and your local focus/win state; it is not sent to a chat service.
+The live companions' gaze responds only to pointer coordinates in the CharmBits view. Their gaze and expressions do not use a camera, microphone, face recognition or a network service. Cali's text comes from installed messages and your local focus/win state; it is not sent to a chat service. Nimbus's optional weather connection is described below.
 
 CharmBits reads the pack file you explicitly choose to import. It does not scan workspace files or send editor contents to an AI model. Its built-in facts, trivia, motivational messages and artwork are installed resources. AI-generated review artwork was prepared during development; displaying it does not make an AI request.
 
@@ -18,9 +18,13 @@ Storage is local, not a cross-device sync service. Your operating system, editor
 
 ## Network activity
 
-All VS Code features and the included charms work without an activation account. If you import access to extra charms or Desktop Pro, CharmBits verifies its signature and stores the grant through the editor's secret storage (or the desktop app's encrypted access store). The grant contains a keyed account identifier, access rights and issuance/trial dates, not your email address. A local clock record helps detect a trial clock moving backwards.
+All features and released charms work without an activation account in VS Code and compatible extension hosts. The extension does not poll the purchase service. Previously imported signed grants remain in the editor's secret storage for compatibility; they are not needed to unlock this release.
 
-When an access service is configured, activated apps can send their signed grant to that service to refresh purchases, trial status and refunds. Photos, workspace files, focus notes, garden progress and Cali's optional name are not sent with that request. Signed purchases remain usable offline from their last confirmed access.
+**Nimbus weather is off by default.** If you enable it in Appearance, you choose a US airport station and Fahrenheit or Celsius. Those preferences stay in the app's local `weather.json`. While CharmBits is visible, its host checks `api.weather.gov` about every ten minutes for that station's latest observation. The request includes the station identifier and a public application identifier; the National Weather Service also receives the connection IP address. No GPS, workspace data, photos, email, focus notes or garden history are sent.
+
+Weather readings are kept in memory, with their observation time displayed separately from the request time. Older or unavailable data is labelled. Turning weather off or hiding the view cancels active requests and stops scheduled checks. The source button opens the fixed National Weather Service website in your browser. See the [National Weather Service privacy policy](https://www.weather.gov/privacy).
+
+The separate standalone desktop app verifies signed trial or purchase grants and stores them in its encrypted access store. These grants contain a keyed account identifier, rights and issuance/trial dates, not an email address. When an access service is configured, activated desktop apps can send their grant to refresh purchases, trial status and refunds. Photos, workspace files, focus notes, garden progress and Cali's optional name are not sent. Signed purchases remain usable offline from their last confirmed access.
 
 The website's review-download flow separately verifies an email address using Cloudflare/Turnstile and Brevo. Marketplace installation does not require that signup. Optional offers require a separate choice. Checkout is handled by Lemon Squeezy; payment-card details do not pass through the app or CharmBits' access service. The service retains a keyed email identity, trial deadline and ownership/consent records; its website privacy page describes the flow. Live delivery and checkout are disabled in this candidate's checked-in settings.
 

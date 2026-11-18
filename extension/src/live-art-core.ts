@@ -12,8 +12,8 @@ export type ArtPoint = readonly [number, number];
 export const CALI_TAP_GESTURES = ['curious', 'wink', 'double-take', 'shimmy'] as const;
 export type CaliGesture = typeof CALI_TAP_GESTURES[number];
 export const NIMBUS_GESTURES = ['sunrise', 'rain', 'lightning'] as const;
-export const BYTE_GESTURES = ['binary', 'compile', 'cursor'] as const;
-export type ArtGesture = CaliGesture | typeof NIMBUS_GESTURES[number] | typeof BYTE_GESTURES[number];
+export const ROBOT_GESTURES = ['think', 'cheer', 'encourage'] as const;
+export type ArtGesture = CaliGesture | typeof NIMBUS_GESTURES[number] | typeof ROBOT_GESTURES[number];
 const CALI_ANCHOR: ArtPoint = [512,101];
 export interface ArtBounds { x: number; y: number; width: number; height: number; }
 export interface ArtEye { x: number; y: number; rx: number; ry: number; }
@@ -162,9 +162,9 @@ function jointPoint(part: ArtPart, source: ArtPoint, pose: ArtPose): ArtPoint {
 		return rotate(source, part.pivot, (part.side ?? 1) * amount * .18);
 	}
 	if (part.role === 'servo' && !pose.reducedMotion) {
-		const typing = pose.gesture === 'compile'
-			? Math.sin((pose.reactionProgress ?? .5) * Math.PI * 6) * amount * .035 : 0;
-		return rotate(source, part.pivot, -(part.side ?? 1) * (pose.pressed ? .1 : amount * .28 + typing));
+		const wave = part.side === 1 && (pose.greeting || pose.gesture === 'cheer' || pose.gesture === 'encourage')
+			? Math.sin((pose.reactionProgress ?? .5) * Math.PI * 6) * amount * .055 : 0;
+		return rotate(source, part.pivot, -(part.side ?? 1) * (pose.pressed ? .06 : amount * .16 + wave));
 	}
 	return source;
 }

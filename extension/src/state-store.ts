@@ -30,8 +30,8 @@ export interface LoadedState {
 export class StateStore<Value = CharmState> {
 	readonly path: string;
 
-	constructor(private readonly directory: string, private readonly filename: 'preferences.json' | 'companion.json' = 'preferences.json') {
-		if (filename !== 'preferences.json' && filename !== 'companion.json') { throw new Error('Unsupported state filename.'); }
+	constructor(private readonly directory: string, private readonly filename: 'preferences.json' | 'companion.json' | 'weather.json' = 'preferences.json') {
+		if (filename !== 'preferences.json' && filename !== 'companion.json' && filename !== 'weather.json') { throw new Error('Unsupported state filename.'); }
 		this.path = join(directory, filename);
 	}
 

@@ -8,17 +8,18 @@ The frontend is a static site; the service runs on Cloudflare Workers with D1 fo
 
 | Offer | Behaviour |
 |---|---|
-| Free app | 31 fixed starter charms; focus, garden, encouragement, basic photo tools and personal imports |
-| More free picks | 15 additional claims online, without starting a trial |
-| Trial | The entire in-app collection for 30 days from confirmation/start; once per normalized email |
-| Pro | $7.49 launch / $17.49 regular, once, across the current apps |
-| Individual extras | $0.49 / $0.99 / $1.99; 49¢ items must check out with another paid item |
+| VS Code and compatible extension hosts | All released charms and software features free; no activation, purchase or trial timer |
+| Desktop starter | 31 fixed starter charms; focus, garden, encouragement, basic photo tools and personal imports |
+| More free desktop picks | 15 additional claims online, without starting a trial |
+| Desktop trial | The entire in-app collection for 30 days from confirmation/start; once per normalized email |
+| Desktop Pro | $7.49 launch / $17.49 regular, once |
+| Individual desktop extras | $0.49 / $0.99 / $1.99; 49¢ items must check out with another paid item |
 | Trial expiry | Free and purchased content, local photos and progress remain |
 | Early beta | The frozen 234-ID entitlement record is retained; only available public art is bundled. Withheld saved choices/cords and personal imports remain |
 
 Starter IDs and prices come from `extension/src/starter-selection.json` and `catalogue-access.ts`. Pro price comes from `website/commerce.json`. The server derives checkout amounts from its own generated catalogue. Music Icons and Sports Icons are excluded from the public catalogue pending their separate rights review. Software and public artwork terms are included in the release.
 
-The shared renderer and **210 public designs** remain bundled for offline use. The edition limits which items a fresh profile can select. Downloaded image packs are data-only files; live companions and fidgets are unlocked with a signed access file. The proprietary licence does not make previously public review artwork secret or provide a technical DRM guarantee.
+The shared renderer and public designs remain bundled for offline use. VS Code and compatible extension hosts can select every released charm. Desktop applies starter, trial and purchase access. Downloaded image packs are data-only files; desktop live companions and fidgets use signed access files. The proprietary licence does not make previously public review artwork secret or provide a technical DRM guarantee.
 
 ## What is already checked
 

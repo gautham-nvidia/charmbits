@@ -1,8 +1,8 @@
 {
   "name": "charmlet",
   "displayName": "CharmBits: Coding Charms",
-  "description": "A free coding companion with focus, a daily garden, photo keepsakes and playful breaks. Optional paid charms.",
-  "version": "0.15.1",
+  "description": "Free coding companions, calm pet reactions, charm bracelets, focus sessions, a daily garden and local photo keepsakes.",
+  "version": "0.16.0",
   "license": "SEE LICENSE IN LICENSE",
   "pricing": "Free",
   "icon": "media/marketplace-icon.png",

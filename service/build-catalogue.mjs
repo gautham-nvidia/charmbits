@@ -60,9 +60,9 @@ export async function buildCommerceCatalogue({ privateAssets = false } = {}) {
     products.push(product);
   }
   products.push({
-    sku: 'pro', name: 'CharmBits Pro', kind: 'pro', priceCents: settings.proPriceCents,
+    sku: 'pro', name: 'CharmBits Desktop Pro', kind: 'pro', priceCents: settings.proPriceCents,
     regularPriceCents: 1749, items: [], available: true, delivery: 'activation',
-    description: 'Desktop Pro and the full in-app charm collection. The charms also work in the free VS Code extension. One purchase.',
+    description: 'Desktop Pro and the full in-app charm collection. One purchase. All released charms are already free in VS Code.',
   });
   const extension = JSON.parse(await readFile(join(repo, 'extension/package.json'), 'utf8'));
   const desktop = JSON.parse(await readFile(join(repo, 'desktop/package.json'), 'utf8'));

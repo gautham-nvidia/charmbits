@@ -16,12 +16,12 @@ const roles = {
   Cali: ['CALIFORNIA CODING COMPANION', 'Big bear energy. Very small coworker.'],
   Terminal: ['WHERE IT ALL BEGAN', 'A little prompt for your next big idea.'],
   Nimbus: ['A CLOUD WITH MOODS', 'A little sunshine. A passing shower.'],
-  Byte: ['SMALL ROBOT, BIG IDEAS', 'Fluent in binary. Excellent company.'],
+  'Robot Assistant': ['A LITTLE ENCOURAGEMENT', 'A quiet wave. A little cheer while you code.'],
   Sunny: ['YOUR POCKET-SIZED OPTIMIST', 'A little brightness for the everyday.'],
 };
 
 function setupPlayground(data) {
-  const names = ['Terminal', 'Cali', 'Nimbus', 'Byte', 'Sunny'];
+  const names = ['Terminal', 'Cali', 'Nimbus', 'Robot Assistant', 'Sunny'];
   const choices = names.map(name => {
     const charm = data.charms.find(item => item.name.split(' - ')[0] === name);
     if (!charm) throw new Error(`The ${name} companion is missing.`);
@@ -67,7 +67,7 @@ function setupPlayground(data) {
     select(others[Math.floor(Math.random() * others.length)]);
   });
   dock.append(surprise);
-  document.querySelector('#react-charm').addEventListener('click', () => document.querySelector('#demo-charm').click());
+  document.querySelector('#react-charm').addEventListener('click', () => window.CharmletDemo.react());
   select(choices.find(choice => choice.name === 'Cali'));
 }
 
@@ -94,7 +94,21 @@ function setupShelf(data) {
     image.width = 216;
     image.height = 252;
     image.loading = 'lazy';
-    item.append(image);
+    if (preview) {
+      const tryPreview = element('button', 'shelf-preview');
+      tryPreview.type = 'button';
+      tryPreview.setAttribute('aria-label', `Try ${charm.name} preview charm`);
+      tryPreview.append(image);
+      tryPreview.addEventListener('click', () => {
+        window.CharmletDemo.setCharm(charm);
+        document.querySelector('#companion-role').textContent = `${charm.collectionLabel.toUpperCase()} PREVIEW`;
+        document.querySelector('#companion-description').textContent = charm.slot === 'sports'
+          ? 'A gentle sway, with his original pose intact.' : 'A small, silent hat-tip when you tap.';
+        for (const button of document.querySelectorAll('#companion-dock [data-companion]')) button.setAttribute('aria-pressed', 'false');
+        window.CharmletDemo.reveal();
+      });
+      item.append(tryPreview);
+    } else item.append(image);
     const caption = preview ? element('figcaption') : item;
     caption.append(element('strong', '', charm.name),
       element('small', '', preview ? `${charm.collectionLabel} · Preview only` : charm.collectionLabel));

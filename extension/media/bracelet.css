@@ -1,0 +1,20 @@
+.bracelet-stage { position: absolute; top: 0; left: 0; isolation: isolate; }
+.bracelet-wire, .bracelet-drop { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.bracelet-wire { z-index: 0; }
+.bracelet-drop { z-index: 1; }
+.bracelet-charm { position: absolute; left: 0; top: 0; z-index: 2; display: block; padding: 0; margin: 0; border: 0; border-radius: 12px; background: transparent; cursor: grab; pointer-events: auto; touch-action: none; user-select: none; overflow: visible; }
+.bracelet-charm:hover, .bracelet-charm:active { background: transparent; }
+.bracelet-charm.dragging { cursor: grabbing; z-index: 3; }
+.bracelet-charm:focus-visible { outline: 2px solid var(--vscode-focusBorder, #43826c); outline-offset: 4px; }
+.bracelet-charm > img, .bracelet-charm > canvas, .bracelet-charm > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 5px 4px #152d2428); }
+.bracelet-charm[data-live-rendered="true"] > img, .bracelet-charm[data-fidget-rendered="true"] > img, .bracelet-charm[data-bloom-rendered="true"] > img { opacity: 0; }
+.bracelet-charm[data-soft="true"]:is(.dragging, [data-keyboard-held="true"]) > img { transform: scale(1.08, .86); }
+.bracelet-charm[data-selected="true"]::after { content: ""; position: absolute; bottom: -7px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--vscode-focusBorder, #43826c); opacity: .65; pointer-events: none; }
+#bracelet-controls { grid-column: 1 / -1; display: grid; gap: 8px; min-width: 0; }
+.bracelet-choice { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 28px); gap: 5px; padding: 6px; border: 1px solid transparent; border-radius: 6px; }
+.bracelet-choice[data-selected="true"] { border-color: var(--vscode-focusBorder, #43826c); }
+.bracelet-choice label { grid-column: 1 / -1; font-size: 11px; opacity: .8; }
+.bracelet-choice select { width: 100%; min-width: 0; grid-column: auto; }
+.bracelet-choice button { min-width: 0; padding: 3px; font-size: 15px; }
+.bracelet-choice button:disabled, #bracelet-add:disabled { opacity: .45; cursor: default; }
+#bracelet-add { justify-self: start; }

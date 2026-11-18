@@ -11,6 +11,7 @@ import { MessageRotation } from './message-rotation';
 import { Pendulum, type Point } from './pendulum';
 import { CORD_STYLES, cordForCharm, isCordStyle } from './cord-design';
 import { createCordView } from './cord-view';
+import { CordMotion } from './cord-motion';
 import { createWinCelebration } from './win-celebration';
 import { createPhotoView, type PhotoView } from './photo-view';
 import { createLiveSmiley } from './live-smiley';
@@ -22,6 +23,13 @@ import { createTapWiggle } from './tap-wiggle';
 import { CALI_WEEK, restoreCaliOutfit } from './cali-wardrobe';
 import { createPuzzleView, type PuzzleView } from './puzzle-view';
 import type { AccessSnapshot } from './access-controller';
+import { createWeatherView } from './weather-view';
+import { createBloomView } from './bloom-view';
+import { MaterialMotion } from './charm-motion-view';
+import { blinkFile, motionKind } from './charm-motion';
+import { createFlowerStemBridge } from './flower-stem-view';
+import { BraceletView } from './bracelet-view';
+import { createBraceletControls } from './bracelet-controls';
 
 declare function acquireVsCodeApi(): {
 	getState(): unknown;
@@ -44,9 +52,13 @@ const backdrop = element<HTMLDivElement>('tools-backdrop');
 let navigationUI: NavigationView | undefined;
 let photoUI: PhotoView | undefined;
 let puzzleUI: PuzzleView | undefined;
+let braceletView: BraceletView | undefined;
 const stage = element<HTMLDivElement>('stage');
 const rig = element<HTMLDivElement>('rig');
 const hanging = element<HTMLDivElement>('hanging');
+const braceletStage = element<HTMLDivElement>('bracelet-stage');
+const arrangement = element<HTMLSelectElement>('arrangement');
+const braceletSettings = element<HTMLDivElement>('bracelet-controls');
 const charm = element<HTMLButtonElement>('charm');
 const anchor = element<HTMLSpanElement>('anchor');
 const restore = element<HTMLButtonElement>('restore');
@@ -67,6 +79,7 @@ const cordValue = element<HTMLOutputElement>('cord-value');
 const phase = element<HTMLSpanElement>('phase');
 const lengthOutput = element<HTMLOutputElement>('length');
 const cordView = createCordView(element<SVGElement>('cord'), element<SVGPathElement>('thread'));
+const flowerStem = createFlowerStemBridge(element<SVGElement>('cord'), element<SVGPathElement>('thread'));
 const cordStyle = element<HTMLSelectElement>('cord-style');
 const cordStyleHint = element<HTMLParagraphElement>('cord-style-hint');
 for (const [value, label] of [['auto', 'Match this charm'], ...Object.entries(CORD_STYLES)]) {
@@ -109,8 +122,17 @@ let frames = 0;
 let drag: { id: number; start: Point; screenStart: Point; moved: boolean; lastAngle: number; angularTravel: number; maxSideways: number; orbitalGesture: boolean; hideDistance: number; orbitSideDistance: number } | undefined;
 const systemMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const pendulum = new Pendulum(280, 320, state.cordLength, state.size, state.layoutMode);
+const cordMotion = new CordMotion();
 const winCelebration = createWinCelebration(charm, reducedMotion);
 const liveSmiley = createLiveSmiley(charm, charmImage, file => new URL(file, mediaRoot).toString());
+const bloomView = createBloomView(charm, charmImage);
+const materialMotion = new MaterialMotion(charm);
+let currentWeather: Parameters<typeof liveSmiley.setWeather>[0];
+const weatherUI = createWeatherView({
+	send: (settings, requestId) => api.postMessage({ type: 'weather-settings', settings, requestId }),
+	condition: value => { currentWeather = value; liveSmiley.setWeather(value); braceletView?.setWeather(value); },
+});
+element<HTMLButtonElement>('weather-source').addEventListener('click', () => api.postMessage({ type: 'weather-source' }));
 const fidgetUI = createFidgetView(charm, charmImage, {
 	rotate: held => {
 		if (held) { tapWiggle.stop(); setKeyboardHeld(false); stop(); }
@@ -120,6 +142,14 @@ const fidgetUI = createFidgetView(charm, charmImage, {
 	tap: () => tap(),
 });
 const tapWiggle = createTapWiggle(charm);
+const braceletControls = createBraceletControls(braceletSettings, {
+	state: () => state.bracelet,
+	catalogue: () => charms,
+	change: next => {
+		state.bracelet = next; state.charmId = next.charms[next.selected]; state.charmPinned = true;
+		applyCharm(); resize(); controls(); save();
+	},
+});
 const mascotUI = createMascotView({
 	charm, stage, canShow: () => !popupOpen(), reducedMotion,
 	cheer: () => liveSmiley.celebrate(),
@@ -142,7 +172,7 @@ const companionUI = createCompanionView({
 	},
 	onActivity: scheduleMessages,
 	onMilestone: () => { if (visible && !state.hidden && activeCharm.id !== MASCOT_CHARM) { winCelebration.show(); } },
-	onWin: () => liveSmiley.celebrate(),
+	onWin: () => { if (isBracelet()) { braceletView?.celebrate(); } else { liveSmiley.celebrate(); } },
 	onSnapshot: snapshot => {
 		celebrationsEnabled = snapshot.state.wins.celebrate;
 		mascotUI.receive(snapshot);
@@ -179,6 +209,41 @@ element<HTMLButtonElement>('picker-photo').addEventListener('click', () => photo
 function popupOpen() { return !settings.hidden || companionUI.isOpen() || navigationUI?.isOpen() === true
 	|| photoUI?.isOpen() === true || puzzleUI?.isOpen() === true; }
 
+function isBracelet() { return state.arrangement === 'bracelet'; }
+
+function seedBracelet() {
+	if (state.bracelet.charms.length >= 2) { return; }
+	const candidates = [state.charmId, 'trial:new-shiba-inu', 'trial:flower-red-rose', 'live:cali', ...charms.map(item => item.id)];
+	state.bracelet = { charms: [...new Set(candidates)].filter(id => charms.some(item => item.id === id)).slice(0, 3), selected: 0 };
+}
+
+function selectBraceletSlot(index: number) {
+	const id = state.bracelet.charms[index];
+	if (!id || (state.bracelet.selected === index && state.charmId === id)) { return; }
+	state.bracelet = { ...state.bracelet, selected: index }; state.charmId = id; state.charmPinned = true;
+	applyCharm(); controls(); save();
+}
+
+function updateBracelet() {
+	braceletStage.hidden = state.hidden || !isBracelet() || !ready;
+	if (!isBracelet()) { braceletView?.setActive(false, reducedMotion()); return; }
+	seedBracelet();
+	braceletView ??= new BraceletView(braceletStage, {
+		image: item => item.source ?? new URL(item.file, mediaRoot).toString(),
+		asset: file => new URL(file, mediaRoot).toString(),
+		state: () => state, select: selectBraceletSlot, puzzleTap: () => { puzzleUI?.tap(); },
+	});
+	braceletView.setGeometry(pendulum.layout);
+	braceletView.setItems(state.bracelet.charms.map(id => {
+		const item = getCharm(id, charms);
+		if (item.id === id || (id.startsWith('trial:') && item.artworkKey === id.slice(6))) { return item; }
+		return { ...getCharm('terminal', charms), id, name: 'Saved charm (unavailable)' };
+	}));
+	braceletView.setWeather(currentWeather);
+	braceletControls.render();
+	refreshArtworkMotion();
+}
+
 function updateOverlays() {
 	const appBounds = appElement.getBoundingClientRect();
 	const navBounds = primaryNav.getBoundingClientRect();
@@ -189,6 +254,8 @@ function updateOverlays() {
 	appElement.classList.toggle('has-popup', open);
 	hanging.inert = state.hidden || open;
 	restore.inert = open;
+	braceletStage.inert = open || state.hidden;
+	refreshArtworkMotion();
 	mascotUI.refresh();
 }
 
@@ -216,6 +283,11 @@ function selectCharm(id: string) {
 	cancelDrag();
 	state.charmId = getCharm(id, charms).id;
 	state.charmPinned = true;
+	if (isBracelet()) {
+		seedBracelet();
+		const slots = [...state.bracelet.charms]; slots[state.bracelet.selected] = state.charmId;
+		state.bracelet = { ...state.bracelet, charms: slots };
+	}
 	applyCharm();
 	resize();
 	controls();
@@ -245,7 +317,9 @@ function save() {
 function applyCharm() {
 	tapWiggle.stop();
 	setKeyboardHeld(false);
-	const selected = displayedCharm(state, charms, Date.now());
+	if (isBracelet()) { seedBracelet(); }
+	const selected = isBracelet() ? getCharm(state.bracelet.charms[state.bracelet.selected], charms)
+		: displayedCharm(state, charms, Date.now());
 	activeCharm = selected;
 	const source = selected.source ?? new URL(selected.file, mediaRoot).toString();
 	if (charmImage.src !== source) {
@@ -261,6 +335,10 @@ function applyCharm() {
 	const soft = isSoftCharm(selected.id);
 	charm.dataset.soft = String(soft);
 	const attachment = selected.attachment ?? DEFAULT_ATTACHMENT;
+	const pose = blinkFile(selected);
+	void materialMotion.select(source, motionKind(selected), {
+		hook: attachment, blink: pose ? new URL(pose, mediaRoot).toString() : undefined,
+	}).catch(error => console.warn('Charm motion could not load; the original artwork remains visible.', error));
 	charmImage.style.transformOrigin = `${attachment.x * 100}% ${attachment.y * 100}%`;
 	charm.setAttribute('aria-label', `${fidgetAction(selected.id) ?? (soft ? 'Squeeze' : 'Nudge')} ${selected.name.toLowerCase()} charm`);
 	charm.title = selected.description;
@@ -271,13 +349,27 @@ function applyCharm() {
 	updateCordChoice();
 	updateFestiveControls();
 	updateLiveSmiley();
+	weatherUI.setCharm(activeCharm.id);
+	updateBracelet();
+	if (isBracelet()) { charmName.textContent = 'Your bracelet'; }
+}
+
+function refreshArtworkMotion() {
+	const shown = ready && visible && !state.hidden && !document.hidden && !popupOpen();
+	materialMotion.setActive(shown && !isBracelet() && !reducedMotion());
+	braceletView?.setActive(shown && isBracelet(), reducedMotion());
 }
 
 function updateLiveSmiley() {
-	liveSmiley.update(activeCharm.id, visible && !state.hidden, reducedMotion(), state.caliOutfit);
-	fidgetUI.update(activeCharm.id, visible && !state.hidden, reducedMotion(), state.puzzles);
+	refreshArtworkMotion();
+	const single = ready && visible && !state.hidden && !document.hidden && !isBracelet();
+	liveSmiley.update(activeCharm.id, single, reducedMotion(), state.caliOutfit);
+	bloomView.update({ shape: activeCharm.bloom, hook: activeCharm.baseAttachment ?? activeCharm.attachment,
+		visible: single, reducedMotion: reducedMotion() });
+	cordView.setMotion(single && !reducedMotion());
+	fidgetUI.update(activeCharm.id, single, reducedMotion(), state.puzzles);
 	puzzleUI?.update(activeCharm.id, ready);
-	mascotUI.surface(activeCharm.id, visible && !state.hidden);
+	mascotUI.surface(activeCharm.id, single);
 }
 
 function updateCordChoice() {
@@ -303,7 +395,7 @@ function updateFestiveControls() {
 }
 
 function refreshFestiveSelection() {
-	if (!drag && !keyboardHeld && displayedCharm(state, charms, Date.now()).id !== activeCharm.id) {
+	if (!isBracelet() && !drag && !keyboardHeld && displayedCharm(state, charms, Date.now()).id !== activeCharm.id) {
 		applyCharm();
 		resize();
 		showState();
@@ -314,7 +406,7 @@ function refreshFestiveSelection() {
 
 function scheduleFestiveRefresh() {
 	if (festiveTimer !== undefined) { window.clearTimeout(festiveTimer); festiveTimer = undefined; }
-	if (!ready || !visible || document.hidden || !state.festiveEnabled || state.charmPinned) { return; }
+	if (!ready || !visible || document.hidden || !state.festiveEnabled || state.charmPinned || isBracelet()) { return; }
 	const now = Date.now();
 	// Also notice timezone/clock changes while a stationary charm is visible.
 	const delay = drag || keyboardHeld ? 1000 : Math.min(60000, Math.max(25, nextLocalMidnight(now) - now + 25));
@@ -362,6 +454,10 @@ function populateCharms() {
 }
 
 function controls() {
+	arrangement.value = state.arrangement;
+	braceletSettings.hidden = !isBracelet();
+	sizeInput.disabled = isBracelet(); cordInput.disabled = isBracelet(); layoutMode.disabled = isBracelet();
+	if (isBracelet()) { braceletControls.render(); }
 	const selected = activeCharm;
 	charm.title = isSoftCharm(selected.id) ? 'Hold or press Space to squeeze; drag and release to bounce.'
 		: state.layoutMode === 'orbit'
@@ -385,13 +481,27 @@ function controls() {
 	updateLiveSmiley();
 }
 
+function cordEndpoints() {
+	const { anchorX, anchorY, attachmentOffset, attachmentX } = pendulum.layout;
+	const { x, y } = pendulum.position;
+	const angle = pendulum.angle;
+	return {
+		anchor: { x: anchorX, y: anchorY },
+		hook: {
+			x: x + Math.cos(angle) * attachmentX + Math.sin(angle) * attachmentOffset,
+			y: y + Math.sin(angle) * attachmentX - Math.cos(angle) * attachmentOffset,
+		},
+	};
+}
+
 function render() {
-	tapWiggle.update(ready && visible && !state.hidden && !reducedMotion() && !popupOpen());
+	refreshArtworkMotion();
+	tapWiggle.update(ready && visible && !state.hidden && !isBracelet() && !reducedMotion() && !popupOpen());
+	bloomView.move(pendulum.angle);
 	const { anchorX, anchorY, cordLength, attachmentOffset, attachmentX } = pendulum.layout;
 	const { x: positionX, y: positionY } = pendulum.position;
 	const angle = pendulum.angle;
-	const hookX = positionX + Math.cos(angle) * attachmentX + Math.sin(angle) * attachmentOffset;
-	const hookY = positionY + Math.sin(angle) * attachmentX - Math.cos(angle) * attachmentOffset;
+	const endpoints = cordEndpoints();
 	charm.style.transform = `translate(${positionX}px, ${positionY}px) rotate(${angle}rad)`;
 	charm.dataset.reducedMotion = String(reducedMotion());
 	anchor.style.left = `${anchorX}px`;
@@ -400,7 +510,10 @@ function render() {
 	focusRing.style.top = `${anchorY}px`;
 	restore.style.left = `${anchorX * scale - 15}px`;
 	restore.style.top = `${Math.max(4, anchorY * scale - 14)}px`;
-	cordView.render(cordForCharm(activeCharm, state.cordChoices), { x: anchorX, y: anchorY }, { x: hookX, y: hookY });
+	cordView.render(cordForCharm(activeCharm, state.cordChoices), endpoints.anchor, endpoints.hook, cordMotion.bend);
+	flowerStem.render(activeCharm, { x: positionX, y: positionY, angle,
+		width: pendulum.layout.charmWidth, height: pendulum.layout.charmHeight,
+		cordStyle: cordForCharm(activeCharm, state.cordChoices) });
 	lengthOutput.value = `${Math.round(cordLength)} px`;
 	sizeInput.value = String(state.size);
 	sizeValue.value = `${state.size}%`;
@@ -415,10 +528,13 @@ function render() {
 		phase.textContent = status;
 	}
 	stage.dataset.frames = String(frames);
+	stage.dataset.cordBend = cordMotion.bend.toFixed(2);
 	stage.dataset.hidden = String(state.hidden);
 	stage.dataset.cord = String(Math.round(cordLength));
 	stage.dataset.size = String(state.size);
 	stage.dataset.layout = state.layoutMode;
+	stage.dataset.arrangement = state.arrangement;
+	if (isBracelet() && !state.hidden) { phase.textContent = reducedMotion() ? 'Still bracelet' : 'Bracelet'; lengthOutput.textContent = `${state.bracelet.charms.length} charms`; }
 	stage.dataset.anchorX = String(anchorX);
 	stage.dataset.anchorY = String(anchorY);
 	stage.dataset.orbitRadius = String(pendulum.layout.orbitRadius);
@@ -437,11 +553,12 @@ function stop() {
 	frameId = undefined;
 	previousTime = 0;
 	accumulatedTime = 0;
+	cordMotion.reset(cordEndpoints().hook);
 	stage.dataset.running = 'false';
 }
 
 function tick(time: number) {
-	if (!visible || document.hidden || state.hidden || reducedMotion()) {
+	if (!visible || document.hidden || state.hidden || reducedMotion() || isBracelet()) {
 		stop();
 		return;
 	}
@@ -449,11 +566,13 @@ function tick(time: number) {
 	previousTime = time;
 	while (accumulatedTime >= 1000 / 60) {
 		pendulum.step();
+		const endpoints = cordEndpoints();
+		cordMotion.step(endpoints.anchor, endpoints.hook);
 		accumulatedTime -= 1000 / 60;
 	}
 	frames++;
 	render();
-	if (pendulum.moving) {
+	if (pendulum.moving || cordMotion.moving) {
 		frameId = requestAnimationFrame(tick);
 	} else {
 		stop();
@@ -461,8 +580,8 @@ function tick(time: number) {
 }
 
 function start() {
-	if (frameId === undefined && pendulum.moving && ready && visible && !document.hidden && !state.hidden
-		&& charm.dataset.rotorHeld !== 'true' && !reducedMotion()) {
+	if (frameId === undefined && (pendulum.moving || cordMotion.moving) && ready && visible && !document.hidden && !state.hidden
+		&& charm.dataset.rotorHeld !== 'true' && !reducedMotion() && !isBracelet()) {
 		stage.dataset.running = 'true';
 		frameId = requestAnimationFrame(tick);
 	}
@@ -482,9 +601,11 @@ function tap(direction = -1) {
 	mascotUI.encourage();
 	const reaction = liveSmiley.playful();
 	if (celebrationsEnabled && reaction === 'happy') { winCelebration.show('confetti'); }
-	else if (celebrationsEnabled && reaction === 'compile') { winCelebration.show(); }
+	else if (celebrationsEnabled && reaction === 'cheer') { winCelebration.show(); }
 	puzzleUI?.tap();
-	tapWiggle.play();
+	bloomView.play();
+	materialMotion.play();
+	if (!materialMotion.configured) { tapWiggle.play(); }
 }
 
 function showState(drop = false) {
@@ -493,6 +614,13 @@ function showState(drop = false) {
 	const restoreFocus = !state.hidden && document.activeElement === restore;
 	const canAnimate = visible && !document.hidden && !reducedMotion();
 	controls();
+	if (isBracelet()) {
+		hanging.hidden = true; stop(); updateBracelet();
+		if (restoreFocus) { braceletView?.focus(); }
+		render(); scheduleMessages(); scheduleFestiveRefresh();
+		return;
+	}
+	braceletStage.hidden = true; braceletView?.setActive(false, reducedMotion());
 	if (state.hidden) {
 		stop();
 		pendulum.settle();
@@ -545,6 +673,8 @@ function setKeyboardHeld(held: boolean) {
 
 function cancelDrag() {
 	tapWiggle.stop();
+	materialMotion.cancelReaction();
+	braceletView?.reset();
 	setKeyboardHeld(false);
 	const cancelled = finishDrag();
 	if (!cancelled) { return; }
@@ -559,15 +689,17 @@ export function resize() {
 	cancelDrag();
 	updateOverlays();
 	const { width, height } = stage.getBoundingClientRect();
-	const attachment = activeCharm.attachment;
-	const layout = getLayout(width, height, state.cordLength, state.size, state.layoutMode, attachment);
+	const attachment = isBracelet() ? DEFAULT_ATTACHMENT : activeCharm.attachment;
+	const mode = isBracelet() ? 'hanging' : state.layoutMode, size = isBracelet() ? 100 : state.size;
+	const layout = getLayout(width, height, state.cordLength, size, mode, attachment);
 	scale = Math.max(0.01, Math.min(1, width / layout.minimumWidth, height / layout.minimumHeight));
-	pendulum.resize(width / scale, height / scale, state.cordLength, state.size, state.layoutMode, attachment);
+	pendulum.resize(width / scale, height / scale, state.cordLength, size, mode, attachment);
 	rig.style.width = `${pendulum.layout.width}px`;
 	rig.style.height = `${pendulum.layout.height}px`;
 	rig.style.transform = `scale(${scale})`;
 	rig.style.setProperty('--charm-width', `${pendulum.layout.charmWidth}px`);
 	rig.style.setProperty('--charm-height', `${pendulum.layout.charmHeight}px`);
+	if (isBracelet()) { updateBracelet(); }
 	stop();
 	render();
 }
@@ -583,6 +715,7 @@ charm.addEventListener('pointerdown', event => {
 	}
 	transition?.cancel();
 	tapWiggle.stop();
+	materialMotion.hold();
 	setKeyboardHeld(false);
 	const startPoint = point(event);
 	drag = {
@@ -608,6 +741,7 @@ charm.addEventListener('pointermove', event => {
 	const deltaY = event.clientY - drag.screenStart.y;
 	if (!drag.moved && Math.hypot(deltaX, deltaY) > 6) {
 		drag.moved = true;
+		materialMotion.cancelReaction();
 	}
 	if (drag.moved) {
 		const angle = Math.atan2(current.y - pendulum.layout.anchorY, current.x - pendulum.layout.anchorX);
@@ -684,6 +818,7 @@ charm.addEventListener('keydown', event => {
 	if (event.key === ' ' || event.key === 'Enter') {
 		event.preventDefault();
 		tapWiggle.stop();
+		materialMotion.hold();
 		setKeyboardHeld(true);
 	} else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
 		event.preventDefault();
@@ -724,6 +859,12 @@ reset.addEventListener('click', () => {
 	resize();
 	showState(true);
 	save();
+});
+arrangement.addEventListener('change', () => {
+	cancelDrag();
+	state.arrangement = arrangement.value === 'bracelet' ? 'bracelet' : 'single';
+	if (isBracelet()) { seedBracelet(); state.charmPinned = true; }
+	applyCharm(); resize(); showState(); save();
 });
 layoutMode.addEventListener('click', () => {
 	cancelDrag();
@@ -819,6 +960,7 @@ cordStyle.addEventListener('change', () => {
 });
 
 function synchronizeVisibility() {
+	api.postMessage({ type: 'weather-visibility', visible: !document.hidden });
 	winCelebration.clear();
 	cancelDrag();
 	transition?.cancel();
@@ -850,7 +992,10 @@ window.addEventListener('message', event => {
 			if (typeof access.activationLabel === 'string') { activateAccess.textContent = access.activationLabel; }
 			browsePacks.disabled = access.canBrowse !== true;
 			websiteLink.disabled = browsePacks.disabled;
-			websiteLink.textContent = access.canBrowse ? 'More charms ↗' : 'Website — coming soon';
+			const freeVscode = access.application === 'vscode';
+			browsePacks.textContent = freeVscode ? 'View gallery' : 'Get more charms';
+			websiteLink.textContent = access.canBrowse ? freeVscode ? 'Gallery ↗' : 'More charms ↗' : 'Website — coming soon';
+			activateAccess.hidden = freeVscode;
 			activateAccess.disabled = access.canActivate !== true;
 		}
 	}
@@ -868,6 +1013,7 @@ window.addEventListener('message', event => {
 		}
 		api.setState(state);
 		if ('companion' in message) { companionUI.receive(message.companion); }
+		if ('weather' in message) { weatherUI.receive(message.weather); }
 		if ('companionTab' in message && (message.companionTab === 'focus' || message.companionTab === 'learn' || message.companionTab === 'garden')) {
 			companionUI.open(message.companionTab);
 		}
@@ -889,6 +1035,10 @@ window.addEventListener('message', event => {
 		showState();
 	} else if (message.type === 'photo-result' && 'requestId' in message && Number.isSafeInteger(message.requestId)) {
 		photoUI?.result(Number(message.requestId), 'error' in message && typeof message.error === 'string' ? message.error : undefined);
+	} else if (message.type === 'weather' && 'snapshot' in message) {
+		weatherUI.receive(message.snapshot);
+	} else if (message.type === 'weather-result' && 'requestId' in message && Number.isSafeInteger(message.requestId)) {
+		weatherUI.result(Number(message.requestId), 'error' in message && typeof message.error === 'string' ? message.error : undefined);
 	} else if (message.type === 'companion' && 'snapshot' in message) {
 		companionUI.receive(message.snapshot);
 		scheduleMessages();
@@ -932,4 +1082,4 @@ applyCharm();
 updateMessage();
 controls();
 resize();
-api.postMessage({ type: 'ready' });
+api.postMessage({ type: 'ready', pageVisible: !document.hidden });

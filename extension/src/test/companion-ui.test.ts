@@ -7,9 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import { PNG } from 'pngjs';
 import { applyCompanionAction, defaultCompanionState } from '../companion-core';
 import { DEFAULT_STATE } from '../charm-state';
-import { CHARMS, TRIAL_CHARMS } from '../charm-catalog';
-import betaCatalogue from '../beta-catalogue.json';
-import { starterSelection } from '../catalogue-access';
+import { CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS } from '../charm-catalog';
 import { learningCard } from '../learning-cards';
 import { MESSAGES } from '../messages';
 import { localDayKey, type GardenState } from '../garden-core';
@@ -17,13 +15,11 @@ import { winsToday } from '../small-wins';
 import { caliOutfitAt } from '../cali-wardrobe';
 import { CALIFORNIA_COMPANIONS } from '../california-companions';
 import { DEFAULT_PUZZLES } from '../puzzle-core';
-import { command, readyFrame, reloadCharm } from './editor-helpers';
+import { command, isolatedEditorEnvironment, readyFrame, reloadCharm } from './editor-helpers';
 
 // Pre-0.13 profiles had no edition marker. These fixtures exercise retained beta
-// artwork; the separate fresh-profile test exercises the real free starter.
+// artwork and preferences; the fresh-profile test checks the full free catalogue.
 const LEGACY_BETA_STATE = { ...DEFAULT_STATE, editionVersion: undefined };
-const retainedBetaIds = new Set([...betaCatalogue, ...starterSelection()]);
-const retainedBetaCount = CHARMS.filter(charm => retainedBetaIds.has(charm.id)).length;
 
 interface OwnedEditor {
 	profile: string;
@@ -150,10 +146,7 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 	mkdirSync(storage, { recursive: true });
 	writeFileSync(scratchFile, "export const companion = 'Focus, learn and grow';\n");
 	seed(paths);
-	const environment: Record<string, string> = {};
-	for (const [key, value] of Object.entries(process.env)) {
-		if (value !== undefined && key !== 'ELECTRON_RUN_AS_NODE') { environment[key] = value; }
-	}
+	const environment = isolatedEditorEnvironment();
 	environment.CHARMLET_TRACE_SAVES = '1';
 	const executablePath = process.env.VSCODE_EXECUTABLE
 		?? (process.platform === 'win32' ? 'C:\\Program Files\\Microsoft VS Code\\Code.exe' : undefined);
@@ -161,9 +154,9 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 	if (installed) {
 		const version = JSON.parse(readFileSync(resolve('package.json'), 'utf8')).version as string;
 		expect(version).toMatch(/^\d+\.\d+\.\d+$/);
-		const cliPath = resolveCliPathFromVSCodeExecutablePath(executablePath);
+		const cliPath = process.env.VSCODE_CLI_PATH ?? resolveCliPathFromVSCodeExecutablePath(executablePath);
 		const args = [`--user-data-dir=${join(profile, 'user')}`, `--extensions-dir=${join(profile, 'extensions')}`,
-			'--install-extension', resolve(`charmbits-${version}.vsix`), '--force'];
+			'--install-extension', resolve(process.env.CHARMLET_TEST_VSIX ?? `charmbits-${version}.vsix`), '--force'];
 		let executable = cliPath;
 		const cliEnvironment = { ...environment };
 		if (process.platform === 'win32') {
@@ -177,6 +170,12 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 			cliEnvironment.VSCODE_DEV = '';
 		}
 		const install = spawnSync(executable, args, { env: cliEnvironment, encoding: 'utf8', timeout: 90000 });
+		if (install.error || install.status !== 0) {
+			writeFileSync(test.info().outputPath('vsix-install.json'), JSON.stringify({
+				profile, error: install.error?.message, status: install.status,
+				stdout: install.stdout, stderr: install.stderr,
+			}, null, 2));
+		}
 		expect(install.error, 'The isolated VSIX installer must start.').toBeUndefined();
 		expect(install.status, install.stderr || install.stdout).toBe(0);
 		const installedManifest = JSON.parse(readFileSync(join(profile, 'extensions', `gautham-nvidia.charmlet-${version}`, 'package.json'), 'utf8'));
@@ -235,7 +234,18 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 
 async function closeOwnedEditor(editor: OwnedEditor, testInfo: TestInfo) {
 	try {
-		await editor.app.close();
+		// A blocked native shutdown must not swallow the original test failure.
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const closed = await Promise.race([
+			editor.app.close().then(() => true),
+			new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 10000); }),
+		]).finally(() => { if (timer) { clearTimeout(timer); } });
+		if (!closed) {
+			writeFileSync(testInfo.outputPath('editor-shutdown.json'), JSON.stringify({
+				profile: editor.profile, pid: editor.app.process().pid, gracefulShutdownTimedOut: true,
+			}));
+			editor.app.process().kill('SIGKILL');
+		}
 	} finally {
 		const editorLogs = join(editor.profile, 'user', 'logs');
 		if (existsSync(editorLogs)) {
@@ -582,13 +592,13 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		const version = JSON.parse(readFileSync(resolve('package.json'), 'utf8')).version;
 		await expect(frame.locator('#app-version')).toHaveText(`v${version}`);
 		await expect(frame.locator('.app-footer')).toContainText('Made in Silicon Valley');
-		await expect(frame.locator('#website-placeholder')).toHaveText('More charms ↗');
+		await expect(frame.locator('#website-placeholder')).toHaveText('Gallery ↗');
 		await expect(frame.locator('#website-placeholder')).toBeEnabled();
 		await frame.getByRole('button', { name: 'Done', exact: true }).click();
 		await expect(frame.locator('#care-cue')).toBeHidden();
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-search')).toBeFocused();
-		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(retainedBetaCount);
+		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
 		await expect(frame.locator('#charm-grid .charm-tile').nth(0)).toHaveAttribute('aria-label', 'Select Terminal');
 		await expect(frame.locator('#charm-grid .charm-tile').nth(1)).toHaveAttribute('aria-label', /^Select Cali /);
 		await frame.locator('#app').screenshot({ path: testInfo.outputPath('navigation-picker.png') });
@@ -933,9 +943,10 @@ test('soft charms squeeze at their attachment and festive defaults protect manua
 
 const installedPersonalization = process.env.CHARMLET_TEST_PACKAGED === '1';
 
-test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a new profile only its starter and keeps that boundary after reload`, async ({}, testInfo) => {
+test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes every released charm without activation and keeps the selection after reload`, async ({}, testInfo) => {
 	const editor = await launchOwnedEditor('charmlet-fresh-starter-', () => {}, installedPersonalization);
 	try {
+		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
 		if (installedPersonalization) {
 			await expect(editor.window.getByRole('button', { name: /^Restricted Mode/ })).toBeVisible();
 		}
@@ -943,11 +954,14 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a ne
 		let frame = await readyFrame(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
-		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(31);
+		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
 		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');
-		await expect(frame.locator('#access-detail')).toContainText('All VS Code features are free.');
-		await expect(frame.locator('#activate-access')).toHaveText('Import charm access');
-		await expect(frame.getByRole('button', { name: 'Select Nimbus - Live Cloud', exact: true })).toHaveCount(0);
+		await expect(frame.locator('#access-detail')).toHaveText('All included charms and features are free. No trial or purchase needed.');
+		await expect(frame.locator('#activate-access')).toBeHidden();
+		await expect(frame.getByRole('button', { name: 'Select Nimbus - Live Cloud', exact: true })).toHaveCount(1);
+		await expect(frame.locator('.charm-tile[data-charm-id="live:robot"]')).toHaveCount(1);
+		await expect(frame.locator('.charm-tile[data-charm-id^="trial:artist-"]')).toHaveCount(0);
+		await expect(frame.locator('.charm-tile[data-charm-id^="trial:athlete-"]')).toHaveCount(0);
 		const cali = CHARMS.find(charm => charm.id === 'live:cali')!;
 		await frame.getByRole('button', { name: `Select ${cali.name}`, exact: true }).click();
 		await expect(frame.locator('#stage')).toHaveAttribute('data-persisted', 'true');
@@ -955,11 +969,204 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free starter'} gives a ne
 		await reloadCharm(editor.window);
 		frame = await readyFrame(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cali');
-		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-starter-main.png') });
+		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-vscode-main.png') });
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
-		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(31);
+		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
 		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');
-		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-starter-picker.png') });
+		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-vscode-picker.png') });
+		const flower = CHARMS.find(charm => charm.group === 'Garden Flowers')!;
+		await frame.locator(`.charm-tile[data-charm-id="${flower.id}"]`).click();
+		await expect(frame.locator('#stage')).toHaveAttribute('data-cord-style', 'stem');
+		await expect(frame.locator('#cord-leaves')).toHaveAttribute('d', / Z/);
+		const stroke = await frame.locator('#thread').evaluate(node => getComputedStyle(node).stroke);
+		const [red, green, blue] = stroke.match(/\d+/g)!.map(Number);
+		expect(green).toBeGreaterThan(red);
+		expect(green).toBeGreaterThan(blue);
+		await frame.locator('#charm-image').evaluate(image => (image as HTMLImageElement).decode());
+		await expect(frame.locator('#charm')).toHaveAttribute('data-bloom-rendered', 'true');
+		const bloom = frame.locator('#live-bloom');
+		await expect(bloom).toHaveAttribute('data-motion', 'living');
+		await expect(frame.locator('#cord')).toHaveAttribute('data-leaf-motion', 'living');
+		const firstBloom = await bloom.screenshot();
+		const firstFrame = Number(await bloom.getAttribute('data-frames'));
+		const firstLeaves = await frame.locator('#cord-leaves').getAttribute('d');
+		await expect.poll(async () => Number(await bloom.getAttribute('data-frames'))).toBeGreaterThan(firstFrame + 2);
+		expect((await bloom.screenshot()).equals(firstBloom), 'The petal surface must visibly move.').toBe(false);
+		expect(await frame.locator('#cord-leaves').getAttribute('d')).not.toBe(firstLeaves);
+		await frame.locator('#charm').click();
+		await expect.poll(async () => Number(await bloom.getAttribute('data-opening'))).toBeGreaterThan(.4);
+		await frame.locator('#app').screenshot({ path: testInfo.outputPath('leafy-flower-cord.png') });
+		await frame.locator('#settings-toggle').click();
+		await frame.locator('#toggle').click();
+		await expect(frame.locator('#stage')).toHaveAttribute('data-hidden', 'true');
+		await expect(bloom).toHaveAttribute('data-motion', 'still');
+		await expect(frame.locator('#cord')).toHaveAttribute('data-leaf-motion', 'still');
+		const hiddenBloom = await bloom.getAttribute('data-frames');
+		await frame.waitForTimeout(350);
+		await expect(bloom).toHaveAttribute('data-frames', hiddenBloom!);
+		await frame.locator('#restore').click();
+		await expect(bloom).toHaveAttribute('data-motion', 'living');
+		await frame.locator('#settings-toggle').click();
+		await frame.locator('#menu-appearance').click();
+		await frame.locator('#motion').click();
+		await frame.locator('#settings-close').click();
+		await expect(bloom).toHaveAttribute('data-motion', 'still');
+		await expect(frame.locator('#cord')).toHaveAttribute('data-leaf-motion', 'still');
+		const stillFrame = await bloom.getAttribute('data-frames');
+		const stillLeaves = await frame.locator('#cord-leaves').getAttribute('d');
+		await frame.waitForTimeout(350); // Longer than three idle animation intervals.
+		await expect(bloom).toHaveAttribute('data-frames', stillFrame!);
+		await expect(frame.locator('#cord-leaves')).toHaveAttribute('d', stillLeaves!);
+		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
+		await frame.getByRole('button', { name: 'Select Nimbus - Live Cloud', exact: true }).click();
+		await frame.locator('#settings-toggle').click();
+		await frame.locator('#menu-appearance').click();
+		await frame.locator('#weather-settings summary').click();
+		await expect(frame.locator('#weather-enabled')).not.toBeChecked();
+		await frame.locator('#weather-station').selectOption('KJFK');
+		await frame.locator('#weather-unit').selectOption('c');
+		await frame.locator('#weather-save').click();
+		await expect(frame.locator('#weather-feedback')).toHaveText('Weather settings saved.');
+		expect(JSON.parse(readFileSync(join(editor.storage, 'weather.json'), 'utf8'))).toEqual({
+			version: 1, enabled: false, stationId: 'KJFK', unit: 'c',
+		});
+		await reloadCharm(editor.window);
+		frame = await readyFrame(editor.window);
+		await frame.locator('#settings-toggle').click();
+		await frame.locator('#menu-appearance').click();
+		await frame.locator('#weather-settings summary').click();
+		await expect(frame.locator('#weather-enabled')).not.toBeChecked();
+		await expect(frame.locator('#weather-station')).toHaveValue('KJFK');
+		await expect(frame.locator('#weather-unit')).toHaveValue('c');
+		await expect(frame.locator('#weather-summary')).toBeHidden();
+		// An explicit local QA run can exercise the real public source; normal CI stays offline.
+		if (process.env.CHARMBITS_TEST_LIVE_WEATHER === '1') {
+			await frame.locator('#weather-station').selectOption('KSFO');
+			await frame.locator('#weather-enabled').check();
+			await frame.locator('#weather-save').click();
+			await expect(frame.locator('#weather-feedback')).toHaveText('Weather settings saved.');
+			await expect(frame.locator('#weather-value')).toContainText('\u00b0C', { timeout: 25000 });
+			await expect(frame.locator('#weather-time')).toContainText('Observed');
+			await expect(frame.locator('#live-smiley')).toHaveAttribute('data-weather', /^(sunny|night|cloudy|rain|snow|storm)$/);
+			await frame.locator('#settings-close').click();
+			await frame.locator('#app').screenshot({ path: testInfo.outputPath('nimbus-current-weather.png') });
+		}
+	} finally { await closeOwnedEditor(editor, testInfo); }
+});
+
+test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps pet reactions calm and every bracelet slot movable in both directions`, async ({}, testInfo) => {
+	test.setTimeout(240000);
+	const shiba = 'trial:new-shiba-inu', rose = 'trial:flower-red-rose';
+	const editor = await launchOwnedEditor('charmlet-approved-motion-', ({ preferencesPath }) => {
+		writeFileSync(preferencesPath, JSON.stringify({ ...DEFAULT_STATE, charmId: shiba,
+			charmPinned: true, showMessages: false, festiveEnabled: false }));
+	}, installedPersonalization);
+	try {
+		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
+		await command(editor.window, 'CharmBits: Show Charm');
+		let frame = await readyFrame(editor.window);
+		const appearance = async () => {
+			await frame.locator('#settings-toggle').click();
+			await frame.locator('#menu-appearance').click();
+		};
+		if (process.env.CHARMBITS_TEST_PERSONAL === '1') {
+			await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
+			await expect(frame.locator('#access-label')).toHaveText('Personal edition');
+			await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length + WITHHELD_CHARMS.length);
+			await expect(frame.locator('#activate-access')).toBeHidden();
+			await expect(frame.locator('#app-version')).toContainText('+personal');
+			await frame.locator(`.charm-tile[data-charm-id="${shiba}"]`).click();
+		}
+		await expect(frame.locator('#charm')).toHaveAttribute('data-material-rendered', 'true');
+		const pet = frame.locator('#charm canvas[data-progress]');
+		const still = await pet.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL());
+		await focusCharmForKeyboard(editor, frame);
+		await editor.window.keyboard.press('Space');
+		await expect(frame.locator('#charm')).toHaveAttribute('data-tap-motion', 'playing');
+		await expect.poll(async () => Number(await pet.getAttribute('data-progress'))).toBeGreaterThan(.15);
+		const progress = Number(await pet.getAttribute('data-progress'));
+		await editor.window.keyboard.press('Space');
+		expect(Number(await pet.getAttribute('data-progress'))).toBeGreaterThanOrEqual(progress);
+		await expect(pet).toHaveAttribute('data-motion', 'still');
+		expect(await pet.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL())).toBe(still);
+		await expect(frame.locator('#charm')).not.toHaveAttribute('data-material-error', 'true');
+
+		const pull = async (target: Locator, direction: number, attribute: string) => {
+			await focusWebviewControl(editor, frame, target);
+			const box = (await target.boundingBox())!;
+			const start = Number(await target.getAttribute(attribute));
+			await editor.window.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+			await editor.window.mouse.down();
+			try {
+				await editor.window.mouse.move(box.x + box.width / 2 + direction * 55, box.y + box.height / 2 + 12, { steps: 16 });
+				await expect.poll(async () => direction * (Number(await target.getAttribute(attribute)) - start)).toBeGreaterThan(4);
+				await expect(target).toHaveClass(/\bdragging\b/);
+			} finally { await editor.window.mouse.up(); }
+			await expect(target).not.toHaveClass(/\bdragging\b/);
+		};
+		await pull(frame.locator('#charm'), -1, 'data-position-x');
+		await pull(frame.locator('#charm'), 1, 'data-position-x');
+		await appearance();
+		await frame.locator('#charm-select').selectOption(rose);
+		await frame.locator('#settings-close').click();
+		await expect(frame.locator('#charm')).toHaveAttribute('data-bloom-rendered', 'true');
+		const bridge = frame.locator('#cord [data-part="flower-stem-bridge"]');
+		await expect(bridge).toBeVisible();
+		const attached = () => frame.evaluate(({ x, y }) => {
+			const charm = document.getElementById('charm')!, rig = document.getElementById('rig')!;
+			const stem = document.querySelector<SVGGElement>('#cord [data-part="flower-stem-bridge"]')!;
+			const width = parseFloat(rig.style.getPropertyValue('--charm-width'));
+			const height = parseFloat(rig.style.getPropertyValue('--charm-height'));
+			const angle = Number(charm.dataset.angle), px = (x - .5) * width, py = (y - .5) * height;
+			return Math.hypot(Number(stem.dataset.baseX) - (Number(charm.dataset.positionX) + px * Math.cos(angle) - py * Math.sin(angle)),
+				Number(stem.dataset.baseY) - (Number(charm.dataset.positionY) + px * Math.sin(angle) + py * Math.cos(angle)));
+		}, TRIAL_CHARMS.find(item => item.id === rose)!.baseAttachment!);
+		await pull(frame.locator('#charm'), -1, 'data-position-x');
+		expect(await attached()).toBeLessThan(.1);
+		await pull(frame.locator('#charm'), 1, 'data-position-x');
+		expect(await attached()).toBeLessThan(.1);
+		await frame.locator('#stage').screenshot({ path: testInfo.outputPath('frontal-flower-attached.png') });
+
+		await appearance();
+		await frame.locator('#arrangement').selectOption('bracelet');
+		await frame.locator('#bracelet-choice-0').selectOption(shiba);
+		await frame.locator('#bracelet-choice-1').selectOption(rose);
+		await frame.locator('#bracelet-choice-2').selectOption('live:cali');
+		await frame.locator('#settings-close').click();
+		await expect(frame.locator('#hanging')).toBeHidden();
+		const slots = frame.locator('#bracelet-stage .bracelet-charm:not([hidden])');
+		await expect(slots).toHaveCount(3);
+		for (let index = 0; index < 3; index++) {
+			for (const direction of [-1, 1]) { await pull(slots.nth(index), direction, 'data-x'); }
+		}
+		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+		await expect(frame.locator('#bracelet-stage .dragging')).toHaveCount(0);
+		const ids = await frame.locator('[id]').evaluateAll(elements => elements.map(element => element.id));
+		expect(new Set(ids).size, 'Repeated live renderers must not duplicate document IDs.').toBe(ids.length);
+		await frame.locator('#stage').screenshot({ path: testInfo.outputPath('bracelet-real-editor.png') });
+		await appearance();
+		await frame.getByRole('button', { name: 'Move left charm 3', exact: true }).click();
+		await expect(frame.locator('#bracelet-choice-1')).toHaveValue('live:cali');
+		await frame.getByRole('button', { name: 'Remove charm 3', exact: true }).click();
+		await frame.locator('#motion').click();
+		await frame.locator('#settings-close').click();
+		await expect(slots).toHaveCount(2);
+		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-running', 'false');
+		await expect(frame.locator('#bracelet-stage canvas[data-motion="living"]')).toHaveCount(0);
+		const paused = await frame.locator('#bracelet-stage').getAttribute('data-frames');
+		await frame.waitForTimeout(400);
+		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-frames', paused!);
+		await expect.poll(() => JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).bracelet.charms)
+			.toEqual([shiba, 'live:cali']);
+		frame = await reloadCharm(editor.window);
+		await expect(frame.locator('#stage')).toHaveAttribute('data-arrangement', 'bracelet');
+		await expect(frame.locator('#bracelet-stage .bracelet-charm:not([hidden])')).toHaveCount(2);
+		await expect(frame.locator('#bracelet-stage')).toHaveAttribute('data-running', 'false');
+		await appearance();
+		await frame.locator('#arrangement').selectOption('single');
+		await frame.locator('#settings-close').click();
+		await expect(frame.locator('#hanging')).toBeVisible();
+		await expect(frame.locator('#bracelet-stage')).toBeHidden();
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 
@@ -1192,7 +1399,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'live collection'} has res
 			await expect(frame.locator('#charm-picker')).toBeHidden();
 			await expect(frame.locator('#stage')).toHaveAttribute('data-persisted', 'true');
 		};
-		for (const [name, character] of [['Sunny - Live Smiley', 'sunny'], ['Nimbus - Live Cloud', 'cloud'], ['Byte - Live Robot', 'robot']]) {
+		for (const [name, character] of [['Sunny - Live Smiley', 'sunny'], ['Nimbus - Live Cloud', 'cloud'], ['Robot Assistant - Live Robot', 'robot']]) {
 			await choose(name, 'Live 3D');
 			const face = frame.locator('#live-smiley');
 			await expect(face).toHaveAttribute('data-character', character);
@@ -1214,14 +1421,14 @@ test(`${installedPersonalization ? 'installed VSIX' : 'live collection'} has res
 					await focusCharmForKeyboard(editor, frame);
 					await editor.window.keyboard.press('Enter');
 					await expect(face).toHaveAttribute('data-expression', character === 'cloud'
-						? /^(sunrise|rain|lightning)$/ : /^(binary|compile|cursor)$/);
+						? /^(sunrise|rain|lightning)$/ : /^(think|cheer|encourage)$/);
 					const expression = (await face.getAttribute('data-expression'))!;
 					reactions.add(expression);
 					images.add(await face.evaluate(canvas => (canvas as HTMLCanvasElement).toDataURL()));
 					await frame.locator('#charm').screenshot({ path: testInfo.outputPath(`live-${character}-${expression}.png`) });
 				}
 				expect([...reactions].sort()).toEqual(character === 'cloud'
-					? ['lightning', 'rain', 'sunrise'] : ['binary', 'compile', 'cursor']);
+					? ['lightning', 'rain', 'sunrise'] : ['cheer', 'encourage', 'think']);
 				expect(images.size).toBe(3);
 				const stillFrames = await face.getAttribute('data-frames');
 				await editor.window.waitForTimeout(100);
@@ -1718,7 +1925,7 @@ if (process.env.CHARMLET_TEST_PACKAGED === '1') {
 			const version = JSON.parse(readFileSync(resolve('package.json'), 'utf8')).version;
 			await expect(frame.locator('#app-version')).toHaveText(`v${version}`);
 			await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
-			await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(retainedBetaCount);
+			await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
 			await frame.locator('#picker-close').click();
 			await expect(frame.locator('#festive-enabled')).toBeChecked();
 			await expect(frame.locator('#charm-pinned')).not.toBeChecked();

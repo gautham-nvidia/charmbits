@@ -115,6 +115,14 @@ The same 0.11.0 candidate now contains 200 charms: 175 static PNG designs, Termi
 
 Nimbus and Byte replace their earlier procedural appearance with registered Gemini 3 Pro Image cloud and metal-body textures. Their live projection, weather effects, narrow cloud-fold eyes, jointed robot arms and binary/code display are application code. The same textures and geometry work in GPU and software rendering. `website/live-art-assets.json` now records 36 output hashes, including the two new source frames and two thumbnails. Sunny remains procedural; the approved Cali and eleven California companion artwork files are unchanged.
 
+## 2026-11-16 - Robot Assistant, pets, parks and wonders
+
+Robot Assistant now uses the preferred ivory body and expressive screen eyes with thinking, cheering and encouraging gestures. Earlier Byte names above describe historical versions. The stable `live:robot` selection remains compatible with saved settings; the current source frame and thumbnail hashes are recorded in `website/live-art-assets.json`.
+
+`website/pets-places-artwork.json` records ten new pets and seven parks or landmark subjects. The cutout process retains original source and preparation variants, corrects green spill for selected neutral subjects, and records PNG hashes in the artwork manifest. Profile 5 identifies the later pet/geyser preparation; existing pack files are never replaced with different contents.
+
+Nimbus's optional current-weather connection adds code-drawn moon and snow effects alongside sun, rain and lightning. These effects map timestamped NWS observations when enabled; they are separate from the existing cloud illustration. Weather starts off, and the purely playful gestures remain available when it is off.
+
 These are generated illustrations, not documentary photographs or verified architectural models. The Cupertino design is inspired by the original Infinite Loop campus rather than Apple Park. New artwork remains available for owner review; public distribution terms and the free/paid lineup remain undecided. Separately prepared artist-inspired studies are local review material and are not bundled in this trial.
 
 ## Music Icons trial, 0.12.0 (2026-11-10)

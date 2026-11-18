@@ -4,6 +4,7 @@ import { DEFAULT_ATTACHMENT, type CharmAttachment } from './charm-attachment';
 import { restoreCordChoices, type CordChoices } from './cord-design';
 import { restoreCaliOutfit, type CaliOutfitChoice } from './cali-wardrobe';
 import { DEFAULT_PUZZLES, matchesPuzzles, restorePuzzles, type PuzzleState } from './puzzle-core';
+import { DEFAULT_BRACELET, matchesBracelet, restoreBracelet, type BraceletState } from './bracelet-core';
 
 export type LayoutMode = 'hanging' | 'orbit';
 export const MIN_CHARM_SIZE = 60;
@@ -15,6 +16,8 @@ export interface CharmState {
 	editionVersion: 1;
 	charmId: CharmId;
 	layoutMode: LayoutMode;
+	arrangement: 'single' | 'bracelet';
+	bracelet: BraceletState;
 	showMessages: boolean;
 	rotateMessages: boolean;
 	messageIndex: number;
@@ -34,6 +37,8 @@ export const DEFAULT_STATE: Readonly<CharmState> = Object.freeze({
 	editionVersion: 1,
 	charmId: 'terminal',
 	layoutMode: 'hanging',
+	arrangement: 'single',
+	bracelet: DEFAULT_BRACELET,
 	showMessages: true,
 	rotateMessages: true,
 	messageIndex: 0,
@@ -63,6 +68,8 @@ export function restoreState(value: unknown, charms: readonly CharmDefinition[] 
 		editionVersion: 1,
 		charmId: selected.id,
 		layoutMode: candidate.layoutMode === 'orbit' ? 'orbit' : 'hanging',
+		arrangement: candidate.arrangement === 'bracelet' ? 'bracelet' : 'single',
+		bracelet: restoreBracelet(candidate.bracelet),
 		showMessages: typeof candidate.showMessages === 'boolean' ? candidate.showMessages : DEFAULT_STATE.showMessages,
 		rotateMessages: typeof candidate.rotateMessages === 'boolean' ? candidate.rotateMessages : DEFAULT_STATE.rotateMessages,
 		messageIndex: typeof candidate.messageIndex === 'number' && Number.isInteger(candidate.messageIndex)
@@ -97,8 +104,9 @@ export function matchesSavedState(expected: CharmState, actual: unknown): boolea
 		|| Object.keys(choices).length !== Object.keys(expected.cordChoices).length
 		|| !Object.entries(expected.cordChoices).every(([id, style]) => Object.hasOwn(choices, id)
 			&& (choices as Record<string, unknown>)[id] === style)) { return false; }
-	return matchesPuzzles(expected.puzzles, stored.puzzles)
-		&& Object.entries(expected).every(([key, value]) => key === 'cordChoices' || key === 'puzzles' || Object.is(stored[key], value));
+	return matchesPuzzles(expected.puzzles, stored.puzzles) && matchesBracelet(expected.bracelet, stored.bracelet)
+		&& Object.entries(expected).every(([key, value]) => key === 'cordChoices' || key === 'puzzles'
+			|| key === 'bracelet' || Object.is(stored[key], value));
 }
 
 export function resetState(state: CharmState): CharmState {
@@ -107,6 +115,8 @@ export function resetState(state: CharmState): CharmState {
 		charmId: state.charmId,
 		reducedMotion: state.reducedMotion,
 		layoutMode: state.layoutMode,
+		arrangement: state.arrangement,
+		bracelet: state.bracelet,
 		showMessages: state.showMessages,
 		rotateMessages: state.rotateMessages,
 		messageIndex: state.messageIndex,
