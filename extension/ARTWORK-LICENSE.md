@@ -47,4 +47,4 @@ have been reviewed.
 
 Nothing here changes an existing purchase into a subscription or limits mandatory
 consumer rights. For rights questions, permissions or support, contact
-Gautham Anebajagane at getcharmlet@gmail.com.
+Gautham Anebajagane at getcharmbits@gmail.com.

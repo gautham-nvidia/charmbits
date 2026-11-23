@@ -1,5 +1,7 @@
 # Collections and Pro offers
 
+**Current contact (November 23, 2026): getcharmbits@gmail.com.** The earlier inbox and release details below are historical. Follow the current [service setup guide](../service/README.md) for account configuration.
+
 Extension 0.14.0 and desktop 0.11.0 expand the catalogue to 261 designs, retain the 31-charm starter and add a compact website theme control and optional subscription popup. The candidate remains for review; live provider configuration and artwork clearance are still required.
 
 ## Collections

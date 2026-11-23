@@ -18,6 +18,7 @@ These values match the package manifest:
 | Keywords | charms, focus, productivity, garden, motivation, silicon, accessibility |
 | Website | [CharmBits](https://charmbits.pages.dev/) |
 | Support | [GitHub issues](https://github.com/gautham-nvidia/charmbits/issues) |
+| Contact | [getcharmbits@gmail.com](mailto:getcharmbits@gmail.com) |
 | Software terms | Approved proprietary [software licence](../extension/LICENSE) |
 | Artwork terms | Separate [artwork licence](../extension/ARTWORK-LICENSE.md) |
 | Privacy | [Privacy disclosure](../extension/PRIVACY.md) |
@@ -56,6 +57,8 @@ The README's hosted image URLs use `main`; merge these reviewed assets before pu
 ## Distribution and remaining account steps
 
 Microsoft Marketplace, Open VSX and manual VSIX installation are separate routes. Current host evidence belongs in [editor-distribution.md](editor-distribution.md). Avoid claiming support for every fork based only on shared VS Code APIs.
+
+The owner confirmed creating the Gmail inbox and personal Microsoft account using **getcharmbits@gmail.com** on November 23, 2026. Sign in with that account for the Marketplace setup below. Creating a Microsoft account does not establish ownership of a Marketplace publisher or configure Trusted Publishing.
 
 The source and artwork terms are already chosen. To publish:
 

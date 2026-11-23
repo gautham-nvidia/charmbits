@@ -8,7 +8,7 @@ The rename preserves the extension identity, desktop storage/encryption identity
 
 **US Tech Hubs & Skylines** includes 13 cities. The public release excludes the 34 Music Icons and 17 Sports Icons studies pending their separate rights review. Historical source art and personal imports remain intact. Saved withheld choices and cords use a neutral placeholder; they are not erased. Redwood Grove and Bay Area / Silicon Valley replace the two artist starters, and Electric Guitar replaces the artist free download.
 
-Official contact: **getcharmlet@gmail.com**. Subscriber delivery still requires the configured email service.
+Official contact: **getcharmbits@gmail.com**. Subscriber delivery still requires the configured email service.
 
 Email-only verification, a once-per-email 30-day desktop trial, signed charm access and protected delivery are implemented. Free extension downloads do not start that trial. **Live signup, checkout and public installers are not enabled by the checked-in configuration.** Marketplace installation will not require our email signup. [Hosting, sender, payments and file-delivery setup](service/README.md) explains the accounts, private keys and acceptance checks.
 

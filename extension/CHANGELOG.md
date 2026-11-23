@@ -5,6 +5,7 @@ Marketplace releases. See the repository PROJECT_LOG.md for commit and verificat
 
 ## 0.16.0 - Unreleased
 
+- Update the official support, licensing and weather-service contact to getcharmbits@gmail.com.
 - Make every released editor charm and feature free without activation. Desktop retains its starter, 30-day Pro trial and purchases.
 - Connect flexible cord animation in the app. Front-facing flowers attach to straight leafy stems tucked behind the bloom, with shaded leaves and softly animated petals. Add linen, silk, rose gold and pearl cords.
 - Add an optional bracelet with two or three independently movable charms, saved slots, reordering and removal. Choose silver, gold, rose gold, woven linen or pearls. Keep the single charm as the default.

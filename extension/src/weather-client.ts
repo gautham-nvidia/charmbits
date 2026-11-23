@@ -27,7 +27,7 @@ export async function fetchWeatherObservation(
 ): Promise<WeatherReading> {
 	if (!WEATHER_STATIONS.some(station => station.id === stationId)) { throw new Error('Unknown weather station.'); }
 	const response = await request(`https://api.weather.gov/stations/${stationId}/observations/latest`, {
-		headers: { Accept: 'application/geo+json', 'User-Agent': 'CharmBits/0.16 (https://charmbits.pages.dev; getcharmlet@gmail.com)' },
+		headers: { Accept: 'application/geo+json', 'User-Agent': 'CharmBits/0.16 (https://charmbits.pages.dev; getcharmbits@gmail.com)' },
 		redirect: 'error', signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
 	});
 	return parseWeatherObservation(await observationJson(response), stationId, Date.now());

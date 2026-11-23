@@ -1,5 +1,7 @@
 # Charmlet website preview and email setup
 
+**Current contact (November 23, 2026): getcharmbits@gmail.com.** The earlier inbox and setup milestones below are historical. Follow the current [service setup guide](../service/README.md) for account configuration.
+
 The preview now explains where Charmlet lives and lets visitors try focus, encouragement, celebrations and coding trivia before the Free/Pro comparison. The refined Terminal logo keeps the original charm's silhouette. Gmail, subscriber collection, checkout and production hosting are **not connected**.
 
 ## Review the experience

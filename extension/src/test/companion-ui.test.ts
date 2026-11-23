@@ -1234,15 +1234,22 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 		const bracelet = frame.locator('#bracelet-stage'), slots = bracelet.locator('.bracelet-charm:not([hidden])');
 		await expect(slots).toHaveCount(3);
 		const traceFrames = await tracePointerInput(editor.window);
-		const stageBounds = (await frame.locator('#stage').boundingBox())!;
-		const braceletBounds = (await bracelet.boundingBox())!;
-		expect(braceletBounds.y + braceletBounds.height, 'The bracelet uses the full available panel height')
-			.toBeCloseTo(stageBounds.y + stageBounds.height, 0);
 		const pullDown = async (index: number, cancel = false) => {
 			const slot = slots.nth(index);
 			await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
 			await focusWebviewControl(editor, frame, slot);
-			const box = (await slot.boundingBox())!, area = (await bracelet.boundingBox())!;
+			// VS Code can resize a newly opened webview after it reports ready.
+			// A resize cancels held input, so measure after the layout settles.
+			let area = (await bracelet.boundingBox())!, resizedAt = performance.now();
+			await expect.poll(async () => {
+				const next = await bracelet.boundingBox();
+				if (!next) { resizedAt = performance.now(); return 0; }
+				if (JSON.stringify(next) !== JSON.stringify(area)) { area = next; resizedAt = performance.now(); }
+				return performance.now() - resizedAt;
+			}, { message: 'The editor layout settles before a held pull', timeout: 10000 }).toBeGreaterThanOrEqual(750);
+			const box = (await slot.boundingBox())!, stageBounds = (await frame.locator('#stage').boundingBox())!;
+			expect(area.y + area.height, 'The bracelet uses the full available panel height')
+				.toBeCloseTo(stageBounds.y + stageBounds.height, 0);
 			const x = box.x + box.width / 2, y = box.y + box.height / 2;
 			const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
 			expect(distance, 'The bracelet leaves room for a downward pull').toBeGreaterThan(30);

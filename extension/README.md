@@ -171,6 +171,8 @@ the visible name is CharmBits.
 
 ## Project and feedback
 
+For support or licensing enquiries, contact [getcharmbits@gmail.com](mailto:getcharmbits@gmail.com).
+
 [Privacy and local data](PRIVACY.md) describes saved preferences, focus notes, imported packs and data removal. CharmBits does not send workspace code or progress to a server.
 
 [Report an issue](https://github.com/gautham-nvidia/charmbits/issues) with your OS/editor version,

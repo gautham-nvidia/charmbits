@@ -475,8 +475,8 @@ try {
     assert.equal((await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' })).status(), 200);
     await expect(page.locator('h1')).toBeVisible();
     if (['about-us.html', 'press.html', 'privacy.html', 'terms.html'].includes(path)) {
-      await expect(page.locator('[data-site-contact] a')).toHaveAttribute('href', 'mailto:getcharmlet@gmail.com');
-      await expect(page.locator('[data-site-contact]')).toHaveText('getcharmlet@gmail.com');
+      await expect(page.locator('[data-site-contact] a')).toHaveAttribute('href', 'mailto:getcharmbits@gmail.com');
+      await expect(page.locator('[data-site-contact]')).toHaveText('getcharmbits@gmail.com');
     }
     assert.equal(await overflow(), false, `Page overflow: ${path}`);
   }

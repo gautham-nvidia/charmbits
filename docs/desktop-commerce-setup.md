@@ -17,7 +17,7 @@ Code and local tests are ready; real account delivery and payment tests are stil
 | Service | Next action | Result to retain |
 |---|---|---|
 | **Lemon Squeezy** | Continue merchant onboarding for **CharmBits**, using **https://charmbits.pages.dev/**. Complete identity, business and payout details directly in the account. | Merchant approval and store ID. If onboarding offers Stripe Managed Payments instead, confirm the actual product before proceeding: the connector uses the Lemon Squeezy API. |
-| **Brevo** | Use the existing **getcharmlet@gmail.com** administration inbox. Create a list named **CharmBits — Confirmed Offers**. | Numeric list ID; keep the API key in the account until adding it as a Worker secret. |
+| **Brevo** | Use the **getcharmbits@gmail.com** administration inbox. Create a list named **CharmBits — Confirmed Offers**. | Numeric list ID; keep the API key in the account until adding it as a Worker secret. |
 | **Sending domain** | Authenticate a domain you own in Brevo, using the DNS records Brevo generates. Choose a sender on that domain and test replies to the support inbox. | Verified sender and authenticated domain. `pages.dev` is the website address, not a sender domain we control. A paid Google Workspace mailbox is optional. |
 | **Cloudflare** | Keep the Pages website. Configure the separate access Worker, D1 database, private R2 bucket and managed Turnstile widget. | Worker/API address, D1 ID and public Turnstile site key. The existing configuration helper connects them. |
 

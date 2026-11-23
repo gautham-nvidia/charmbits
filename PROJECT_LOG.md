@@ -725,3 +725,28 @@ Type checking, lint, all 115 app unit tests and the full website suite pass.
 The homepage now introduces charm bracelets, their three slots and five styles,
 with a prominent preview button. Desktop and mobile screenshots were inspected.
 Fresh package verification and hosted checks are recorded in the session handoff.
+
+## 2026-11-23 — CharmBits contact inbox
+
+The owner confirmed creating getcharmbits@gmail.com and a personal Microsoft
+account using it, then requested the appropriate app and website contact
+updates. Current website links, contact configuration, support/licensing
+documents and the NWS request contact now use the new inbox. Earlier release
+records retain their historical address with a current-contact note where needed.
+
+The service setup and Marketplace draft now distinguish the completed Microsoft
+account creation from the still-unverified publisher ownership and Trusted
+Publishing setup. Cloudflare guidance retains the existing hosting resources
+and describes changing the existing user profile email, plus separate billing
+and notification addresses. No external account profile was changed.
+
+Type checking, lint, six weather tests and the full local website suite pass.
+The first personal VSIX check exposed a startup resize while its test held a
+charm: the recorded panel height changed from 700.40625 to 674.40625 immediately
+before lost pointer capture. The regression now waits for stable panel geometry
+before pulling. Its height, distance, cancellation and return assertions remain.
+The fresh personal builder then passes the extracted desktop archive and both
+installed editor scenarios with all 292 designs unlocked.
+
+Package checksums, deployment and hosted results belong in the phase27 session
+handoff once observed.
