@@ -1261,7 +1261,8 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 				}, { message: `Bracelet charm ${index + 1} reaches the bottom of the panel` }).toBeGreaterThan(distance * .9);
 				if (index === 0) {
 					const reduced = await frame.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
-					await bracelet.screenshot({ path: testInfo.outputPath(`bracelet-bottom-${reduced ? 'reduced' : 'motion'}.png`) });
+					// Locator screenshots scroll ancestors; preserve pointer routing during the held drag.
+					await editor.window.screenshot({ path: testInfo.outputPath(`bracelet-bottom-${reduced ? 'reduced' : 'motion'}.png`) });
 				}
 				if (cancel) {
 					// Exercise the browser's real lostpointercapture event while
@@ -1275,6 +1276,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 				await frame.locator('#app').screenshot({ path: testInfo.outputPath('bracelet-pull-failed.png') });
 				throw error;
 			} finally { await editor.window.mouse.up(); }
+			await savePointerTrace(editor, traceFrames, testInfo.outputPath('bracelet-pull-input.json'));
 			await expect(slot).not.toHaveClass(/\bdragging\b/);
 			await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
 				{ message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
