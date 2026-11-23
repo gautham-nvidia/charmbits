@@ -1224,11 +1224,6 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 			bracelet: { charms: ['trial:new-shiba-inu', 'trial:flower-red-rose', 'live:cali'], selected: 0, style: 'silver' },
 			charmId: 'trial:new-shiba-inu', charmPinned: true, showMessages: false, festiveEnabled: false }));
 	}, installedPersonalization);
-	const pointer = await editor.window.context().newCDPSession(editor.window);
-	const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel', point?: { x: number; y: number }) =>
-		pointer.send('Input.dispatchTouchEvent', {
-			type, touchPoints: point ? [{ ...point, id: 1, radiusX: 1, radiusY: 1, force: 1 }] : [],
-		});
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
 		await command(editor.window, 'CharmBits: Show Charm');
@@ -1238,13 +1233,11 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 		}
 		const bracelet = frame.locator('#bracelet-stage'), slots = bracelet.locator('.bracelet-charm:not([hidden])');
 		await expect(slots).toHaveCount(3);
+		const traceFrames = await tracePointerInput(editor.window);
 		const stageBounds = (await frame.locator('#stage').boundingBox())!;
 		const braceletBounds = (await bracelet.boundingBox())!;
 		expect(braceletBounds.y + braceletBounds.height, 'The bracelet uses the full available panel height')
 			.toBeCloseTo(stageBounds.y + stageBounds.height, 0);
-		// An independent touch pointer keeps geometry checks separate from the
-		// physical mouse while the owner works in another editor window.
-		await pointer.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
 		const pullDown = async (index: number, cancel = false) => {
 			const slot = slots.nth(index);
 			await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
@@ -1254,11 +1247,13 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 			const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
 			expect(distance, 'The bracelet leaves room for a downward pull').toBeGreaterThan(30);
 			const rest = Number(await slot.getAttribute('data-y'));
-			await touch('touchStart', { x, y });
+			await slot.evaluate(element => element.addEventListener('pointerdown', event => {
+				element.dataset.testPointerId = String((event as PointerEvent).pointerId);
+			}, { once: true }));
+			await editor.window.mouse.move(x, y); await editor.window.mouse.down();
 			try {
-				for (let step = 1; step <= 16; step++) {
-					await touch('touchMove', { x, y: y + distance * step / 16 });
-				}
+				await expect(slot).toHaveClass(/\bdragging\b/);
+				await editor.window.mouse.move(x, y + distance, { steps: 16 });
 				await expect(slot).toHaveClass(/\bdragging\b/);
 				await expect.poll(async () => {
 					const moved = (await slot.boundingBox())!;
@@ -1268,7 +1263,18 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 					const reduced = await frame.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
 					await bracelet.screenshot({ path: testInfo.outputPath(`bracelet-bottom-${reduced ? 'reduced' : 'motion'}.png`) });
 				}
-			} finally { await touch(cancel ? 'touchCancel' : 'touchEnd'); }
+				if (cancel) {
+					// Exercise the browser's real lostpointercapture event while
+					// the mouse is still held, before its normal pointerup.
+					await slot.evaluate(element => element.releasePointerCapture(Number(element.dataset.testPointerId)));
+					await editor.window.mouse.move(x, y + distance - 1);
+					await expect(slot).not.toHaveClass(/\bdragging\b/);
+				}
+			} catch (error) {
+				await savePointerTrace(editor, traceFrames, testInfo.outputPath('bracelet-pull-input.json'));
+				await frame.locator('#app').screenshot({ path: testInfo.outputPath('bracelet-pull-failed.png') });
+				throw error;
+			} finally { await editor.window.mouse.up(); }
 			await expect(slot).not.toHaveClass(/\bdragging\b/);
 			await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
 				{ message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
@@ -1280,9 +1286,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 		await pullDown(0);
 		await expect(bracelet).toHaveAttribute('data-frames', paused!);
 		await expect(bracelet.locator('canvas[data-motion="living"]')).toHaveCount(0);
-	} finally {
-		try { await pointer.detach(); } finally { await closeOwnedEditor(editor, testInfo); }
-	}
+	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 
 test(`${installedPersonalization ? 'installed VSIX' : 'playful charms'} reacts to taps and preserves 200 percent sizing`, async ({}, testInfo) => {
