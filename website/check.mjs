@@ -155,6 +155,8 @@ async function checkCaliSwing() {
 }
 
 async function checkBracelet() {
+  await expect(page.locator('#bracelet-title')).toHaveText('A few favourites, together.');
+  await expect(page.locator('#bracelet-description')).toContainText('up to three charms');
   await page.locator('#demo-arrangement').click();
   await expect(page.locator('#demo-arrangement')).toHaveAttribute('aria-pressed', 'true');
   const bracelet = page.locator('#demo-bracelet'), slots = bracelet.locator('.bracelet-charm:not([hidden])');
@@ -176,6 +178,24 @@ async function checkBracelet() {
       } finally { await page.mouse.up(); }
       await expect(slot).not.toHaveClass(/\bdragging\b/);
     }
+    await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+    await slot.scrollIntoViewIfNeeded();
+    const box = await slot.boundingBox(), area = await bracelet.boundingBox();
+    const x = box.x + box.width / 2, y = box.y + box.height / 2;
+    const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
+    assert.ok(distance > 30, 'The bracelet leaves room for a downward pull.');
+    const rest = Number(await slot.getAttribute('data-y'));
+    await page.mouse.move(x, y); await page.mouse.down();
+    try {
+      await page.mouse.move(x, y + distance, { steps: 16 });
+      await expect(slot).toHaveClass(/\bdragging\b/);
+      await expect.poll(async () => {
+        const moved = await slot.boundingBox();
+        return moved.y + moved.height / 2 - y;
+      }, { message: `Bracelet charm ${index + 1} reaches the bottom of its stage` }).toBeGreaterThan(distance * .9);
+    } finally { await page.mouse.up(); }
+    await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+      { message: 'The released charm returns to its resting drop', timeout: 10000 }).toBeLessThan(2);
   }
   const pet = bracelet.locator('[data-charm="new-shiba-inu"]');
   await expect(pet).toHaveAttribute('data-material-rendered', 'true');
@@ -647,7 +667,7 @@ try {
   const result = { version: manifest.version, charms: 241, artists: 0, athletes: 0, heldArtworkExcludedFromDownloads: true,
     homepagePreviews: data.homepagePreviews.map(item => item.id), skylines: 13, collections: data.collections.length,
     desktop: true, mobileWidths: [390, 320, 768], caliBidirectionalSwing: true, liveCompanions: 15, puzzleBoards: 3,
-    publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true,
+    publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true, braceletDownwardPullAndReturn: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,
     popupDismissal: true, compactAutoTheme: true, marketplaceDirectInstall: true, consoleErrors: errors };
   await writeFile(join(output, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);

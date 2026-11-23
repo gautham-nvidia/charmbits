@@ -34,8 +34,9 @@ Desktop: extract the entire archive and open CharmBits Personal. It has its own
 profile named CharmBits Personal, so you can compare it with the public desktop.
 Existing desktop packs/photos can be imported through its normal controls.
 
-Appearance > Charm bracelet holds two or three charms. Tap a pet for a quiet
-response; pull any charm left or right. Reduced Motion stops decorative effects.
+Appearance > Charm bracelet holds up to three charms. Tap a pet for a quiet
+response; pull any charm down, left or right, then release to let it return.
+Reduced Motion stops decorative effects.
 These are unsigned review builds. The package identity and checksums are in
 personal-build.json.
 `;
@@ -90,7 +91,7 @@ try {
 }
 // Run after desktop smoke: two native UI tests must not compete for keyboard focus.
 run(join(extension, 'node_modules/@playwright/test/cli.js'),
-  ['test', '--grep', 'keeps pet reactions calm'], extension, {
+  ['test', '--grep', 'keeps pet reactions calm|downward bracelet pulls'], extension, {
     ...process.env, CHARMLET_TEST_PACKAGED: '1', CHARMLET_TEST_VSIX: vsix, CHARMBITS_TEST_PERSONAL: '1',
   });
 async function artifact(file) {
@@ -102,7 +103,8 @@ const record = {
   edition: 'personal', publicDistribution: false, designs: 292,
   editorVersion: extensionManifest.version, desktopVersion: desktopManifest.version,
   vsix: await artifact(vsix), desktop: await artifact(archive), application,
-  verification: ['extracted desktop archive smoke', 'installed VSIX full personal catalogue and approved motion'],
+  verification: ['extracted desktop archive smoke', 'installed VSIX full personal catalogue and approved motion',
+    'installed VSIX downward bracelet pulls, cancellation, return and Reduced Motion'],
 };
 await writeFile(join(output, 'personal-build.json'), `${JSON.stringify(record, null, 2)}\n`);
 console.log(JSON.stringify(record, null, 2));

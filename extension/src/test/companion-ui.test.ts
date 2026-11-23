@@ -1218,6 +1218,73 @@ test(`${installedPersonalization ? 'installed VSIX' : 'approved motion'} keeps p
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 
+test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} supports downward bracelet pulls and a calm return`, async ({}, testInfo) => {
+	const editor = await launchOwnedEditor('charmlet-bracelet-pull-', ({ preferencesPath }) => {
+		writeFileSync(preferencesPath, JSON.stringify({ ...DEFAULT_STATE, arrangement: 'bracelet',
+			bracelet: { charms: ['trial:new-shiba-inu', 'trial:flower-red-rose', 'live:cali'], selected: 0, style: 'silver' },
+			charmId: 'trial:new-shiba-inu', charmPinned: true, showMessages: false, festiveEnabled: false }));
+	}, installedPersonalization);
+	const pointer = await editor.window.context().newCDPSession(editor.window);
+	const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd' | 'touchCancel', point?: { x: number; y: number }) =>
+		pointer.send('Input.dispatchTouchEvent', {
+			type, touchPoints: point ? [{ ...point, id: 1, radiusX: 1, radiusY: 1, force: 1 }] : [],
+		});
+	try {
+		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
+		await command(editor.window, 'CharmBits: Show Charm');
+		const frame = await readyFrame(editor.window);
+		for (const attribute of ['data-companion-ready', 'data-persisted', 'data-companion-persisted']) {
+			await expect(frame.locator('#stage')).toHaveAttribute(attribute, 'true');
+		}
+		const bracelet = frame.locator('#bracelet-stage'), slots = bracelet.locator('.bracelet-charm:not([hidden])');
+		await expect(slots).toHaveCount(3);
+		const stageBounds = (await frame.locator('#stage').boundingBox())!;
+		const braceletBounds = (await bracelet.boundingBox())!;
+		expect(braceletBounds.y + braceletBounds.height, 'The bracelet uses the full available panel height')
+			.toBeCloseTo(stageBounds.y + stageBounds.height, 0);
+		// An independent touch pointer keeps geometry checks separate from the
+		// physical mouse while the owner works in another editor window.
+		await pointer.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+		const pullDown = async (index: number, cancel = false) => {
+			const slot = slots.nth(index);
+			await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+			await focusWebviewControl(editor, frame, slot);
+			const box = (await slot.boundingBox())!, area = (await bracelet.boundingBox())!;
+			const x = box.x + box.width / 2, y = box.y + box.height / 2;
+			const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
+			expect(distance, 'The bracelet leaves room for a downward pull').toBeGreaterThan(30);
+			const rest = Number(await slot.getAttribute('data-y'));
+			await touch('touchStart', { x, y });
+			try {
+				for (let step = 1; step <= 16; step++) {
+					await touch('touchMove', { x, y: y + distance * step / 16 });
+				}
+				await expect(slot).toHaveClass(/\bdragging\b/);
+				await expect.poll(async () => {
+					const moved = (await slot.boundingBox())!;
+					return moved.y + moved.height / 2 - y;
+				}, { message: `Bracelet charm ${index + 1} reaches the bottom of the panel` }).toBeGreaterThan(distance * .9);
+				if (index === 0) {
+					const reduced = await frame.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+					await bracelet.screenshot({ path: testInfo.outputPath(`bracelet-bottom-${reduced ? 'reduced' : 'motion'}.png`) });
+				}
+			} finally { await touch(cancel ? 'touchCancel' : 'touchEnd'); }
+			await expect(slot).not.toHaveClass(/\bdragging\b/);
+			await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+				{ message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
+		};
+		for (let index = 0; index < 3; index++) { await pullDown(index, index === 2); }
+		await editor.window.emulateMedia({ reducedMotion: 'reduce' });
+		await expect(bracelet).toHaveAttribute('data-running', 'false');
+		const paused = await bracelet.getAttribute('data-frames');
+		await pullDown(0);
+		await expect(bracelet).toHaveAttribute('data-frames', paused!);
+		await expect(bracelet.locator('canvas[data-motion="living"]')).toHaveCount(0);
+	} finally {
+		try { await pointer.detach(); } finally { await closeOwnedEditor(editor, testInfo); }
+	}
+});
+
 test(`${installedPersonalization ? 'installed VSIX' : 'playful charms'} reacts to taps and preserves 200 percent sizing`, async ({}, testInfo) => {
 	test.setTimeout(180000);
 	const editor = await launchOwnedEditor('charmlet-playful-ui-', ({ preferencesPath, companionPath }) => {

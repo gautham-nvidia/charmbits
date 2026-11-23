@@ -7,6 +7,11 @@
 :root[data-theme="dark"] { --card: #213328; --muted: #b8c5b7; --note: #273b2d; --stage: #25372b; --orange: #f2ac83; --copper: #c9ab78; }
 #demo-bracelet-design { width: min(320px, 100%); margin: 14px auto 0; text-align: left; }
 #demo-bracelet-design select { min-height: 44px; color: var(--fg); background: var(--card); border-color: var(--line); }
+.bracelet-intro { width: min(100%, 640px); margin-top: 32px; padding: 28px clamp(18px, 4vw, 36px); border: 1px solid var(--line); border-radius: 24px; background: var(--card); text-align: center; }
+.concept-page .bracelet-intro h2 { margin: 8px 0 12px; font: 650 clamp(24px, 4vw, 32px)/1.2 var(--display); letter-spacing: -.03em; }
+.bracelet-intro > p:not(.overline) { margin: 12px 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.bracelet-intro .pill { margin-top: 10px; }
+.bracelet-intro .pill[aria-pressed="true"] { outline: 2px solid var(--copper); outline-offset: 3px; }
 html { scroll-behavior: smooth; scroll-padding-top: 115px; }
 .concept-page { line-height: 1.6; overflow-x: clip; }
 .concept-page main { width: 100%; max-width: none; margin: 0; }

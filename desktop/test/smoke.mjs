@@ -891,7 +891,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(fourth.window.locator('body')).toHaveAttribute('data-desktop-pinned-toolbar', String(!nativeInput));
   assert.deepEqual((await diagnostic(fourth.application)).desktopView,
     { background: !nativeInput, toolbarPinned: !nativeInput, messagesPinned: !nativeInput });
-  console.log('Desktop bracelet: three independent charms move left/right and stop with Reduced Motion.');
+  console.log('Desktop bracelet: three independent charms pull down, return, move left/right and stop with Reduced Motion.');
   const appearance = async () => {
     await openTools(fourth.window);
     await fourth.window.getByRole('button', { name: 'Charm settings', exact: true }).click();
@@ -913,6 +913,9 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(bracelet).toHaveAttribute('data-style', 'rose-gold');
   const slots = bracelet.locator('.bracelet-charm:not([hidden])');
   await expect(slots).toHaveCount(3);
+  const stageBounds = await fourth.window.locator('#stage').boundingBox(), braceletBounds = await bracelet.boundingBox();
+  assert.ok(Math.abs(braceletBounds.y + braceletBounds.height - stageBounds.y - stageBounds.height) < 1,
+    'The desktop bracelet uses the full available stage height.');
   await expect(fourth.window.locator('#charm')).toBeHidden();
   // As with the single-charm geometry check, use an independent touch pointer
   // so forwarded, unheld physical mouse moves cannot cancel simulated capture.
@@ -938,6 +941,26 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
           }, { message: `Desktop bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
         } finally { await braceletTouch('touchEnd'); }
       }
+      await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+      const box = await slot.boundingBox(), area = await bracelet.boundingBox();
+      const x = box.x + box.width / 2, y = box.y + box.height / 2;
+      const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
+      assert.ok(distance > 30, 'The desktop bracelet leaves room for a downward pull.');
+      const rest = Number(await slot.getAttribute('data-y'));
+      await braceletTouch('touchStart', { x, y });
+      try {
+        for (let step = 1; step <= 16; step++) {
+          await braceletTouch('touchMove', { x, y: y + distance * step / 16 });
+        }
+        await expect(slot).toHaveClass(/\bdragging\b/);
+        await expect.poll(async () => {
+          const moved = await slot.boundingBox();
+          return moved.y + moved.height / 2 - y;
+        }, { message: `Desktop bracelet charm ${index + 1} reaches the bottom of the stage` }).toBeGreaterThan(distance * .9);
+      } finally { await braceletTouch(index === 2 ? 'touchCancel' : 'touchEnd'); }
+      await expect(slot).not.toHaveClass(/\bdragging\b/);
+      await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+        { message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
     }
   } finally {
     await braceletInput.send('Emulation.setTouchEmulationEnabled', { enabled: false });

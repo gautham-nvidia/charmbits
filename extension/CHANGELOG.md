@@ -8,6 +8,7 @@ Marketplace releases. See the repository PROJECT_LOG.md for commit and verificat
 - Make every released editor charm and feature free without activation. Desktop retains its starter, 30-day Pro trial and purchases.
 - Connect flexible cord animation in the app. Front-facing flowers attach to straight leafy stems tucked behind the bloom, with shaded leaves and softly animated petals. Add linen, silk, rose gold and pearl cords.
 - Add an optional bracelet with two or three independently movable charms, saved slots, reordering and removal. Choose silver, gold, rose gold, woven linen or pearls. Keep the single charm as the default.
+- Let each bracelet charm pull to the bottom of the available app or editor panel and gently return on release. Keep direct dragging available with Reduced Motion.
 - Add quiet material effects and calm tap responses for all 23 pets. Pets blink or breathe and return to their original artwork. Hidden views and Reduced Motion stop decorative effects.
 - Preserve room for left and right pulls, including large desktop charms near screen edges.
 - Use the preferred ivory Robot Assistant with thinking, cheering and encouraging expressions. Remove its duplicate static picker entry while retaining saved cords and selections.

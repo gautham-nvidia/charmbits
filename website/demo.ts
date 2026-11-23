@@ -108,6 +108,7 @@ function updateBracelet() {
 	charm.hidden = braceletEnabled; anchor.hidden = braceletEnabled;
 	thread.ownerSVGElement!.style.display = braceletEnabled ? 'none' : '';
 	braceletButton?.setAttribute('aria-pressed', String(braceletEnabled));
+	if (braceletButton) { braceletButton.textContent = braceletEnabled ? 'Back to one charm' : 'Try a bracelet'; }
 	const designControl = document.getElementById('demo-bracelet-design');
 	if (designControl) { designControl.hidden = !braceletEnabled; }
 	if (!braceletEnabled) { braceletView?.setActive(false, motionReduced()); return; }
@@ -455,7 +456,7 @@ braceletButton?.addEventListener('click', async () => {
 		braceletEnabled = true; braceletSelected = 0;
 		stop(); updateBracelet(); render();
 		name.textContent = `${braceletItems[0].name} · bracelet`;
-		hint.textContent = 'Tap a pet, or pull any charm left and right. Choose another companion to swap the selected slot.';
+		hint.textContent = 'Pull any charm down or sideways, then release. Tap to select it; choose another companion to swap that charm.';
 		reveal();
 	} catch (error) {
 		braceletItems = []; braceletEnabled = false;

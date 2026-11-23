@@ -25,7 +25,8 @@ interface Slot {
 	bloom: ReturnType<typeof createBloomView>; live: ReturnType<typeof createLiveSmiley>;
 	fidget: ReturnType<typeof createFidgetView>; material: MaterialMotion;
 	item: CharmDefinition; body?: Body; tether?: Constraint;
-	anchor: { x: number; y: number }; size: number;
+	anchor: { x: number; y: number }; size: number; restLength: number;
+	returnMotion?: { from: number; elapsed: number };
 }
 const SVG = 'http://www.w3.org/2000/svg';
 function svgElement<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Record<string, string> = {}) {
@@ -69,7 +70,7 @@ export class BraceletView {
 		window.addEventListener('blur', () => { this.releaseHold(); this.settle(); });
 	}
 	setGeometry(area: { width: number; height: number; anchorX: number; anchorY: number }) {
-		const width = Math.min(380, area.width), height = Math.min(310, area.height - area.anchorY);
+		const width = Math.min(380, area.width), height = Math.max(1, area.height - area.anchorY);
 		const left = clamp(area.anchorX - width / 2, 0, area.width - width);
 		const next = `${width}:${height}:${left}:${area.anchorY}`;
 		if (next === this.geometry && !this.layoutPending) { return; }
@@ -133,7 +134,7 @@ export class BraceletView {
 			fidget: createFidgetView(button, image, { tap: () => this.react(slot), rotate: held => {
 				if (held) { this.releaseHold(); } else { this.start(); }
 			} }),
-			material: new MaterialMotion(button), anchor: { x: 0, y: 0 }, size: 70,
+			material: new MaterialMotion(button), anchor: { x: 0, y: 0 }, size: 70, restLength: 0,
 		};
 		const namespace = () => {
 			for (const root of [button, svg]) {
@@ -185,22 +186,27 @@ export class BraceletView {
 		event.preventDefault(); slot.button.setPointerCapture(event.pointerId); slot.material.hold();
 		const point = this.point(slot, event), body = slot.body;
 		this.held = { slot, id: event.pointerId, ...point, moved: 0 };
+		slot.returnMotion = undefined;
 		slot.button.classList.add('dragging');
 		this.stage.dataset.dragging = 'true';
-		if (!this.reduced) {
-			this.grip = Constraint.create({ pointA: point, bodyB: body,
-				pointB: { x: point.x - body.position.x, y: point.y - body.position.y },
-				length: 0, stiffness: .25, damping: .14 });
-			Composite.add(this.engine.world, this.grip); Sleeping.set(body, false); this.start();
-		}
+		this.grip = Constraint.create({ pointA: point, bodyB: body,
+			pointB: { x: point.x - body.position.x, y: point.y - body.position.y },
+			length: 0, stiffness: .25, damping: .14 });
+		Composite.add(this.engine.world, this.grip);
+		if (!this.reduced) { Sleeping.set(body, false); this.start(); }
 	}
 	private move(slot: Slot, event: PointerEvent) {
-		if (this.held?.slot !== slot || this.held.id !== event.pointerId) { return; }
+		if (this.held?.slot !== slot || this.held.id !== event.pointerId || !this.grip || !slot.tether) { return; }
 		const point = this.point(slot, event);
 		this.held.moved = Math.max(this.held.moved, Math.hypot(point.x - this.held.x, point.y - this.held.y));
 		if (this.held.moved > 5) { slot.material.cancelReaction(); }
-		if (this.reduced) { Body.setPosition(slot.body!, point); this.render(); }
-		else if (this.grip) { this.grip.pointA = point; this.start(); }
+		const target = { x: point.x - this.grip.pointB.x, y: point.y - this.grip.pointB.y };
+		// Extend from the artwork's attachment, keeping an off-centre grab under the pointer.
+		slot.tether.length = Math.max(slot.restLength, Math.hypot(
+			target.x + slot.tether.pointB.x - slot.anchor.x, target.y + slot.tether.pointB.y - slot.anchor.y));
+		this.grip.pointA = point;
+		if (this.reduced) { Body.setPosition(slot.body!, target); this.contain(slot); this.render(); }
+		else { this.start(); }
 	}
 	private release(slot: Slot, event: PointerEvent) {
 		if (this.held?.slot !== slot || this.held.id !== event.pointerId) { return; }
@@ -213,6 +219,13 @@ export class BraceletView {
 	private releaseHold() {
 		const held = this.held; this.held = undefined; this.stage.dataset.dragging = 'false';
 		if (held) {
+			const { slot } = held;
+			if (slot.body && slot.tether) {
+				const from = Math.hypot(slot.body.position.x + slot.tether.pointB.x - slot.anchor.x,
+					slot.body.position.y + slot.tether.pointB.y - slot.anchor.y);
+				slot.tether.length = from;
+				slot.returnMotion = { from, elapsed: 0 };
+			}
 			held.slot.button.classList.remove('dragging');
 			if (held.slot.button.hasPointerCapture(held.id)) { held.slot.button.releasePointerCapture(held.id); }
 		}
@@ -277,6 +290,7 @@ export class BraceletView {
 		this.main.replaceChildren(this.band); this.main.setAttribute('viewBox', `0 0 ${width} ${height}`);
 		this.bandWidth = width; this.paintBand();
 		this.slots.forEach((slot, index) => {
+			slot.returnMotion = undefined;
 			if (index >= this.items.length) { slot.body = undefined; return; }
 			slot.size = Math.min(84, (width - 44) / (this.items.length + .65), (height - 90) * .62);
 			slot.size = Math.max(24, slot.size);
@@ -288,6 +302,7 @@ export class BraceletView {
 			const hook = slot.item.attachment ?? DEFAULT_ATTACHMENT, h = slot.size * 7 / 6;
 			const local = { x: (hook.x - .5) * slot.size, y: (hook.y - .5) * h };
 			const drop = Math.min(index === 1 && this.items.length === 3 ? 63 : 40, Math.max(16, height - slot.anchor.y - h - 10));
+			slot.restLength = drop;
 			slot.body = Bodies.circle(slot.anchor.x - local.x, slot.anchor.y + drop - local.y, slot.size * .36,
 				{ frictionAir: .055, restitution: .15, sleepThreshold: 45 });
 			slot.tether = Constraint.create({ pointA: { ...slot.anchor }, bodyB: slot.body,
@@ -304,6 +319,7 @@ export class BraceletView {
 	private settle() {
 		for (const slot of this.slots) {
 			if (!slot.body || !slot.tether) { continue; }
+			slot.returnMotion = undefined; slot.tether.length = slot.restLength;
 			const hook = slot.item.attachment ?? DEFAULT_ATTACHMENT, h = slot.size * 7 / 6;
 			Body.setAngle(slot.body, 0); Body.setVelocity(slot.body, { x: 0, y: 0 }); Body.setAngularVelocity(slot.body, 0);
 			slot.tether.pointB = { x: (hook.x - .5) * slot.size, y: (hook.y - .5) * h };
@@ -313,6 +329,16 @@ export class BraceletView {
 			Sleeping.set(slot.body, true);
 		}
 		this.render();
+	}
+	private retract(slot: Slot) {
+		const motion = slot.returnMotion;
+		if (!motion || !slot.body || !slot.tether) { return; }
+		const duration = clamp(Math.abs(slot.restLength - motion.from) * 2, 650, 1400);
+		const progress = Math.min(1, (motion.elapsed += 1000 / 60) / duration);
+		const eased = progress * progress * (3 - 2 * progress);
+		slot.tether.length = motion.from + (slot.restLength - motion.from) * eased;
+		Sleeping.set(slot.body, false);
+		if (progress === 1) { slot.returnMotion = undefined; }
 	}
 	private contain(slot: Slot) {
 		if (!slot.body) { return; }
@@ -358,12 +384,14 @@ export class BraceletView {
 			this.accumulated += this.lastTime ? Math.min(50, time - this.lastTime) : 1000 / 60;
 			this.lastTime = time;
 			while (this.accumulated >= 1000 / 60) {
+				for (const slot of this.slots) { this.retract(slot); }
 				Engine.update(this.engine, 1000 / 60);
 				for (const slot of this.slots) { this.contain(slot); }
 				this.accumulated -= 1000 / 60;
 			}
 			this.frames++; this.render();
-			const moving = this.slots.some(slot => slot.body && (slot.body.speed > .045 || Math.abs(slot.body.angularSpeed) > .001));
+			const moving = this.slots.some(slot => slot.body
+				&& (slot.returnMotion || slot.body.speed > .045 || Math.abs(slot.body.angularSpeed) > .001));
 			this.quietFrames = moving || this.held ? 0 : this.quietFrames + 1;
 			if (this.quietFrames < 35) { this.frame = requestAnimationFrame(tick); }
 			else { for (const slot of this.slots) { if (slot.body) { Sleeping.set(slot.body, true); } } this.stop(); }

@@ -709,3 +709,19 @@ verification remains pending. Desktop and service audits report zero findings,
 while picomatch 4.0.7 remains the latest published version and the extension's
 dependency audit still fails. No exemption or forced downgrade was added.
 Hosted checks and deployment are recorded only after their results are observed.
+
+## 2026-11-23 — Full-height bracelet pulls
+
+The owner reported that bracelet charms could not pull to the bottom of the
+desktop app or VS Code panel like a single charm. The shared bracelet renderer
+had a 310-pixel height limit and a fixed attachment length. It now uses the
+available height, extends each attachment during a pull, and returns to the
+original drop after release or cancellation. Reduced Motion keeps direct
+dragging and restores the resting position without an animated return.
+
+A focused native VS Code regression failed against the previous bundle and
+passes with the fix, including all three slots, cancellation and Reduced Motion.
+Type checking, lint, all 115 app unit tests and the full website suite pass.
+The homepage now introduces charm bracelets, their three slots and five styles,
+with a prominent preview button. Desktop and mobile screenshots were inspected.
+Fresh package verification and hosted checks are recorded in the session handoff.
