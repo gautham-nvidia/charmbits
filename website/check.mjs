@@ -25,13 +25,10 @@ const counts = { coding: 1, live: 15, stress: 18, music: 12,
   trees: 2, space: 13, zodiac: 12, gemstones: 8, culture: 26,
   sports: 5, seasonal: 24, flowers: 18 };
 assert.equal(data.charms.length, 241);
-assert.deepEqual(data.homepagePreviews.map(item => item.id).sort(),
-  ['artist-michael-jackson', 'athlete-stephen-curry']);
-const homepageImages = new Set(data.homepagePreviews.map(item => item.preview.replace(/^\.\//, '')));
-assert.ok([...homepageImages].every(path => /^assets\/home-previews\/[a-z0-9-]+\.webp$/.test(path)));
+assert.deepEqual(data.homepagePreviews, []);
 assert.equal((await readdir(join(root, 'dist'), { recursive: true })).some(file =>
-  isWithheldArtworkFile(file) && !homepageImages.has(file.replaceAll('\\', '/'))), false,
-  'Only the two selected homepage WebP previews may accompany the public catalogue.');
+  isWithheldArtworkFile(file)), false,
+  'Withheld artwork must not be served by the public website.');
 assert.equal(data.version, manifest.version);
 assert.deepEqual(Object.fromEntries(data.collections.map(item => [item.id, item.charmIds.length])), counts);
 const marketplace = `https://marketplace.visualstudio.com/items?itemName=${manifest.publisher}.${manifest.name}`;
@@ -253,14 +250,16 @@ try {
   await expect(page.locator('#demo-name')).toHaveText('Cali');
   await expect(page.locator('#live-smiley')).toHaveAttribute('data-art-ready', /^cali:/);
   await expect(page.locator('.shelf-item')).toHaveCount(8);
-  await expect(page.locator('[data-home-preview]')).toHaveCount(2);
-  await expect(page.locator('[data-home-preview="sports"]')).toContainText('Stephen Curry inspired');
-  await expect(page.locator('[data-home-preview="music"]')).toContainText('Michael Jackson inspired');
-  await expect(page.locator('[data-home-preview] a')).toHaveCount(0);
-  for (const item of data.homepagePreviews) {
-    assert.equal(data.charms.some(charm => charm.id === item.id), false);
-    assert.equal(publicCommerce.products.some(product => product.sku === `trial:${item.id}`), false);
-    assert.equal((await page.request.get(new URL(item.preview, base).href)).status(), 200);
+  await expect(page.locator('[data-home-preview]')).toHaveCount(0);
+  for (const name of ['Eiffel Tower', 'Taj Mahal']) {
+    const charm = data.charms.find(item => item.name === name);
+    assert.ok(charm, `${name} must belong to the released catalogue.`);
+    const item = page.locator('.shelf-item').filter({ hasText: name });
+    await expect(item).toHaveAttribute('href', `./charms.html?collection=${encodeURIComponent(charm.collectionId)}`);
+  }
+  for (const file of ['artist-michael-jackson-r1-p4.webp', 'athlete-stephen-curry-r1-p4.webp']) {
+    assert.equal((await page.request.get(new URL(`assets/home-previews/${file}`, base).href)).status(), 404,
+      'Previously exposed likeness previews must no longer be served.');
   }
   assert.equal(await page.locator('a[href="./studio/"]').count(), 0);
   for (const name of ['Sunny', 'Nimbus', 'Robot Assistant', 'Cali']) {
@@ -278,15 +277,6 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await checkBracelet();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  for (const slot of ['sports', 'music']) {
-    await page.locator(`[data-home-preview="${slot}"] button`).click();
-    await expect(page.locator('#demo-image')).toHaveAttribute('src', /assets\/home-previews\//);
-    await expect(page.locator('#demo-charm')).toHaveAttribute('data-material-rendered', 'true');
-    await expect(page.locator('#demo-charm')).toBeInViewport();
-    await page.locator('#demo-charm').press('Enter');
-    await expect(page.locator('#demo-charm')).toHaveAttribute('data-tap-motion', 'playing');
-    await expect(page.locator('#demo-charm canvas[data-progress]')).toHaveAttribute('data-motion', 'still');
-  }
   await page.getByRole('button', { name: 'Try Cali', exact: true }).click();
   await page.getByRole('button', { name: '✦ Cheer', exact: true }).click();
   await expect(page.locator('#demo-charm .win-sparkles[data-kind="confetti"] i')).toHaveCount(28);

@@ -1,9 +1,8 @@
 # CharmBits artwork
 
-**Current public selection, 0.15.1:** 210 designs, with separate software and artwork terms.
+**Current public selection, 0.16.0:** 241 designs, with separate software and artwork terms.
 Music Icons (34) and Sports Icons (17) remain review material and are excluded from public
-packages and the downloadable catalogue. Two selected homepage-only concept previews
-are described in the latest entry below. The dated records preserve the earlier
+packages, the public website and the downloadable catalogue. The dated records preserve the earlier
 authoring and review history; their inclusion counts are not the current release selection.
 
 The 0.6.0 trial bundles ten original SVG charms and 134 rendered PNG designs for offline use. Original-source records appear below; the final dated entry documents the generated trial collection. Inclusion in the trial does not approve the public-release lineup or grant a reuse licence.
@@ -170,3 +169,15 @@ separate homepage preview directory; they do not enter the app catalogue,
 commerce products, raw PNG downloads or press kit. `website/homepage-previews.json`
 records this display selection. This changes the homepage presentation permission,
 not the recorded status of third-party likeness or commercial-use rights.
+
+## 2026-11-23 - Marketplace public selection
+
+The 0.16.0 public release contains 241 designs. The 51 Music Icons and Sports Icons
+studies remain withheld. The two homepage display exceptions from November 16
+are removed before Marketplace publication: their WebP files are no longer copied
+to the public website. The shelf instead features the included Eiffel Tower and
+Taj Mahal illustrations, linked to the Europe and Asia collections.
+
+`website/homepage-previews.json` remains an authoring-history record, not an input
+to the public build. Private review sources and the owner's personal packages
+are retained. This distribution change grants no new third-party rights.

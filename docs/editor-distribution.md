@@ -11,7 +11,7 @@ are **CharmBits** and **`charmbits-0.16.0.vsix`**.
 
 | Route | What it provides | Remaining account step |
 |---|---|---|
-| Microsoft Visual Studio Marketplace | The normal VS Code installation and update route | Confirm control of publisher `gautham-nvidia` and configure its GitHub Trusted Publisher |
+| Microsoft Visual Studio Marketplace | The normal VS Code installation and update route | Publisher and Trusted Publishing policy created; first authenticated release and public listing verification pending |
 | Open VSX | A separate registry used by compatible editors | Claim the matching namespace, complete the publisher agreement and add `OVSX_PAT` to repository Actions secrets |
 | VSIX | The same package installed manually through **Extensions → Install from VSIX…** | Retain a tested artifact and its checksum; do not describe a local package as a published store listing |
 
@@ -36,6 +36,13 @@ For Microsoft Trusted Publishing, authorize:
 The workflow uses `vsce publish --oidc`; it does not need a persistent Marketplace
 token in GitHub. Open VSX uses its separate `OVSX_PAT` secret. Configure the policy
 in the publisher account; setting GitHub permissions alone does not prove ownership.
+
+On November 23, 2026, the owner's Marketplace screens confirmed **CharmBits
+(`gautham-nvidia`)**, Owner access under the personal Microsoft account, and the
+**CharmBits releases** policy with the repository/workflow above. Its status was
+Inactive / Last used: Never, with a first-use deadline of **November 25, 2026,
+5:19 PM local time**. The first successful token exchange activates the policy;
+an artifact-only workflow run does not exchange a publishing token.
 
 Start with the workflow's **artifact** destination. Review the listing, screenshots,
 VSIX and SHA-256, then choose the intended store destination after the account setup

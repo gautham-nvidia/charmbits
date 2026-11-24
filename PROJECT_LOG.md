@@ -750,3 +750,27 @@ installed editor scenarios with all 292 designs unlocked.
 
 Package checksums, deployment and hosted results belong in the phase27 session
 handoff once observed.
+
+## 2026-11-23 - Marketplace release preparation
+
+The owner created the CharmBits publisher (`gautham-nvidia`) under the personal
+Microsoft account, then configured its GitHub Trusted Publishing policy and
+requested proceeding with the Marketplace release. Open VSX remains separate.
+
+The public website no longer copies the two held athlete/musician thumbnails.
+Its eight-item collection shelf features the released Eiffel Tower and Taj Mahal
+illustrations instead. Public package selection remains 241 designs, with 51
+likeness studies withheld. Artwork terms and provenance now describe that same
+boundary. The listing removes stale editor-trial and prepublication wording;
+unverified host/architecture limits remain explicit.
+
+Local production packaging, type checking, lint, release validation and the full
+website suite pass. The website check now verifies that neither former likeness
+URL is served, no withheld image exists in the public output, and the new shelf
+links lead to included collections. Desktop/mobile layouts, bracelet pulls,
+Reduced Motion and zero browser console errors pass. Hosted checks on the new
+candidate and the resulting main commit must complete before store upload.
+
+The publisher policy's first token exchange and the live Marketplace listing
+remain unverified at this checkpoint. Current execution evidence is maintained
+in the phase29 session record.

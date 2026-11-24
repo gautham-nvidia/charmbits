@@ -159,15 +159,14 @@ the visible name is CharmBits.
 
 ## Current limits
 
-- The entire curated collection is included for trial; artwork approval and the final release lineup remain open. Photo Studio and the standalone desktop beta are separate from this VSIX.
-- Current candidate validation and remaining release gates are recorded in the [Phase 6 verification log](https://github.com/gautham-nvidia/charmlet/blob/main/docs/phase-6-trial-catalogue.md). The matrix covers VS Code **1.90.0 and 1.140.0** on Windows, Linux and macOS, including an installed VSIX in Restricted Mode. Earlier results do not establish this candidate's status.
-- The animation loop stops when settled or hidden. [Recorded measurements](https://github.com/gautham-nvidia/charmlet/blob/main/docs/phase-1-validation.md) include whole-editor overhead and do not promise zero CPU use.
+- All 241 included designs are free in the editor. Music Icons and Sports Icons concept studies remain excluded while their rights are under review. Photo Studio and the standalone desktop beta are separate from this VSIX.
+- The validation matrix covers VS Code **1.90.0 and 1.140.0** on Windows, Linux and macOS, including an installed VSIX in Restricted Mode. The [distribution guide](https://github.com/gautham-nvidia/charmbits/blob/main/docs/editor-distribution.md) records installed-host checks and their limits.
+- The animation loop stops when settled or hidden. [Recorded measurements](https://github.com/gautham-nvidia/charmbits/blob/main/docs/phase-1-validation.md) include whole-editor overhead and do not promise zero CPU use.
 - Intel Mac, Windows ARM, authenticated Cursor/Devin Desktop, browser hosts and Remote-SSH/WSL remain unverified.
 - These checks cover the VS Code extension. The standalone developer beta has its own verification and manual desktop-interaction gates; see the repository's desktop guide.
 - The dock occupies editor space. Hanging saves headroom; Orbit reserves room for a full loop. Small panels scale the play area.
 - Charm choice, layout, size, resting cord, visibility, motion and message preferences persist locally; cross-machine sync is not implemented.
-- This is not yet published to VS Code Marketplace or Open VSX. The manifest publisher is not
-	evidence of a registered or verified Marketplace publisher.
+- Marketplace and Open VSX are separate distribution routes; availability can differ by editor.
 
 ## Project and feedback
 

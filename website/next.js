@@ -72,47 +72,22 @@ function setupPlayground(data) {
 }
 
 function setupShelf(data) {
-  const patterns = [/Acoustic Guitar/i, /Goldendoodle/i, /Granite Dome/i, 'sports',
-    /San Francisco Skyline/i, 'music', /Giant Panda/i, /Painted Ladies/i];
+  const patterns = [/Acoustic Guitar/i, /Goldendoodle/i, /Granite Dome/i, /^Eiffel Tower$/,
+    /San Francisco Skyline/i, /^Taj Mahal$/, /Giant Panda/i, /Painted Ladies/i];
   const shelf = document.querySelector('#collection-shelf');
   for (const pattern of patterns) {
-    const preview = typeof pattern === 'string';
-    const charm = preview ? data.homepagePreviews.find(item => item.slot === pattern)
-      : data.charms.find(item => pattern.test(item.name));
-    if (!charm) throw new Error(`A featured collection artwork is missing: ${preview ? pattern : pattern.source}`);
-    const item = element(preview ? 'figure' : 'a', 'shelf-item');
-    if (preview) {
-      item.dataset.homePreview = charm.slot;
-      item.setAttribute('aria-label', `${charm.name}, homepage preview`);
-    } else {
-      item.href = `./charms.html?collection=${encodeURIComponent(charm.collectionId)}`;
-      item.setAttribute('aria-label', `Explore ${charm.collectionLabel}, featuring ${charm.name}`);
-    }
+    const charm = data.charms.find(item => pattern.test(item.name));
+    if (!charm) throw new Error(`A featured collection artwork is missing: ${pattern.source}`);
+    const item = element('a', 'shelf-item');
+    item.href = `./charms.html?collection=${encodeURIComponent(charm.collectionId)}`;
+    item.setAttribute('aria-label', `Explore ${charm.collectionLabel}, featuring ${charm.name}`);
     const image = element('img');
     image.src = charm.preview;
     image.alt = '';
     image.width = 216;
     image.height = 252;
     image.loading = 'lazy';
-    if (preview) {
-      const tryPreview = element('button', 'shelf-preview');
-      tryPreview.type = 'button';
-      tryPreview.setAttribute('aria-label', `Try ${charm.name} preview charm`);
-      tryPreview.append(image);
-      tryPreview.addEventListener('click', () => {
-        window.CharmletDemo.setCharm(charm);
-        document.querySelector('#companion-role').textContent = `${charm.collectionLabel.toUpperCase()} PREVIEW`;
-        document.querySelector('#companion-description').textContent = charm.slot === 'sports'
-          ? 'A gentle sway, with his original pose intact.' : 'A small, silent hat-tip when you tap.';
-        for (const button of document.querySelectorAll('#companion-dock [data-companion]')) button.setAttribute('aria-pressed', 'false');
-        window.CharmletDemo.reveal();
-      });
-      item.append(tryPreview);
-    } else item.append(image);
-    const caption = preview ? element('figcaption') : item;
-    caption.append(element('strong', '', charm.name),
-      element('small', '', preview ? `${charm.collectionLabel} · Preview only` : charm.collectionLabel));
-    if (preview) item.append(caption);
+    item.append(image, element('strong', '', charm.name), element('small', '', charm.collectionLabel));
     shelf.append(item);
   }
 }

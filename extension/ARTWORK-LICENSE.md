@@ -1,6 +1,6 @@
 # CharmBits artwork terms
 
-Version 1.1 - 16 November 2026
+Version 1.2 - 23 November 2026
 
 The maintainer is Gautham Anebajagane. These terms cover first-party artwork supplied
 with a public CharmBits release or an authorized charm pack, to the extent the
@@ -27,11 +27,9 @@ Third-party components and fonts retain their original licences and notices.
 The public catalogue excludes the Music Icons and Sports Icons review collections.
 Those studies are retained in the authoring history for review; they are not
 licensed for public or commercial redistribution under these terms. New public
-VSIX and desktop builds exclude their images. The website separately displays
-two owner-selected concept previews, one athlete and one musician; these are not
-part of app downloads, paid packs or the press kit. Their display does not claim
-third-party permission or endorsement. Saved selections may use a neutral
-placeholder; existing personal imports and saved settings are retained.
+VSIX and desktop builds exclude their images. The public website, downloads,
+paid packs and press kit also exclude these studies. Saved selections may use a
+neutral placeholder; existing personal imports and saved settings are retained.
 
 The included selection consists of the original Terminal, live companions,
 fidgets and the selected generic, cultural, nature, music-instrument and skyline

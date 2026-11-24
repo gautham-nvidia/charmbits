@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { basename, dirname, join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from '../extension/node_modules/esbuild/lib/main.js';
 import { legacyPagesRedirect, validateDistribution } from './distribution.mjs';
@@ -26,13 +26,6 @@ const privateReview = process.argv.includes('--review-downloads');
 const builtins = JSON.parse(await readFile(join(repo, 'extension', 'src', 'builtin-charms.json'), 'utf8'));
 const trial = TRIAL_CHARMS;
 const withheldKeys = new Set(WITHHELD_CHARMS.map(charm => charm.artworkKey));
-const homepageSelection = JSON.parse(await readFile(join(root, 'homepage-previews.json'), 'utf8'));
-if (homepageSelection.length !== 2 || new Set(homepageSelection.map(item => item.slot)).size !== 2
-  || homepageSelection.some(item => !['sports', 'music'].includes(item.slot)
-    || !withheldKeys.has(item.key) || typeof item.label !== 'string')) {
-  throw new Error('The homepage needs exactly one selected sports preview and one music preview.');
-}
-const homepagePreviews = [];
 const trialByKey = new Map(trial.map(charm => [charm.artworkKey, charm]));
 const extras = JSON.parse(await readFile(join(root, 'extras.json'), 'utf8'));
 const collectionConfig = JSON.parse(await readFile(join(root, 'collections.json'), 'utf8'));
@@ -93,7 +86,7 @@ for (const extra of extras) {
   validated.push({ extra, packPath });
 }
 await rm(dist, { recursive: true, force: true });
-for (const path of ['assets/default', 'assets/extras', 'assets/previews', 'assets/home-previews', 'assets/garden', 'assets/app-review', 'assets/fonts', 'packs', 'downloads', 'studio', 'api/studio']) {
+for (const path of ['assets/default', 'assets/extras', 'assets/previews', 'assets/garden', 'assets/app-review', 'assets/fonts', 'packs', 'downloads', 'studio', 'api/studio']) {
   await mkdir(join(dist, path), { recursive: true });
 }
 // Static hosting advertises no paid service. Do not copy local API credentials.
@@ -219,15 +212,6 @@ if (review) {
     if (!/^\.\/assets\/review\/[a-z0-9-]+\.png$/.test(item.image)
       || !/^\.\/assets\/review\/[a-z0-9-]+\.webp$/.test(item.preview)) throw new Error('Invalid review image path.');
     if (withheldKeys.has(item.key) || isWithheldArtworkFile(item.image)) {
-      const homepage = homepageSelection.find(entry => entry.key === item.key);
-      if (homepage) {
-        const preview = `./assets/home-previews/${basename(item.preview)}`;
-        await copyFile(join(root, item.preview), join(dist, preview));
-        const artwork = WITHHELD_CHARMS.find(charm => charm.artworkKey === item.key);
-        homepagePreviews.push({ id: item.key, name: item.name, slot: homepage.slot,
-          collectionLabel: homepage.label, preview, homepageOnly: true,
-          group: artwork.group, attachment: artwork.attachment });
-      }
       if (privateReview) {
         await copyFile(join(root, item.image), join(dist, item.image));
         await copyFile(join(root, item.preview), join(dist, item.preview));
@@ -296,11 +280,10 @@ const orderedCharms = orderByCollection(charms).map(charm => {
 const collections = currentWorlds.map(world => ({ ...world, charmIds: orderedCharms
   .filter(charm => charm.collectionId === world.id).map(charm => charm.id) }));
 if (!trial.length || charms.length !== ORIGINAL_CHARMS.length + trial.length + LIVE_CHARMS.length + FIDGET_CHARMS.length) throw new Error('The complete trial must appear in the gallery.');
-if (homepagePreviews.length !== homepageSelection.length) throw new Error('A selected homepage preview is missing.');
 await writeFile(join(dist, 'catalogue.json'), `${JSON.stringify({ version: manifest.version,
-  extensionDownload: privateReview ? './downloads/charmbits.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews, homepagePreviews,
+  extensionDownload: privateReview ? './downloads/charmbits.vsix' : './download.html', distribution, launch, charms: orderedCharms, collections, artPreviews, homepagePreviews: [],
   sportsWishlist: collectionConfig.sportsWishlist }, null, 2)}\n`, 'utf8');
-console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included; ${WITHHELD_CHARMS.length} studies excluded from downloads, ${homepagePreviews.length} homepage-only previews.`);
+console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.length} original, ${trial.length} rendered designs, ${LIVE_CHARMS.length} live companions and ${FIDGET_CHARMS.length} fidgets included; ${WITHHELD_CHARMS.length} studies withheld from public distribution.`);
 const { publicData } = await buildCommerceCatalogue();
 await writeFile(join(dist, 'commerce-public.json'), `${JSON.stringify(publicData, null, 2)}\n`);
 await writeFile(join(dist, '_headers'), `/*\n${Object.entries(securityHeaders(publicData.apiOrigin)).map(([name, value]) => `  ${name}: ${value}`).join('\n')}\n`);

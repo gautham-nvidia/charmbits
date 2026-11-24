@@ -1,4 +1,4 @@
-# CharmBits 0.16 Marketplace and Open VSX draft
+# CharmBits 0.16 Marketplace release candidate
 
 This is the public editor candidate for owner review. All 241 released charms and all editor features are free. The listing body is [extension/README.md](../extension/README.md); use that same body for Microsoft Marketplace and Open VSX.
 
@@ -58,13 +58,26 @@ The README's hosted image URLs use `main`; merge these reviewed assets before pu
 
 Microsoft Marketplace, Open VSX and manual VSIX installation are separate routes. Current host evidence belongs in [editor-distribution.md](editor-distribution.md). Avoid claiming support for every fork based only on shared VS Code APIs.
 
-The owner confirmed creating the Gmail inbox and personal Microsoft account using **getcharmbits@gmail.com** on November 23, 2026. Sign in with that account for the Marketplace setup below. Creating a Microsoft account does not establish ownership of a Marketplace publisher or configure Trusted Publishing.
+The owner created the publisher **CharmBits (`gautham-nvidia`)** under the personal
+Microsoft account **getcharmbits@gmail.com** on November 23, 2026. The publisher
+screen confirms Owner access. The **CharmBits releases** Trusted Publishing
+policy is configured for `gautham-nvidia/charmbits`, workflow `release.yml`, with
+no GitHub environment. Its first authenticated use and the public listing still
+need verification. The current release target is Microsoft Marketplace.
+
+The public homepage uses the released collection only; its former athlete and
+musician previews are excluded along with the withheld app artwork. Cursor and
+Devin installation evidence remains separate from their unverified authenticated
+runtime behavior.
 
 The source and artwork terms are already chosen. To publish:
 
 1. Review and merge the tested candidate, then confirm successful CI for that exact `main` commit.
-2. Confirm ownership of Marketplace publisher `gautham-nvidia` and configure the Trusted Publishing policy in [editor-distribution.md](editor-distribution.md).
-3. For Open VSX, claim the matching namespace, accept the publisher agreement and configure its separate publishing secret.
-4. Run the prepared release workflow for the intended registry. Verify the resulting public listing before enabling its website install link.
+2. Run the release workflow with destination `artifact` and review the public VSIX and checksum.
+3. Run destination `marketplace` through the configured Trusted Publishing policy.
+4. Verify the resulting public listing before enabling its website install link.
+
+Open VSX remains a separate future step: claim the matching namespace, accept
+its publisher agreement and configure its separate publishing secret.
 
 No store publication is implied by this draft or by a locally packaged VSIX. Payment and Brevo accounts are not required for the free editor release.
