@@ -12,5 +12,5 @@
     "dev": "npm run build && wrangler dev --local",
     "db:local": "wrangler d1 execute DB --local --file schema.sql"
   },
-  "devDependencies": { "wrangler": "4.161.0" }
+  "devDependencies": { "wrangler": "4.166.0" }
 }
