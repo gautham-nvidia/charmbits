@@ -113,11 +113,15 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 						};
 						return {
 							url: location.href, visibility: document.visibilityState,
-							focus: document.activeElement?.id, viewport: { width: innerWidth, height: innerHeight },
+							focus: document.activeElement?.id, documentFocused: document.hasFocus(),
+							viewport: { width: innerWidth, height: innerHeight },
 							stage: { ...document.getElementById('stage')?.dataset },
 							selected: (document.getElementById('charm-select') as HTMLSelectElement | null)?.value,
 							appearance: details('settings'), menu: details('settings-menu'),
 							weather: details('weather-settings'),
+							careCue: details('care-cue'), careDone: details('care-done'),
+							pointerEvents: JSON.parse(document.documentElement.dataset.pointerTrace ?? '[]'),
+							saveMessages: JSON.parse(document.documentElement.dataset.saveTrace ?? '[]'),
 						};
 					}));
 				} catch (captureError) { snapshots.push({ url: frame.url(), error: String(captureError) }); }

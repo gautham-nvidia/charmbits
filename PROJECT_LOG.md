@@ -856,3 +856,11 @@ the package inspection. The full website suite passes with 241 public designs,
 both store and unpublished-fallback install flows, desktop/mobile layouts and
 zero console errors. Hosted candidate/main checks and live publication still
 need verification before this patch is reported as released.
+
+The first hosted pass completed eight of nine jobs. The macOS 1.140 installed
+navigation check left the initial water reminder visible after its first click.
+That check now establishes native-window and iframe focus before one pointer
+click, verifies the reminder's saved reschedule, and retains pointer/state
+diagnostics before editor cleanup on failure. Type checking, lint and three
+consecutive Windows installed-package runs pass. The new hosted Mac result is
+still required; no application behavior or assertions were relaxed.
