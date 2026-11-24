@@ -917,3 +917,16 @@ pool for both editor versions. The complete six-job editor matrix, security
 checks and release gate remain required. Desktop CI continues on Apple Silicon.
 
 Runner specifications: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+
+Both Intel Mac editor jobs passed. Windows 1.140 exposed a second instance of
+an unstyled webview after reload. Twelve normal local runs and 21 reloads with
+CPU throttling did not reproduce that failure; its cause remains unconfirmed.
+
+Editor failure evidence now includes bounded browser errors, failed webview
+resource requests, the document head, stylesheet/script URLs and resource timing.
+This preserves the information needed to distinguish resource delivery from
+initialization failures. Application behavior, CSP, readiness assertions and
+test deadlines are unchanged. Fresh hosted validation is still required.
+
+Type checking, lint and both affected navigation/reload checks pass locally
+on VS Code 1.90.0 and 1.140.0.
