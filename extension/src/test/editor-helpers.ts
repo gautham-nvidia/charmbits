@@ -1,5 +1,6 @@
-import { test, expect, type Frame, type Page } from '@playwright/test';
-import { writeFileSync } from 'node:fs';
+import { test, expect, type ElectronApplication, type Frame, type Page, type TestInfo } from '@playwright/test';
+import { cpSync, existsSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export const primaryModifier = process.platform === 'darwin' ? 'Meta' : 'Control';
 export const endOfDocument = process.platform === 'darwin' ? 'Meta+ArrowDown' : 'Control+End';
@@ -87,4 +88,39 @@ export async function reloadCharm(window: Page): Promise<Frame> {
 		command(window, 'Developer: Reload Window'),
 	]);
 	return readyFrame(window, previous);
+}
+
+export async function captureEditorFailure(window: Page, testInfo: TestInfo, error: unknown) {
+	// Save the triggering error before asking a stalled renderer for a screenshot.
+	writeFileSync(testInfo.outputPath('original-error.json'), JSON.stringify({
+		message: String(error), stack: error instanceof Error ? error.stack : undefined,
+		frames: window.frames().map(frame => ({ url: frame.url(), detached: frame.isDetached() })),
+	}, null, 2));
+	try {
+		await window.screenshot({ path: testInfo.outputPath('failure.png'), timeout: 3000 });
+	} catch (captureError) {
+		writeFileSync(testInfo.outputPath('failure-capture.txt'), String(captureError));
+	}
+}
+
+export async function closeOwnedEditor(editor: { app: ElectronApplication; profile: string }, testInfo: TestInfo) {
+	try {
+		// A blocked native shutdown must not swallow the original test failure.
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const closed = await Promise.race([
+			editor.app.close().then(() => true),
+			new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 10000); }),
+		]).finally(() => { if (timer) { clearTimeout(timer); } });
+		if (!closed) {
+			writeFileSync(testInfo.outputPath('editor-shutdown.json'), JSON.stringify({
+				profile: editor.profile, pid: editor.app.process().pid, gracefulShutdownTimedOut: true,
+			}));
+			editor.app.process().kill('SIGKILL');
+		}
+	} finally {
+		const editorLogs = join(editor.profile, 'user', 'logs');
+		if (existsSync(editorLogs)) {
+			try { cpSync(editorLogs, testInfo.outputPath('editor-logs'), { recursive: true }); } catch { /* Keep test result. */ }
+		}
+	}
 }

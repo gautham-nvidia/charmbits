@@ -12,6 +12,7 @@ import { validateLaunch } from './launch.mjs';
 import { validateAudience } from './audience.mjs';
 import { buildCommerceCatalogue } from '../service/build-catalogue.mjs';
 import { securityHeaders } from './security-headers.mjs';
+import artworkPolicy from '../extension/src/artwork-policy.json' with { type: 'json' };
 
 const require = createRequire(import.meta.url);
 const { parseCharmPack } = require('../extension/out/charm-packs.js');
@@ -287,6 +288,19 @@ console.log(`Built CharmBits gallery ${manifest.version}: ${ORIGINAL_CHARMS.leng
 const { publicData } = await buildCommerceCatalogue();
 await writeFile(join(dist, 'commerce-public.json'), `${JSON.stringify(publicData, null, 2)}\n`);
 await writeFile(join(dist, '_headers'), `/*\n${Object.entries(securityHeaders(publicData.apiOrigin)).map(([name, value]) => `  ${name}: ${value}`).join('\n')}\n`);
+await build({
+  entryPoints: [join(root, 'retired-assets-worker.mjs')], bundle: true, platform: 'browser',
+  format: 'esm', outfile: join(dist, '_worker.js'), minify: true, target: ['es2022'],
+});
+await writeFile(join(dist, '_routes.json'), `${JSON.stringify({
+  version: 1,
+  include: [
+    '/assets/home-previews/*',
+    ...['assets/default', 'assets/review', 'assets/app-review', 'packs/review']
+      .flatMap(directory => artworkPolicy.withheldFilePrefixes.map(prefix => `/${directory}/${prefix}*`)),
+  ],
+  exclude: [],
+}, null, 2)}\n`);
 for (const [source, target] of [['LICENSE', 'software-license.txt'], ['ARTWORK-LICENSE.md', 'artwork-license.txt']]) {
   await copyFile(join(repo, 'extension', source), join(dist, target));
 }

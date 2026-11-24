@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 import { validateDistribution } from './distribution.mjs';
 import { validateLaunch } from './launch.mjs';
@@ -29,6 +29,34 @@ assert.deepEqual(data.homepagePreviews, []);
 assert.equal((await readdir(join(root, 'dist'), { recursive: true })).some(file =>
   isWithheldArtworkFile(file)), false,
   'Withheld artwork must not be served by the public website.');
+const { default: retiredAssets } = await import(pathToFileURL(join(root, 'dist/_worker.js')).href);
+const edgeRoutes = JSON.parse(await readFile(join(root, 'dist/_routes.json'), 'utf8'));
+assert.equal(edgeRoutes.version, 1);
+assert.deepEqual(edgeRoutes.exclude, []);
+const invokesWorker = path => edgeRoutes.include.some(route => path.startsWith(route.slice(0, -1)));
+let cacheReads = 0;
+const cachedAssets = { ASSETS: { fetch: async () => {
+  cacheReads++;
+  return new Response('cached image', { headers: { 'Content-Type': 'image/webp' } });
+} } };
+for (const directory of ['assets/home-previews', 'assets/review', 'assets/app-review', 'assets/default', 'packs/review']) {
+  for (const prefix of ['artist-', 'athlete-', 'trial-artist-', 'trial-athlete-']) {
+    const path = `/${directory}/${prefix}retired.webp`;
+    assert.ok(invokesWorker(path), 'Retired artwork must invoke the edge guard.');
+    for (const method of ['GET', 'HEAD']) {
+      const response = await retiredAssets.fetch(new Request(`https://charmbits.pages.dev${path}`, { method }), cachedAssets);
+      assert.equal(response.status, 404);
+      assert.equal(response.headers.get('Cache-Control'), 'no-store');
+    }
+  }
+}
+assert.equal(cacheReads, 0, 'Retired artwork must not reach a previously populated asset cache.');
+for (const charm of data.charms) {
+  assert.equal(invokesWorker(new URL(charm.preview, 'https://charmbits.pages.dev/').pathname), false,
+    'Released artwork should remain on the normal static delivery route.');
+}
+assert.equal(await (await retiredAssets.fetch(new Request('https://charmbits.pages.dev/'), cachedAssets)).text(), 'cached image');
+assert.equal(cacheReads, 1, 'Other requests must retain normal asset forwarding.');
 assert.equal(data.version, manifest.version);
 assert.deepEqual(Object.fromEntries(data.collections.map(item => [item.id, item.charmIds.length])), counts);
 const marketplace = `https://marketplace.visualstudio.com/items?itemName=${manifest.publisher}.${manifest.name}`;

@@ -774,3 +774,24 @@ candidate and the resulting main commit must complete before store upload.
 The publisher policy's first token exchange and the live Marketplace listing
 remain unverified at this checkpoint. Current execution evidence is maintained
 in the phase29 session record.
+
+### Follow-up: retained CDN copies and Linux editor evidence
+
+The f4ab4af candidate passed eight hosted jobs; Linux VS Code 1.90 failed a
+post-reload garden click and later reached the core scenario's total timeout.
+The core test's failure screenshot and native shutdown were unbounded. It now
+shares the companion suite's bounded shutdown and records the original error
+before a bounded screenshot. Interaction assertions and performance limits
+are unchanged; a fresh hosted run is required.
+
+The new live catalogue excluded the studies, but canonical former image URLs
+still returned cached WebP responses (`200`, `cf-cache-status: HIT`). Public
+build deletion alone did not retire those URLs. The website now emits a Pages
+Module Worker and narrow invocation routes for withdrawn artwork. It checks
+the shared filename policy before accessing the static asset cache. A fixture
+with prepopulated cached content verifies GET/HEAD rejection without a cache
+read, and checks that released catalogue images retain static delivery.
+
+Local production packaging, type checking, lint, the complete website suite
+and release validation pass after this follow-up. Actual production cache
+behavior and the fresh Linux run remain to be verified after deployment.

@@ -15,7 +15,7 @@ import { winsToday } from '../small-wins';
 import { caliOutfitAt } from '../cali-wardrobe';
 import { CALIFORNIA_COMPANIONS } from '../california-companions';
 import { DEFAULT_PUZZLES } from '../puzzle-core';
-import { command, isolatedEditorEnvironment, readyFrame, reloadCharm } from './editor-helpers';
+import { captureEditorFailure, closeOwnedEditor, command, isolatedEditorEnvironment, readyFrame, reloadCharm } from './editor-helpers';
 
 // Pre-0.13 profiles had no edition marker. These fixtures exercise retained beta
 // artwork and preferences; the fresh-profile test checks the full free catalogue.
@@ -238,28 +238,6 @@ async function launchOwnedEditor(prefix: string, seed: (paths: Omit<OwnedEditor,
 			}
 		}
 		throw error;
-	}
-}
-
-async function closeOwnedEditor(editor: OwnedEditor, testInfo: TestInfo) {
-	try {
-		// A blocked native shutdown must not swallow the original test failure.
-		let timer: ReturnType<typeof setTimeout> | undefined;
-		const closed = await Promise.race([
-			editor.app.close().then(() => true),
-			new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 10000); }),
-		]).finally(() => { if (timer) { clearTimeout(timer); } });
-		if (!closed) {
-			writeFileSync(testInfo.outputPath('editor-shutdown.json'), JSON.stringify({
-				profile: editor.profile, pid: editor.app.process().pid, gracefulShutdownTimedOut: true,
-			}));
-			editor.app.process().kill('SIGKILL');
-		}
-	} finally {
-		const editorLogs = join(editor.profile, 'user', 'logs');
-		if (existsSync(editorLogs)) {
-			try { cpSync(editorLogs, testInfo.outputPath('editor-logs'), { recursive: true }); } catch { /* Keep test result. */ }
-		}
 	}
 }
 
@@ -546,6 +524,9 @@ test('garden entry is visible before opening companion tools', async ({}, testIn
 		await expect(frame.locator('#garden-count')).toHaveText('1 / 11 waterings');
 		expect(JSON.parse(readFileSync(companionPath, 'utf8')).garden.plant.id).toBe(plantId);
 		await window.screenshot({ path: testInfo.outputPath('garden-entry.png') });
+	} catch (error) {
+		await captureEditorFailure(window, testInfo, error);
+		throw error;
 	} finally {
 		await closeOwnedEditor(editor, testInfo);
 	}

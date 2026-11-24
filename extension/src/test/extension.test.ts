@@ -1,12 +1,12 @@
 import { test, expect, _electron as electron, type Frame, type Page } from '@playwright/test';
-import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { CHARMS, ORIGINAL_CHARMS } from '../charm-catalog';
 import { charmCollection } from '../charm-collections';
 import { DEFAULT_STATE, getLayout } from '../charm-state';
 import { DEFAULT_WEATHER } from '../weather-core';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { command, commandInput, endOfDocument, isolatedEditorEnvironment, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
+import { captureEditorFailure, closeOwnedEditor, command, commandInput, endOfDocument, isolatedEditorEnvironment, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
 
 async function dismissResolvedHostNotice(frame: Frame) {
 	// This editor-owned marketplace warning can cover the secondary-side toolbar.
@@ -958,26 +958,16 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 			await testInfo.attach('resource-profile.json', { path: reportPath, contentType: 'application/json' });
 		});
 	} catch (error) {
-		await window.screenshot({ path: testInfo.outputPath('failure.png') });
-		writeFileSync(testInfo.outputPath('host-notifications.json'), JSON.stringify(await window.locator('.notifications-toasts').evaluateAll(nodes =>
-			nodes.map(node => ({ text: node.textContent, controls: [...node.querySelectorAll('[aria-label]')].map(control => control.getAttribute('aria-label')) }))), null, 2));
+		await captureEditorFailure(window, testInfo, error);
 		throw error;
 	} finally {
 		try {
-			await app.close();
+			await closeOwnedEditor({ app, profile }, testInfo);
 		} finally {
 			try {
 				writeFileSync(testInfo.outputPath('preference-events.json'), `${JSON.stringify(preferenceEvents, null, 2)}\n`);
 			} catch {
 				// Keep the original test result if optional diagnostic writing fails.
-			}
-			try {
-				const editorLogs = join(profile, 'user', 'logs');
-				if (existsSync(editorLogs)) {
-					cpSync(editorLogs, testInfo.outputPath('editor-logs'), { recursive: true });
-				}
-			} catch {
-				// Keep the original test result if optional diagnostic copying fails.
 			}
 		}
 	}

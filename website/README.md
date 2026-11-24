@@ -1,6 +1,6 @@
 # CharmBits website
 
-The homepage shows where CharmBits hangs on Desktop and in VS Code, then demonstrates focus, encouragement, cheers and breaks. **`charms.html`** is the searchable **261-charm gallery**, with eighteen collections including 34 Music Icons, 17 Sports Icons and 13 US skylines. VS Code features are free, with 31 starter charms and optional paid charms. Desktop retains its 30-day trial and the planned $7.49 launch / $17.49 regular Pro purchase. Email delivery and sales are off in the checked-in configuration.
+The homepage shows where CharmBits hangs on Desktop and in VS Code, then demonstrates focus, encouragement, cheers and breaks. **`charms.html`** is the searchable **241-charm gallery**, with twenty collections including Europe, Americas, Asia and National Parks. All released VS Code charms and features are free. The 34 Music Icons and 17 Sports Icons likeness studies remain withheld. Desktop retains its 30-day trial and the planned $7.49 launch / $17.49 regular Pro purchase. Email delivery and sales are off in the checked-in configuration.
 
 The site is static and uses the extension's locked build dependencies. It does not call an image-generation service. The [brand kit](../docs/charmlet-brand-kit.md) records the visual direction. The [current hosting and payment guide](../service/README.md) covers Cloudflare, Brevo, Lemon Squeezy and protected file delivery. Earlier Vercel and merchant comparisons remain background; merchandise is deferred.
 
@@ -29,8 +29,14 @@ The site is static and uses the extension's locked build dependencies. It does n
 | `extras.json`, `collections.json`, `assets/previews/` | Preserved historical metadata, art studies and legacy downloads |
 | `styles.css`, `concepts.*`, `studio/` | Legacy review/concept styling and the disabled Studio route |
 | `build.mjs`, `security-headers.mjs` | Validates inputs and emits public previews, security headers and `dist/`; excludes raw installers/packs |
+| `retired-assets-worker.mjs`, generated `_worker.js` / `_routes.json` | Returns 404 for withdrawn artwork before the Pages asset cache; released assets retain normal static delivery |
 
 Generated `dist/` is ignored by Git. Root `vercel.json` builds it from a clean checkout. `.vercelignore` excludes raw authoring output, credentials, local profiles, session notes, desktop archives and dependency directories.
+
+Cloudflare Pages uses the generated Module Worker only for the retired artwork
+routes. Deleting a file from a new deployment alone did not clear previously
+cached image URLs. The guard checks the shared artwork policy before forwarding
+to `env.ASSETS`; the normal public collection does not invoke the Worker.
 
 ## Build and preview
 
