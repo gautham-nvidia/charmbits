@@ -120,8 +120,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 115px; }
 .locket-note { position: absolute; top: 128px; right: 15px; font: italic 16px Georgia, serif; color: #d1dfbd; transform: rotate(8deg); }
 .locket-shadow { position: absolute; width: 190px; height: 25px; top: 500px; left: calc(50% - 65px); border-radius: 50%; filter: blur(12px); background: #09110b80; pointer-events: none; }
 .locket-caption { position: absolute; top: 550px; left: 0; right: 0; text-align: center; color: #c7d6bf; font: 10px Consolas, monospace; }
-.ritual-section { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12%; padding-block: 115px; }
+.ritual-section { display: grid; grid-template-columns: 1fr 1fr; align-items: center; column-gap: 12%; row-gap: 40px; padding-block: 115px; }
 .ritual-copy > p:not(.overline) { max-width: 360px; font-size: 14px; line-height: 1.8; }.muted { color: var(--muted); }
+.garden-app-example { grid-column: 1 / -1; margin: 0; min-width: 0; }
+.garden-app-example a { display: block; border-radius: 20px; }
+.garden-app-example img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 20px; }
+.garden-app-example figcaption { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.7; text-align: center; }
 .garden-postcard { position: relative; padding: 24px 32px; background: var(--note); border: 1px solid var(--line); transform: rotate(3deg); border-radius: 3px; box-shadow: 0 17px 24px #1d281511; text-align: center; }
 .postcard-top { display: flex; justify-content: space-between; gap: 15px; font: 8px/1.5 Consolas, monospace; color: var(--muted); letter-spacing: .03em; }
 .garden-postcard img { height: 265px; width: 100%; filter: drop-shadow(0 12px 6px #253a1712); }

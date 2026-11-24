@@ -1,4 +1,4 @@
-<!-- CharmBits 0.16.1 -->
+<!-- CharmBits 0.16.2 -->
 
 ## Install
 
@@ -14,11 +14,11 @@
 
 ## Features
 
-**Make it yours.** Live companions, pets, places and little lucky things, with 13 cord choices and five bracelet styles.
+**Make it yours.** Live animated charms with a 3D look: companions, pets, places and little lucky things, with 13 cord choices and five bracelet styles.
 
 ![The real charm picker and a three-charm bracelet with Cali, a dog locket and a rose.](https://charmbits.pages.dev/assets/store/choose-and-play-0161.png)
 
-**Find your rhythm.** Focus sessions, small wins and a garden that grows one watering at a time.
+**Grow your garden.** Water once a day. After eleven waterings, hang your flower as a charm. Focus sessions and small wins help you find your rhythm.
 
 ![A hibiscus blooms in the CharmBits garden after eleven daily waterings, ready to hang as a charm.](https://charmbits.pages.dev/assets/store/garden-focus-0161.png)
 

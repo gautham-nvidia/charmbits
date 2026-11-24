@@ -3,6 +3,11 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
+## 0.16.2 - 2026-11-24
+
+- Make the daily garden and its flower reward clearer in the overview.
+- Describe the live animated charms and their 3D look while preserving the Cali visual story.
+
 ## 0.16.1 - 2026-11-24
 
 - Introduce Cali as the Marketplace picture mascot, with a concise visual overview of installation, features and terms.

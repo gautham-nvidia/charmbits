@@ -1,8 +1,8 @@
 {
   "name": "charmlet",
   "displayName": "CharmBits: Coding Charms",
-  "description": "Free VS Code companions with Cali, photo lockets, charm bracelets, focus sessions and a daily garden.",
-  "version": "0.16.1",
+  "description": "Free live animated charms with a 3D look: Cali, photo lockets, bracelets, focus sessions and a daily garden.",
+  "version": "0.16.2",
   "license": "SEE LICENSE IN LICENSE",
   "pricing": "Free",
   "icon": "media/marketplace-icon.png",
