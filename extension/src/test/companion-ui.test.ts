@@ -956,8 +956,7 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 		await frame.getByRole('button', { name: `Select ${cali.name}`, exact: true }).click();
 		await expect(frame.locator('#stage')).toHaveAttribute('data-persisted', 'true');
 		expect(JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).editionVersion).toBe(1);
-		await reloadCharm(editor.window);
-		frame = await readyFrame(editor.window);
+		frame = await reloadCharm(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cali');
 		await frame.locator('#app').screenshot({ path: testInfo.outputPath('free-vscode-main.png') });
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
@@ -1009,8 +1008,12 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 		await expect(frame.locator('#cord-leaves')).toHaveAttribute('d', stillLeaves!);
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await frame.getByRole('button', { name: 'Select Nimbus - Live Cloud', exact: true }).click();
+		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cloud');
+		await expect(frame.locator('#stage')).toHaveAttribute('data-persisted', 'true');
+		expect(JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).charmId).toBe('live:cloud');
 		await frame.locator('#settings-toggle').click();
 		await frame.locator('#menu-appearance').click();
+		await expect(frame.locator('#settings')).toBeVisible();
 		await frame.locator('#weather-settings summary').click();
 		await expect(frame.locator('#weather-enabled')).not.toBeChecked();
 		await frame.locator('#weather-station').selectOption('KJFK');
@@ -1020,10 +1023,14 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 		expect(JSON.parse(readFileSync(join(editor.storage, 'weather.json'), 'utf8'))).toEqual({
 			version: 1, enabled: false, stationId: 'KJFK', unit: 'c',
 		});
-		await reloadCharm(editor.window);
-		frame = await readyFrame(editor.window);
+		// Keep the new frame selected by reloadCharm; it excludes pre-reload frames.
+		frame = await reloadCharm(editor.window);
+		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'live:cloud');
+		expect(JSON.parse(readFileSync(editor.preferencesPath, 'utf8')).charmId).toBe('live:cloud');
 		await frame.locator('#settings-toggle').click();
 		await frame.locator('#menu-appearance').click();
+		await expect(frame.locator('#settings')).toBeVisible();
+		await expect(frame.locator('#weather-settings')).toBeVisible();
 		await frame.locator('#weather-settings summary').click();
 		await expect(frame.locator('#weather-enabled')).not.toBeChecked();
 		await expect(frame.locator('#weather-station')).toHaveValue('KJFK');
@@ -1041,6 +1048,18 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 			await frame.locator('#settings-close').click();
 			await frame.locator('#app').screenshot({ path: testInfo.outputPath('nimbus-current-weather.png') });
 		}
+	} catch (error) {
+		try {
+			writeFileSync(testInfo.outputPath('weather-reload-storage.json'), JSON.stringify({
+				preferences: existsSync(editor.preferencesPath) ? readFileSync(editor.preferencesPath, 'utf8') : null,
+				weather: existsSync(join(editor.storage, 'weather.json'))
+					? readFileSync(join(editor.storage, 'weather.json'), 'utf8') : null,
+			}, null, 2));
+		} catch (captureError) {
+			testInfo.annotations.push({ type: 'storage-capture', description: String(captureError) });
+		}
+		await captureEditorFailure(editor.window, testInfo, error);
+		throw error;
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 

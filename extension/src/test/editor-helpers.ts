@@ -96,6 +96,36 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 		message: String(error), stack: error instanceof Error ? error.stack : undefined,
 		frames: window.frames().map(frame => ({ url: frame.url(), detached: frame.isDetached() })),
 	}, null, 2));
+	const snapshots: unknown[] = [];
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	try {
+		await Promise.race([
+			Promise.all(window.frames().map(async frame => {
+				try {
+					snapshots.push(await frame.evaluate(() => {
+						const details = (id: string) => {
+							const node = document.getElementById(id);
+							if (!node) { return null; }
+							return {
+								hidden: node.hidden, display: getComputedStyle(node).display,
+								bounds: node.getBoundingClientRect().toJSON(),
+							};
+						};
+						return {
+							url: location.href, visibility: document.visibilityState,
+							focus: document.activeElement?.id, viewport: { width: innerWidth, height: innerHeight },
+							stage: { ...document.getElementById('stage')?.dataset },
+							selected: (document.getElementById('charm-select') as HTMLSelectElement | null)?.value,
+							appearance: details('settings'), menu: details('settings-menu'),
+							weather: details('weather-settings'),
+						};
+					}));
+				} catch (captureError) { snapshots.push({ url: frame.url(), error: String(captureError) }); }
+			})),
+			new Promise<void>(resolve => { timer = setTimeout(resolve, 3000); }),
+		]);
+		writeFileSync(testInfo.outputPath('frame-state.json'), JSON.stringify(snapshots, null, 2));
+	} finally { if (timer) { clearTimeout(timer); } }
 	try {
 		await window.screenshot({ path: testInfo.outputPath('failure.png'), timeout: 3000 });
 	} catch (captureError) {

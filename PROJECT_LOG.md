@@ -795,3 +795,24 @@ read, and checks that released catalogue images retain static delivery.
 Local production packaging, type checking, lint, the complete website suite
 and release validation pass after this follow-up. Actual production cache
 behavior and the fresh Linux run remain to be verified after deployment.
+
+### Production cache fix verified; Nimbus reload test follow-up
+
+Commit d281a4c deployed successfully. Both former canonical homepage image URLs
+now return 404, plain text and `Cache-Control: no-store`; the full production
+website suite passes with zero console errors. The public artwork licence
+serves version 1.2 and excludes the studies from the website.
+
+Eight of nine d281a4c hosted jobs passed, including Linux 1.90. The remaining
+Mac 1.140 failure occurred in the installed-package weather test after reload:
+the Nimbus summary existed but was hidden. All sixteen source scenarios and
+the other nine installed scenarios passed on that Mac runner. Its original
+artifact does not establish whether the restored charm or the drawer was wrong.
+
+The weather test now keeps the new frame returned by the reload helper rather
+than searching again without its stale-frame exclusion. It explicitly checks
+Nimbus persistence and drawer visibility, and retains bounded DOM/state and
+saved-file diagnostics on failure. No assertions were relaxed and no runtime
+code changed. Type checking, lint and three consecutive installed-package runs
+of this scenario pass locally on Windows VS Code 1.140. Fresh hosted results
+are still required before merge.
