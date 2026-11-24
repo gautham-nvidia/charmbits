@@ -219,8 +219,9 @@ async function checkBracelet() {
         return moved.y + moved.height / 2 - y;
       }, { message: `Bracelet charm ${index + 1} reaches the bottom of its stage` }).toBeGreaterThan(distance * .9);
     } finally { await page.mouse.up(); }
-    await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
-      { message: 'The released charm returns to its resting drop', timeout: 10000 }).toBeLessThan(2);
+    await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+    expect(Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+      'The released charm settles at its resting drop').toBeLessThan(2);
   }
   const pet = bracelet.locator('[data-charm="new-shiba-inu"]');
   await expect(pet).toHaveAttribute('data-material-rendered', 'true');

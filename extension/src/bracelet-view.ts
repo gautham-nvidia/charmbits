@@ -10,7 +10,7 @@ import { createLiveSmiley } from './live-smiley';
 import { createFidgetView } from './fidget-view';
 import { MaterialMotion } from './charm-motion-view';
 import { blinkFile, motionKind, petMotionProfile } from './charm-motion';
-import type { BraceletStyle } from './bracelet-core';
+import { braceletReturnPose, type BraceletReturnMotion, type BraceletStyle } from './bracelet-core';
 
 interface Options {
 	image(charm: CharmDefinition): string;
@@ -26,7 +26,7 @@ interface Slot {
 	fidget: ReturnType<typeof createFidgetView>; material: MaterialMotion;
 	item: CharmDefinition; body?: Body; tether?: Constraint;
 	anchor: { x: number; y: number }; size: number; restLength: number;
-	returnMotion?: { from: number; elapsed: number };
+	returnMotion?: BraceletReturnMotion;
 }
 const SVG = 'http://www.w3.org/2000/svg';
 function svgElement<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Record<string, string> = {}) {
@@ -221,10 +221,10 @@ export class BraceletView {
 		if (held) {
 			const { slot } = held;
 			if (slot.body && slot.tether) {
-				const from = Math.hypot(slot.body.position.x + slot.tether.pointB.x - slot.anchor.x,
+				const fromLength = Math.hypot(slot.body.position.x + slot.tether.pointB.x - slot.anchor.x,
 					slot.body.position.y + slot.tether.pointB.y - slot.anchor.y);
-				slot.tether.length = from;
-				slot.returnMotion = { from, elapsed: 0 };
+				slot.tether.length = fromLength;
+				slot.returnMotion = { fromLength, fromAngle: slot.body.angle, elapsedMs: 0 };
 			}
 			held.slot.button.classList.remove('dragging');
 			if (held.slot.button.hasPointerCapture(held.id)) { held.slot.button.releasePointerCapture(held.id); }
@@ -333,12 +333,13 @@ export class BraceletView {
 	private retract(slot: Slot) {
 		const motion = slot.returnMotion;
 		if (!motion || !slot.body || !slot.tether) { return; }
-		const duration = clamp(Math.abs(slot.restLength - motion.from) * 2, 650, 1400);
-		const progress = Math.min(1, (motion.elapsed += 1000 / 60) / duration);
-		const eased = progress * progress * (3 - 2 * progress);
-		slot.tether.length = motion.from + (slot.restLength - motion.from) * eased;
+		motion.elapsedMs += 1000 / 60;
+		const pose = braceletReturnPose(motion, slot.restLength);
+		slot.tether.length = pose.length;
+		// An inverted pendant can otherwise be pinned against the upper bound as its cord shortens.
+		Body.setAngle(slot.body, pose.angle); Body.setAngularVelocity(slot.body, 0);
 		Sleeping.set(slot.body, false);
-		if (progress === 1) { slot.returnMotion = undefined; }
+		if (pose.complete) { slot.returnMotion = undefined; }
 	}
 	private contain(slot: Slot) {
 		if (!slot.body) { return; }

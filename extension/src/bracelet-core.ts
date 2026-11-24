@@ -9,6 +9,18 @@ export type BraceletStyle = keyof typeof BRACELET_STYLES;
 export interface BraceletState { charms: readonly string[]; selected: number; style: BraceletStyle; }
 export const DEFAULT_BRACELET: Readonly<BraceletState> = Object.freeze({ charms: Object.freeze([]), selected: 0, style: 'silver' });
 
+export interface BraceletReturnMotion { fromLength: number; fromAngle: number; elapsedMs: number; }
+
+/** Retract the cord and unwind the pendant by at most half a turn. */
+export function braceletReturnPose(motion: Readonly<BraceletReturnMotion>, restLength: number) {
+	const duration = Math.max(650, Math.min(1400, Math.abs(restLength - motion.fromLength) * 2));
+	const progress = Math.max(0, Math.min(1, motion.elapsedMs / duration));
+	const eased = progress * progress * (3 - 2 * progress);
+	const turn = Math.atan2(Math.sin(motion.fromAngle), Math.cos(motion.fromAngle));
+	return { length: motion.fromLength + (restLength - motion.fromLength) * eased,
+		angle: motion.fromAngle - turn * eased, complete: progress === 1 };
+}
+
 export function isBraceletStyle(value: unknown): value is BraceletStyle {
 	return typeof value === 'string' && Object.hasOwn(BRACELET_STYLES, value);
 }

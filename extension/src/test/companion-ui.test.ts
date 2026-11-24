@@ -1305,8 +1305,9 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 			} finally { await editor.window.mouse.up(); }
 			await savePointerTrace(editor, traceFrames, testInfo.outputPath('bracelet-pull-input.json'));
 			await expect(slot).not.toHaveClass(/\bdragging\b/);
-			await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
-				{ message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
+			await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+			expect(Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+				'Released and cancelled pulls settle at the resting drop').toBeLessThan(2);
 		};
 		for (let index = 0; index < 3; index++) { await pullDown(index, index === 2); }
 		await editor.window.emulateMedia({ reducedMotion: 'reduce' });
@@ -1315,6 +1316,9 @@ test(`${installedPersonalization ? 'installed VSIX' : 'bracelet motion'} support
 		await pullDown(0);
 		await expect(bracelet).toHaveAttribute('data-frames', paused!);
 		await expect(bracelet.locator('canvas[data-motion="living"]')).toHaveCount(0);
+	} catch (error) {
+		await captureEditorFailure(editor.window, testInfo, error);
+		throw error;
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 

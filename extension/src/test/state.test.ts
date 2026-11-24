@@ -4,6 +4,7 @@ import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { Bodies, Body, Composite, Constraint, Engine, Sleeping } from 'matter-js';
 import { DEFAULT_STATE, getLayout, matchesSavedState, resetState, restoreState, type CharmState, type LayoutMode } from '../charm-state';
 import { buildCatalogue, CHARMS, FIDGET_CHARMS, getCharm, LIVE_CHARMS, ORIGINAL_CHARMS, RETIRED_CHARMS, TRIAL_CHARMS, WITHHELD_CHARMS } from '../charm-catalog';
 import { MESSAGES } from '../messages';
@@ -22,6 +23,7 @@ import { charmCollection } from '../charm-collections';
 import betaCatalogue from '../beta-catalogue.json';
 import { PNG } from 'pngjs';
 import { flowerBaseFromPixels } from '../charm-attachment';
+import { braceletReturnPose } from '../bracelet-core';
 
 test('the starter remains fixed across gallery reordering and beta migration never grants future content', async context => {
 	const directory = mkdtempSync(join(tmpdir(), 'charmlet-access-migration-'));
@@ -302,6 +304,38 @@ test('bracelet slots survive storage, missing packs and position reset without c
 	serialized.bracelet = { ...bracelet, style: 'gold' };
 	assert.equal(matchesSavedState(saved, serialized), false);
 	assert.deepEqual(saved.bracelet, bracelet);
+});
+
+test('an inverted bracelet pendant returns below its band instead of staying trapped at the upper bound', () => {
+	for (const fromAngle of [Math.PI, -Math.PI, 3 * Math.PI]) {
+		const engine = Engine.create({ enableSleeping: true }); engine.gravity.y = .8;
+		const body = Bodies.circle(160, 60, 30, { frictionAir: .055, restitution: .15, sleepThreshold: 45 });
+		Body.setAngle(body, fromAngle);
+		// The inverted hook lies below the body; a short cord would pull its centre above the permitted y=60.
+		const tether = Constraint.create({ pointA: { x: 160, y: 40 }, bodyB: body,
+			pointB: { x: 0, y: 40 }, length: 60, stiffness: .9, damping: .12 });
+		Composite.add(engine.world, [body, tether]);
+		const motion = { fromLength: 60, fromAngle, elapsedMs: 0 };
+		let returning = true, maximumTurn = 0;
+		for (let frame = 0; frame < 180; frame++) {
+			if (returning) {
+				motion.elapsedMs += 1000 / 60;
+				const pose = braceletReturnPose(motion, 40);
+				tether.length = pose.length; Body.setAngle(body, pose.angle); Body.setAngularVelocity(body, 0);
+				Sleeping.set(body, false); returning = !pose.complete;
+				maximumTurn = Math.max(maximumTurn, Math.abs(pose.angle - fromAngle));
+			}
+			Engine.update(engine, 1000 / 60);
+			if (body.position.y < 60) {
+				Body.setVelocity(body, { x: body.velocity.x, y: body.velocity.y * -.3 });
+				Body.setPosition(body, { x: body.position.x, y: 60 });
+			}
+		}
+		assert.ok(Math.abs(body.position.y - 120) < 2, `The pendant returns to its resting drop: ${body.position.y}`);
+		assert.ok(Math.cos(body.angle) > .99, 'The artwork finishes upright.');
+		assert.ok(maximumTurn <= Math.PI + 1e-9, 'Returning does not unwind extra full rotations.');
+		Engine.clear(engine);
+	}
 });
 
 test('the former static robot restores the live assistant and preserves its cord and bracelet position', () => {

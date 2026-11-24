@@ -871,3 +871,20 @@ button; the failure screenshot shows both the Restricted Mode banner and status
 label. The fixture now checks the visible status-bar label within the editor's
 30-second startup deadline, and captures the host's mode text on failures.
 Restricted Mode remains required for the installed-package coverage.
+
+## 2026-11-24 - Bracelet return recovery
+
+Main validation exposed intermittent bracelet returns that stayed above the resting
+drop. A controlled browser fixture reproduced a 51.91-pixel error: an inverted
+pendant was trapped between its shortening tether and the panel's upper boundary.
+The return now eases the pendant upright by the shortest rotation while retracting
+its cord. That same fixture settles within 0.14 pixels of rest after the change.
+
+A Matter physics regression covers inverted starting poses and extra rotations.
+The editor and website checks wait for motion to stop before checking the final
+drop, and the editor case retains failure state before cleanup.
+
+Local verification passes: 116 unit tests, type checking, lint, the two motion and
+bracelet checks in both VS Code 1.90.0 and 1.140.0, and the complete website suite
+with 241 designs and zero console errors. Hosted checks on the fix and resulting
+main commit, followed by a new artifact review, remain required before publication.
