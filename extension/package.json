@@ -21,6 +21,7 @@
   },
   "homepage": "https://charmbits.pages.dev/",
   "bugs": {
+    "url": "https://charmbits.pages.dev/about-us.html#support",
     "email": "getcharmbits@gmail.com"
   },
   "extensionKind": [

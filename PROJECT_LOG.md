@@ -888,3 +888,13 @@ Local verification passes: 116 unit tests, type checking, lint, the two motion a
 bracelet checks in both VS Code 1.90.0 and 1.140.0, and the complete website suite
 with 241 designs and zero console errors. Hosted checks on the fix and resulting
 main commit, followed by a new artifact review, remain required before publication.
+
+## 2026-11-24 - Marketplace support link
+
+Marketplace rejected the email-derived Issues URL during the 0.16.1 upload.
+The package now supplies an HTTPS Issues URL to the website's support section.
+That section offers the existing support email and asks which app the user
+needs help with and what happened.
+
+Local packaging, type checking and lint pass. The rebuilt 340-file VSIX contains
+the HTTPS Support property, and the built page retains its contact anchor and email.
