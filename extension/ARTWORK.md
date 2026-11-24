@@ -1,4 +1,9 @@
-# Charmlet artwork
+# CharmBits artwork
+
+**Current public selection, 0.16.0:** 241 designs, with separate software and artwork terms.
+Music Icons (34) and Sports Icons (17) remain review material and are excluded from public
+packages, the public website and the downloadable catalogue. The dated records preserve the earlier
+authoring and review history; their inclusion counts are not the current release selection.
 
 The 0.6.0 trial bundles ten original SVG charms and 134 rendered PNG designs for offline use. Original-source records appear below; the final dated entry documents the generated trial collection. Inclusion in the trial does not approve the public-release lineup or grant a reuse licence.
 
@@ -19,7 +24,9 @@ The four images were loaded in real Windows VS Code 1.90.0 and 1.138.0 views and
 
 ## License status
 
-The project's source/art license is still pending. This provenance record does not grant a separate reuse license or imply company endorsement. Third-party code and icon notices remain in `THIRD_PARTY_NOTICES.md`; no new third-party artwork or dependency was introduced for this collection.
+The approved software terms are in `LICENSE`, and the separate artwork terms are in
+`ARTWORK-LICENSE.md`. This provenance record grants no additional rights or company
+endorsement. Third-party code and icon notices remain in `THIRD_PARTY_NOTICES.md`.
 
 ## 2026-10-06 - Expanded bundled collection and gallery extras
 
@@ -86,3 +93,91 @@ Cali is an original California-inspired golden bear with a teal scarf, front-fac
 Ten new Gemini 3 Pro Image renders add Giant Panda, Golden Retriever, Labrador, German Shepherd, Husky, Corgi, Beagle, Goldendoodle, Silver Tabby and Tuxedo Cat. Raw images and receipts remain in the ignored authoring output. Preparation profile 3 removes green backdrop spill from the neutral-fur subjects without changing alpha; edge-only correction preserves the cats' green irises. Earlier exports remain archived.
 
 The 0.9.0 trial contains 159 PNG designs, Terminal, four live companions and three fidgets: 167 charms. Technical validation and assistant visual inspection do not constitute the owner's final artwork approval, a distribution licence or a paid-pack decision.
+
+## 2026-11-06 - Detailed Cali and California companions
+
+The 0.10.0 candidate replaces Cali's toy-like rendering with detailed Gemini 3 Pro Image artwork, a consistent grizzly face and seven registered daily outfits. Curved illustrated surfaces provide depth; the head, arms and paws move separately for glances, waves and thumbs-up cheers. The GPU and software renderers share these textures and geometry.
+
+Eleven new illustrated companions depict Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. They have gentle live gaze and figure movement. Sunny, Nimbus and Byte retain their procedural geometry.
+
+Thirty-two prepared PNGs comprise seven outfit frames, two gesture references, eleven regional frames and twelve thumbnails. `website/live-art-assets.json` in the source repository records source, prompt and output hashes, dimensions, model and authoring timestamps. Original images and receipts remain in ignored authoring storage; normal builds never call a model. The images are generated illustrations, not documentary photographs or downloaded 3D models.
+
+The candidate contains 178 selectable charms. These new designs remain for the owner's visual review; licensing, final lineup and paid offerings remain undecided. Earlier Cali captures and original artwork are retained for comparison.
+
+## 2026-11-09 - Playful charms, spinners and puzzles
+
+The owner approved Cali and the eleven California designs on 2026-11-09. The 0.11.0 trial preserves those artwork files, adds four tap gestures and offers a saved choice of Cali's seven outfits. It adds six original code-authored SVG/canvas designs: Orbit Spinner, Pinwheel Spinner, Bar Spinner, Twisty Cube, Sliding Tiles and Lights Out. No generation service, stock image, external model or branded logo was used for these six toys. The colour cube is an original generic puzzle depiction; no affiliation or endorsement is implied. The trial now has 184 selectable charms. Artwork terms, public lineup and paid offerings remain separate decisions.
+
+## 2026-11-09 - Nimbus, Byte, Music and California expansion
+
+The same 0.11.0 candidate now contains 200 charms: 175 static PNG designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Twelve instruments and controllers, four California landmarks, Diwali Diyas and Halloween Lantern are new Gemini 3 Pro Image illustrations. Four place designs and Black Friday/Cyber Monday are replaced, while the bundled Soldering Iron and Digital Caliper retire. The exact prompts and reference-edit variants are recorded in `website/art-collection-refresh.json`; source receipts and original images remain in ignored authoring storage.
+
+Nimbus and Byte replace their earlier procedural appearance with registered Gemini 3 Pro Image cloud and metal-body textures. Their live projection, weather effects, narrow cloud-fold eyes, jointed robot arms and binary/code display are application code. The same textures and geometry work in GPU and software rendering. `website/live-art-assets.json` now records 36 output hashes, including the two new source frames and two thumbnails. Sunny remains procedural; the approved Cali and eleven California companion artwork files are unchanged.
+
+## 2026-11-16 - Robot Assistant, pets, parks and wonders
+
+Robot Assistant now uses the preferred ivory body and expressive screen eyes with thinking, cheering and encouraging gestures. Earlier Byte names above describe historical versions. The stable `live:robot` selection remains compatible with saved settings; the current source frame and thumbnail hashes are recorded in `website/live-art-assets.json`.
+
+`website/pets-places-artwork.json` records ten new pets and seven parks or landmark subjects. The cutout process retains original source and preparation variants, corrects green spill for selected neutral subjects, and records PNG hashes in the artwork manifest. Profile 5 identifies the later pet/geyser preparation; existing pack files are never replaced with different contents.
+
+Nimbus's optional current-weather connection adds code-drawn moon and snow effects alongside sun, rain and lightning. These effects map timestamped NWS observations when enabled; they are separate from the existing cloud illustration. Weather starts off, and the purely playful gestures remain available when it is off.
+
+These are generated illustrations, not documentary photographs or verified architectural models. The Cupertino design is inspired by the original Infinite Loop campus rather than Apple Park. New artwork remains available for owner review; public distribution terms and the free/paid lineup remain undecided. Separately prepared artist-inspired studies are local review material and are not bundled in this trial.
+
+## Music Icons trial, 0.12.0 (2026-11-10)
+
+The owner approved inclusion of all 34 artist studies: the original ten, twelve legends and twelve current performers, including twelve women. They now form Music Icons in the 234-charm trial; the previous paragraph describes 0.11.0. `website/artist-artwork.json` records each final prompt, generation variant, approved source pack and PNG SHA256. No new generation request was needed for integration.
+
+Profile4 preserves the exact PNG bytes previously supplied in the three review packs. Reprocessing those sources changed their hashes and produced duplicate imported/bundled figures; the canonical images now preserve the original saved selections, pins and cords. Generated large previews use the same source artwork. Original receipts and sources remain in ignored authoring storage.
+
+These are original generated, artist-inspired illustrations, not official products, endorsements or licensed merchandise. Design approval does not settle names/likenesses, trademarks, generation-provider terms or commercial distribution rights. Public and paid use still require the owner's separate review. New paid collections should use artwork cleared for that purpose; this addition activates no sales.
+
+## Sports Icons and US skylines, 0.14.0 (2026-11-13)
+
+Seventeen athlete-inspired studies are included in the Pro catalogue without a separate sports charge. The lineup removes Mia Hamm and Caitlin Clark and adds MS Dhoni, Sachin Tendulkar, Stephen Curry, Lewis Hamilton, Roger Federer, Rafael Nadal and Michael Phelps. Ten existing PNGs retain the exact bytes from the earlier private sports review; seven new illustrations use Gemini 3 Pro Image. The final three use a separate source pack so all fourteen earlier images and both previous packs remain unchanged. `website/sports-artwork.json` records prompts, variants, approved source packs and PNG hashes. These are generated studies, not licensed portraits or endorsements; including them with Pro still requires likeness and commercial-rights clearance before public distribution.
+
+Nadal's prepared illustration is horizontally mirrored to put the racquet in his left hand. The registry records this transform; the original generated image, prompt and receipt remain unchanged.
+
+On 2026-11-13 the owner approved sharing the completed candidate, including the seventeen sports studies, in the public GitHub draft PR for review. This records permission to share the review material; it does not establish third-party likeness rights or approve a commercial release.
+
+Thirteen new miniature skylines depict the Bay Area/Silicon Valley, San Francisco, San Diego, Austin, Raleigh-Durham, Dallas, Miami, Seattle, Boston, New York, Chicago, Atlanta and Denver. The Cupertino design now depicts the current circular campus with its green courtyard; it replaces the older Infinite Loop interpretation described above. Santa Clara Office and San Francisco Tower use generic names. The illustrations omit company names and logos, and are not verified architectural models. Prompts, revisions and hashes are recorded in `website/art-collection-refresh.json` and `website/art-review.json`; original images and receipts remain in ignored authoring storage.
+
+Alpine Lake, Night Sky and Ringed Planet retire from the current catalogue. Their built-in selections migrate to the free San Francisco, Austin and Seattle skylines without losing pins or cord choices. Existing personal imports remain intact. The 261-design candidate contains 236 static designs, Terminal, fifteen live companions and nine fidget/puzzle tools; garden rewards remain separate from flower-art previews.
+
+## Public release selection, 0.15.1 (2026-11-16)
+
+The owner accepted the recommended proprietary software and separate artwork terms,
+with unresolved recognizable-person collections deferred. The public catalogue now
+contains 185 rendered designs, Terminal, fifteen live companions and nine fidgets.
+The source images and prior review packs have not been deleted or regenerated.
+
+The 31 starter choices now include Redwood Grove and Bay Area / Silicon Valley in
+place of two artist studies; Electric Guitar replaces the artist free download,
+keeping 15 optional free claims. Existing personal packs remain usable. A saved
+withheld built-in choice retains its ID and cord while displaying a neutral
+placeholder. The frozen beta entitlement list is unchanged.
+
+Public packaging excludes the withheld PNGs, website thumbnails and artist review
+screenshots. `--review-downloads` remains an explicitly private authoring preview.
+This selection and the new terms do not establish rights in any third-party
+likeness, trademark or work, or claim exclusive copyright in generated material.
+
+Later on November 16, the owner explicitly requested one athlete figure and one
+musician figure on the homepage, using two of the existing studies selected in
+`website/homepage-previews.json`. Only their existing WebP previews are copied to the
+separate homepage preview directory; they do not enter the app catalogue,
+commerce products, raw PNG downloads or press kit. `website/homepage-previews.json`
+records this display selection. This changes the homepage presentation permission,
+not the recorded status of third-party likeness or commercial-use rights.
+
+## 2026-11-23 - Marketplace public selection
+
+The 0.16.0 public release contains 241 designs. The 51 Music Icons and Sports Icons
+studies remain withheld. The two homepage display exceptions from November 16
+are removed before Marketplace publication: their WebP files are no longer copied
+to the public website. The shelf instead features the included Eiffel Tower and
+Taj Mahal illustrations, linked to the Europe and Asia collections.
+
+`website/homepage-previews.json` remains an authoring-history record, not an input
+to the public build. Private review sources and the owner's personal packages
+are retained. This distribution change grants no new third-party rights.

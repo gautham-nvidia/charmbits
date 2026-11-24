@@ -3,6 +3,83 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
+## 0.16.0 - Unreleased
+
+- Update the official support, licensing and weather-service contact to getcharmbits@gmail.com.
+- Make every released editor charm and feature free without activation. Desktop retains its starter, 30-day Pro trial and purchases.
+- Connect flexible cord animation in the app. Front-facing flowers attach to straight leafy stems tucked behind the bloom, with shaded leaves and softly animated petals. Add linen, silk, rose gold and pearl cords.
+- Add an optional bracelet with two or three independently movable charms, saved slots, reordering and removal. Choose silver, gold, rose gold, woven linen or pearls. Keep the single charm as the default.
+- Let each bracelet charm pull to the bottom of the available app or editor panel and gently return on release. Keep direct dragging available with Reduced Motion.
+- Add quiet material effects and calm tap responses for all 23 pets. Pets blink or breathe and return to their original artwork. Hidden views and Reduced Motion stop decorative effects.
+- Preserve room for left and right pulls, including large desktop charms near screen edges.
+- Use the preferred ivory Robot Assistant with thinking, cheering and encouraging expressions. Remove its duplicate static picker entry while retaining saved cords and selections.
+- Expand the pets and landmarks into 241 released charms. Organize Europe, Americas, Asia and National Parks collections, reusing existing places; add the Eiffel Tower and more US parks. Separate Plants & Trees and move City Auto to Culture & Traditions.
+- Add opt-in Nimbus weather from US National Weather Service airport observations, with temperature units, observation timestamps, stale/offline states and quiet updates while visible.
+- Preserve extension identities, settings, personal packs, purchases, photos, focus and garden progress.
+
+## 0.15.1 - 2026-11-16
+
+- Use the new CharmBits website address and add the approved proprietary software and separate artwork terms.
+- Publish 210 designs with 31 starter charms and 15 optional free downloads. Music Icons and Sports Icons remain excluded from app packages; two selected homepage concept previews are displayed separately.
+- Retain saved review selections and cords with a neutral placeholder, and keep personal imports, photos, purchases, focus and garden data intact.
+- Keep the extension identity and desktop trial/Pro model unchanged.
+- Give the website demo room to swing in both directions, including its desktop, sidebar and mobile layouts.
+
+## 0.15.0 - Unreleased (CharmBits)
+
+- Renamed the app and its public website to CharmBits, keeping the Terminal logo and artwork.
+- Made the free VS Code offering explicit: all extension features stay free, with optional paid charms. Desktop keeps its existing 30-day trial and Pro rules.
+- Retained extension, desktop storage and activation identities so settings, photos, packs, progress and purchases carry forward.
+- Updated download names and Marketplace copy; publication still requires publisher access and approved source/artwork terms.
+
+## 0.14.0 - Unreleased (Sports Icons and tech-city collection)
+
+- Added 17 Sports Icons to the Pro collection, including Dhoni, Tendulkar, Curry, Hamilton, Federer, Nadal and Phelps. Sports Icons are not sold individually; artwork remains subject to publication review.
+- Added 13 US tech-hub skylines. San Francisco, Austin and Seattle replace three retired starter designs; saved choices and cord preferences migrate.
+- Renamed two office landmarks and redrew Cupertino as the current circular campus.
+- Added a compact Auto-default website theme control and a dismissible, verified email signup for Pro offers. Subscribing does not start a trial.
+- Enabled merchant-created Pro coupon entry at hosted checkout while retaining server price and signed-payment validation.
+- Added getcharmlet@gmail.com as the official website contact; subscriber delivery remains off until the email service is configured.
+
+## 0.13.0 - Unreleased (Free starter, access and website candidate)
+
+- New profiles start with 31 fixed free charms. Existing beta profiles retain the frozen 234-design collection, and local photos, imports and earned flowers remain available.
+- Added signed, passwordless trial and purchase activation shared with desktop. Trial expiry preserves free and individually owned content; sandbox purchases cannot activate release apps.
+- Added more live click reactions and shared visible cheers/confetti, with Reduced Motion support.
+- Promoted the approved Terminal logo and website, with gallery themes, About, About Us, Press, a charm shop and an email-download portal.
+- Added an inactive-by-default email/payment service with durable trial records, server prices, verified webhooks and private delivery. Live accounts and publication review are still required.
+- Updated vulnerable development dependencies and added native/service security regression coverage.
+
+## 0.12.0 - Unreleased (Music Icons trial)
+
+- Added all 34 approved artist studies under Music Icons, immediately after Music: the original ten, twelve legends and twelve current performers, including Travis Scott and twelve women.
+- The complete trial now has 234 charms. Previously imported copies retain their saved IDs and preferences without adding duplicate tiles when the artwork is identical.
+- Updated the companion website for the current digital app, desktop installation and future optional collections.
+
+## 0.11.0 - 2026-11-09 (Live reactions, music and playful charms trial)
+
+- Expanded the trial to 200 charms. Terminal is first and remains the fresh-profile default, followed by Live 3D, Stress Busters, Music and other themed packs.
+- Redrew Nimbus as a textured cloud with sunrise, rain and a gentle lightning reaction. Byte now has a brushed-metal body, jointed arms and animated binary, compile-check and terminal displays.
+- Added twelve instruments: MIDI keyboard, analog synth, grand piano, electric/acoustic/bass guitars, ukulele, flute, saxophone, violin, drum kit and DJ controller.
+- Replaced vague place artwork with NVIDIA's Santa Clara campus, Painted Ladies and Pebble Beach; redrew Granite Dome as Yosemite's Half Dome. Added Palace of Fine Arts, Coastal Cypress, Salesforce Tower and an original-Infinite-Loop-inspired Cupertino campus.
+- Redrew Black Friday and Cyber Monday; added Diwali Diyas and Halloween Lantern. Retired the bundled Soldering Iron and Digital Caliper; saved selections move to Terminal while retaining pin and cord preferences.
+- Choose Cali's outfit in Appearance: automatic daily changes or any of his seven looks, saved across restarts.
+- Added Orbit, Pinwheel and Bar spinners. Drag the rotor to turn it and release to coast; pull the centre for the cord. Shift+Space spins backwards.
+- Added Twisty Cube, Sliding Tiles and Lights Out. Select a puzzle and open Play for its larger board, shuffle, undo and reset. Progress saves locally; the boards stay closed until opened.
+- Cali cycles through a curious head tilt, a wink, a double take and a victory shimmy on taps. Daily outfits, the approved grizzly artwork and win celebrations remain available.
+- Every charm gives a brief wiggle on a click or Space/Enter, including imported artwork, photos, flowers and fidget tools. New holds interrupt the wiggle, and Reduced Motion uses still feedback.
+- Made 100% about 15% larger. Appearance now offers 60-200% in 5% steps; saved percentages are preserved.
+- Kept the artwork's hook attached during the wiggle and extended layout, orbit and desktop-edge bounds for larger charms.
+- Added bounded retries for temporary Windows settings-file locks; a failed replacement preserves the previous saved file.
+
+## 0.10.0 - 2026-11-06 (California companions trial)
+
+- Redesigned Cali as a detailed California grizzly with a consistent face, seven daily outfits and a relaxed Friday coastal shirt.
+- Added live head and arm movement, a clear thumbs-up and a waving cheer. The shared GPU and software renderers retain the same detailed artwork.
+- Added eleven California companions: Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle.
+- Renamed the collection to Live Companions. All 178 charms are included, with matching cord defaults and attachment points for the new silhouettes.
+- Kept personal encouragement, optional confetti, saved controls, local photos, fidget toys and garden progress. Detailed figures react without the stress-ball squeeze; Reduced Motion remains still.
+
 ## 0.9.0 - 2026-11-06 (Cali and pets trial)
 
 - Added Cali, an original California-inspired golden bear and motivational live 3D mascot. Brief text bubbles encourage your next step, acknowledge focus progress and cheer new wins.

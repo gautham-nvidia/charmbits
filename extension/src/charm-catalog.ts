@@ -1,6 +1,13 @@
 import builtinCharms from './builtin-charms.json';
 import trialCharms from './trial-charms.json';
+import artworkPolicy from './artwork-policy.json';
+import { CALIFORNIA_COMPANIONS } from './california-companions';
+import { ROBOT_ART } from './weather-code-companions';
+import { artToStage } from './live-art-core';
+import { orderByCollection } from './charm-collections';
 import type { CharmAttachment } from './charm-attachment';
+import type { BloomShape } from './bloom-motion';
+import { PERSONAL_EDITION } from './build-edition';
 export interface CharmDefinition {
 	id: string;
 	name: string;
@@ -12,6 +19,11 @@ export interface CharmDefinition {
 	attachment?: CharmAttachment;
 	artworkKey?: string;
 	artworkHash?: string;
+	bloom?: BloomShape;
+	baseAttachment?: CharmAttachment;
+	stemColour?: number[];
+	stemWidth?: number;
+	stemCalyx?: boolean;
 }
 export const ORIGINAL_CHARMS: readonly CharmDefinition[] = builtinCharms.filter(charm => charm.id === 'terminal');
 export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
@@ -24,30 +36,51 @@ export const RETIRED_CHARMS: Readonly<Record<string, string>> = Object.freeze({
 	drishti: 'trial:starter-drishti',
 	hamsa: 'trial:starter-hamsa',
 	'lemon-chilies': 'trial:starter-lemon-chilies',
+	'trial:new-soldering-iron': 'terminal',
+	'trial:new-digital-caliper': 'terminal',
+	'trial:extra-alpine-lake': 'trial:new-us-san-francisco-skyline',
+	'trial:extra-night-sky': 'trial:new-us-austin-skyline',
+	'trial:new-ringed-planet': 'trial:new-us-seattle-skyline',
+	'trial:new-robot-assistant': 'live:robot',
 });
-export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms;
+export const WITHHELD_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => artworkPolicy.withheldGroups.includes(charm.group));
+export const TRIAL_CHARMS: readonly CharmDefinition[] = trialCharms.filter(charm => !Object.hasOwn(RETIRED_CHARMS, charm.id)
+	&& (PERSONAL_EDITION || !artworkPolicy.withheldGroups.includes(charm.group)));
 export const LIVE_CHARMS: readonly CharmDefinition[] = [{
-	id: 'live:cali', name: 'Cali - Live Mascot', file: 'live-cali.svg', group: 'Live 3D', accent: '#dcaa65',
-	description: 'A California-inspired golden bear cheering for your next small step. Click for encouragement; focus prompts and celebrations are optional.',
+	id: 'live:cali', name: 'Cali - Live Mascot', file: 'live-cali.png', group: 'Live Companions', accent: '#dcaa65',
+	description: 'A California grizzly with a coder wardrobe, a new outfit each day and a relaxed Friday look. Live glances, waves and thumbs-up; click for encouragement. Focus prompts and celebrations are optional.',
 	attachment: { x: .5, y: 2.5 / 84 },
 }, {
-	id: 'live:smiley', name: 'Sunny - Live Smiley', file: 'live-smiley.svg', group: 'Live 3D', accent: '#f3cd48',
+	id: 'live:smiley', name: 'Sunny - Live Smiley', file: 'live-smiley.svg', group: 'Live Companions', accent: '#f3cd48',
 	description: 'A sunny 3D stress ball with quick glances, blinks and a playful wink. Hold to squish; release to bounce.',
 	attachment: { x: .5, y: 2.5 / 84 },
 }, {
-	id: 'live:cloud', name: 'Nimbus - Live Cloud', file: 'live-cloud.svg', group: 'Live 3D', accent: '#a6ddef',
-	description: 'A soft little 3D cloud. It looks your way, brightens when greeted and puffs its cheeks when squeezed.',
+	id: 'live:cloud', name: 'Nimbus - Live Cloud', file: 'live-cloud.png', group: 'Live Companions', accent: '#a6ddef',
+	description: 'A friendly cloud with optional current US weather in Appearance. With weather off, tap for playful sun, rain and lightning.',
 	attachment: { x: .5, y: 2.5 / 84 },
 }, {
-	id: 'live:robot', name: 'Byte - Live Robot', file: 'live-robot.svg', group: 'Live 3D', accent: '#78d8c1',
-	description: 'A rounded metal robot with lively mint eyes. Tap for a wink; record a win for a happy reaction.',
-	attachment: { x: .5, y: 2.5 / 84 },
-}];
+	id: 'live:robot', name: 'Robot Assistant - Live Robot', file: 'live-robot-assistant.png', group: 'Live Companions', accent: '#93b8c8',
+	description: 'A calm ivory robot with soft blue eyes and a friendly wave. Tap for thinking, a little cheer and encouragement while you code.',
+	attachment: { x: artToStage(ROBOT_ART, ROBOT_ART.anchor)[0] / 72, y: 2.5 / 84 },
+}, ...CALIFORNIA_COMPANIONS.map(companion => ({
+	id: `live:${companion.character}`, name: `${companion.name} - Live Companion`,
+	file: `live-${companion.character}.png`, group: 'Live Companions', accent: companion.accent,
+	description: companion.description,
+	attachment: { x: artToStage(companion, companion.anchor)[0] / 72, y: 2.5 / 84 },
+}))];
 export const FIDGET_CHARMS: readonly CharmDefinition[] = [{
 	id: 'fidget:spinner', name: 'Fidget Spinner', file: 'fidget-spinner.svg', group: 'Stress Busters', accent: '#51bfc4',
-	description: 'Tap or flick the three-lobed spinner; its rotor spins and slows to a stop. Space spins it too. Silent, with no scores.',
+	description: 'Drag the rotor to turn it, then release to coast. Pull the centre to stretch the cord. Space spins; Shift+Space reverses.',
 	attachment: { x: .5, y: 2.5 / 84 },
-}, {
+}, ...([
+	['orbit', 'Orbit Spinner', '#aaa2e6', 'A violet orbital ring with three coloured satellites.'],
+	['pinwheel', 'Pinwheel Spinner', '#ed829c', 'Five folded, colourful blades with a satin sheen.'],
+	['bar', 'Bar Spinner', '#d2b071', 'A balanced brass bar with two polished bearings.'],
+] as const).map(([design, name, accent, description]) => ({
+	id: `fidget:spinner-${design}`, name, accent, file: `fidget-spinner-${design}.svg`, group: 'Stress Busters',
+	description: `${description} Drag the rotor to turn; release to coast. Pull the centre for the cord. Space spins; Shift+Space reverses.`,
+	attachment: { x: .5, y: 2.5 / 84 },
+})), {
 	id: 'fidget:bubbles', name: 'Bubble Pop', file: 'fidget-bubbles.svg', group: 'Stress Busters', accent: '#e7a7ae',
 	description: 'Six soft reusable bubbles. Tap a bubble to pop it or press it back out. Space presses the next bubble. Always silent.',
 	attachment: { x: .5, y: 2.5 / 84 },
@@ -55,27 +88,39 @@ export const FIDGET_CHARMS: readonly CharmDefinition[] = [{
 	id: 'fidget:stone', name: 'Worry Stone', file: 'fidget-stone.svg', group: 'Stress Busters', accent: '#89bba5',
 	description: 'A smooth jade-coloured thumb stone. Hold and rub to gently rock it; release to settle. Space holds it still in your hand.',
 	attachment: { x: .5, y: 2.5 / 84 },
-}];
-export const CHARMS: readonly CharmDefinition[] = [
+}, ...([
+	['cube', 'Twisty Cube', '#55ad8a', 'A working three-by-three colour cube. Tap to turn the front face; open Play for all six sides, shuffle and undo.'],
+	['tiles', 'Sliding Tiles', '#d7b889', 'A little number puzzle. Tap to slide a tile; open Play to arrange one through eight with the gap at the end.'],
+	['lights', 'Lights Out', '#e1a952', 'Switch off all nine lights. Each press flips that light and its neighbours. Tap the charm for the centre switch; open Play to solve.'],
+] as const).map(([kind, name, accent, description]) => ({
+	id: `fidget:${kind}`, name, accent, description, file: `fidget-${kind}.svg`, group: 'Stress Busters',
+	attachment: { x: .5, y: 2.5 / 84 },
+}))];
+export const CHARMS: readonly CharmDefinition[] = orderByCollection([
 	...ORIGINAL_CHARMS,
-	...TRIAL_CHARMS,
 	...LIVE_CHARMS,
 	...FIDGET_CHARMS,
-];
+	...TRIAL_CHARMS,
+]);
 
 /** An identical imported review image keeps its saved ID without adding a second trial tile. */
 export function buildCatalogue(custom: readonly CharmDefinition[]): CharmDefinition[] {
 	const imported = new Set(custom.flatMap(charm => charm.artworkKey && charm.artworkHash
 		? [`${charm.artworkKey}:${charm.artworkHash}`] : []));
-	return [
+	return orderByCollection([
 		...CHARMS.filter(charm => !charm.artworkKey || !charm.artworkHash
 			|| !imported.has(`${charm.artworkKey}:${charm.artworkHash}`)),
 		...custom.map(charm => {
 			const current = TRIAL_CHARMS.find(trial => trial.artworkKey === charm.artworkKey);
+			if (current && current.artworkHash === charm.artworkHash) {
+				return { ...charm, attachment: current.attachment, bloom: current.bloom,
+					baseAttachment: current.baseAttachment, stemColour: current.stemColour,
+					stemWidth: current.stemWidth, stemCalyx: current.stemCalyx };
+			}
 			return current && current.artworkHash !== charm.artworkHash
 				? { ...charm, name: `${charm.name} (Imported)` } : charm;
 		}),
-	];
+	]);
 }
 export type CharmId = string;
 export function getCharm(id: unknown, charms: readonly CharmDefinition[] = CHARMS): CharmDefinition {
@@ -83,15 +128,21 @@ export function getCharm(id: unknown, charms: readonly CharmDefinition[] = CHARM
 	if (direct) { return direct; }
 	const replacement = typeof id === 'string' && Object.hasOwn(RETIRED_CHARMS, id) ? RETIRED_CHARMS[id] : id;
 	const artworkKey = typeof replacement === 'string' && replacement.startsWith('trial:') ? replacement.slice(6) : undefined;
-	return charms.find(charm => charm.id === replacement)
-		?? (artworkKey ? charms.find(charm => charm.artworkKey === artworkKey) : undefined)
-		?? CHARMS[0];
+	const available = charms.find(charm => charm.id === replacement)
+		?? (artworkKey ? charms.find(charm => charm.artworkKey === artworkKey) : undefined);
+	if (available) { return available; }
+	// Keep a saved review choice restorable without distributing its image.
+	if (WITHHELD_CHARMS.some(charm => charm.id === id)) {
+		return { ...ORIGINAL_CHARMS[0], id: id as string, name: 'Saved artwork (unavailable)',
+			description: 'This artwork is not included in this release. Your saved choice and cord are kept; choose another charm to switch.' };
+	}
+	return CHARMS[0];
 }
 
 const SOFT_CHARM_KEYS = new Set([
 	'stress-ball', 'squishy-star',
 	'smiley-happy', 'smiley-determined', 'smiley-calm', 'smiley-wink',
-	'emoji-heart', 'emoji-thumbs-up', 'emoji-rocket', 'smiley', 'cloud', 'cali',
+	'emoji-heart', 'emoji-thumbs-up', 'emoji-rocket', 'smiley', 'cloud',
 ]);
 
 export function isSoftCharm(id: string): boolean {

@@ -58,7 +58,7 @@ export class CompanionController {
 
 	async initialize(): Promise<void> {
 		if (this.newerSchema) {
-			this.error = 'Saved companion data is from a newer version. Update Charmlet to use it.';
+			this.error = 'Saved companion data is from a newer version. Update CharmBits to use it.';
 			this.emit();
 			return;
 		}
@@ -102,7 +102,7 @@ export class CompanionController {
 			this.state = state;
 			this.error = undefined;
 		} catch (error) {
-			this.error = 'Charmlet could not save companion settings. Try the action again.';
+			this.error = 'CharmBits could not save companion settings. Try the action again.';
 			this.stopTimer();
 			this.emit();
 			throw error;

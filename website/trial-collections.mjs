@@ -1,0 +1,29 @@
+/** The current trial's themed packs; archival collection metadata stays intact. */
+export function trialCollections(legacy) {
+  const original = new Map(legacy.map(collection => [collection.id, collection]));
+  const pack = (id, name, changes = {}) => ({ ...original.get(id), id, name, ...changes });
+  return [
+    pack('coding', 'Terminal', { description: 'A sharp little terminal for your desk. The starting charm, ready when you are.', ideas: ['Terminal'] }),
+    pack('live', 'Live 3D', { description: 'Cali’s wardrobe and playful gestures, Sunny’s quick expressions, Nimbus’s weather, a gentle Robot Assistant and eleven California companions.', ideas: ['Cali', 'Sunny', 'Nimbus', 'Robot Assistant', 'California companions'] }),
+    pack('stress', 'Stress Busters', { description: 'Four draggable spinners, reusable bubbles, a worry stone, soft squishies and three optional brain-puzzle boards.', ideas: ['Four spinners', 'Bubble Pop', 'Worry Stone', 'Twisty Cube', 'Sliding Tiles', 'Lights Out'] }),
+    { id: 'music', name: 'Music', code: 'MUS', accent: '#d2a474', description: 'Twelve instruments and music-making tools, with natural wood, polished metal, keys, strings and controls.', ideas: ['MIDI & synth', 'Grand piano', 'Guitars & ukulele', 'Flute & sax', 'Violin & drums', 'DJ controller'] },
+    { id: 'music-icons', name: 'Music Icons', code: 'ICON', accent: '#c7a4d2', description: 'Thirty-four artist-inspired stage figures and signature objects, spanning music legends and current performers.', ideas: ['Music legends', 'Travis Scott', 'Whitney & Tina', 'Beyonce & Billie', 'Daft Punk'] },
+    { id: 'sports-icons', name: 'Sports Icons', code: 'PLAY', accent: '#b56d44', description: 'Seventeen athlete-inspired figures across soccer, cricket, basketball, football, tennis, swimming, track, gymnastics and racing. Included with CharmBits Pro, without a separate sports-pack charge.', ideas: ['Messi & Ronaldo', 'Dhoni & Tendulkar', 'Jordan, Kobe, LeBron & Curry', 'Hamilton', 'Serena, Federer, Nadal & Phelps', 'Bolt & Biles'], rightsReview: true },
+    { id: 'california', name: 'California', code: 'CA', accent: '#8cb8a1', description: 'Familiar California architecture and landscapes, from Painted Ladies and Palace of Fine Arts to Pebble Beach, Yosemite and the circular Cupertino Ring Campus.', ideas: ['San Francisco Tower', 'Santa Clara Office', 'Cupertino Ring Campus', 'Pebble Beach', 'Granite Dome'] },
+    { id: 'us-cities', name: 'US Tech Hubs & Skylines', code: 'CITY', accent: '#8ab7bb', description: 'Thirteen miniature skylines: the Bay Area and San Francisco, San Diego, Austin, Raleigh–Durham, Dallas, Miami, Boston, Atlanta, Denver, New York, Chicago and Seattle.', ideas: ['Bay Area / Silicon Valley', 'San Francisco & San Diego', 'Austin & Dallas', 'Research Triangle', 'Miami, Seattle & more'] },
+    pack('animals', 'Pets & Wildlife', { description: 'Familiar dog and cat breeds, gentle little pets and a few wildlife favourites.', ideas: ['Shiba Inu & Pomeranian', 'French Bulldog & Dachshund', 'Maine Coon, Ragdoll & Siamese', 'Lop Rabbit & Hamster', 'Cockatiel', 'Pandas'] }),
+    pack('silicon', 'Tech & Lab', { description: 'Recognizable chips, computer parts and bench instruments, with a little AI company.', ideas: ['Chip & wafer', 'GPU & CPU', 'Circuit board', 'Oscilloscope', 'Multimeter'] }),
+    pack('parks', 'National Parks', { description: 'Quiet miniature escapes: Yosemite granite, redwoods, desert arches, alpine lakes and wild coasts.', ideas: ['Yosemite & Redwood Grove', 'Yellowstone & Zion', 'Bryce Canyon & Grand Teton', 'Glacier & Crater Lake', 'Acadia & Joshua Tree'] }),
+    { id: 'europe', name: 'Europe', code: 'EUR', accent: '#b49c80', description: 'A little European daydream: Paris ironwork, Roman arches, London clocks, a Bavarian castle and an Aegean village.', ideas: ['Eiffel Tower', 'Colosseum', 'Big Ben', 'Neuschwanstein', 'Santorini'] },
+    { id: 'americas', name: 'Americas', code: 'AMER', accent: '#7fa99c', description: 'From New York and the great falls to ancient terraces high in the Andes.', ideas: ['Statue of Liberty', 'Niagara Falls', 'Machu Picchu'] },
+    { id: 'asia', name: 'Asia', code: 'ASIA', accent: '#b79581', description: 'Mountain stillness, ancient stonework and places that stay with you long after a journey.', ideas: ['Mount Fuji', 'Taj Mahal & Great Wall', 'Angkor Wat', 'Petra', 'Kyoto Torii Gates'] },
+    pack('trees', 'Plants & Trees', { description: 'Small green companions, from a carefully shaped bonsai to a quiet pine tree.', ideas: ['Bonsai', 'Pine tree'] }),
+    pack('space', 'Space & Stars', { description: 'All eight planets, the Sun and Moon, plus a little starlight from farther away.', ideas: ['Solar System', 'Nebula', 'Galaxy', 'Shooting star'] }),
+    pack('zodiac', 'Zodiac'),
+    pack('gemstones', 'Gemstones'),
+    pack('culture', 'Culture & Traditions', { description: 'Colourful devotional figures, South Indian traditions, everyday rituals and familiar good-luck symbols.', ideas: ['Ganesha & Murugan', 'Kuthuvilakku', 'Kolam', 'Filter coffee', 'Lotus'] }),
+    pack('sports', 'Sports'),
+    pack('seasonal', 'Celebrations', { description: 'Diwali lamps, a Halloween lantern, Christmas favourites and other celebrations through the year. Automatic holiday choices respect your pinned favourite.', ideas: ['Diwali', 'Halloween', 'Christmas', 'Thanksgiving', 'Black Friday', 'Cyber Monday'] }),
+    pack('flowers', 'Flowers'),
+  ];
+}

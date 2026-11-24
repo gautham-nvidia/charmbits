@@ -40,7 +40,7 @@ function comingSoon() {
   studio.dataset.studioState = 'unavailable';
   panel.replaceChildren();
   const section = element('div', 'coming-soon');
-  section.append(element('h2', '', 'Photo Studio is coming soon.'), element('p', '', 'Personal-photo art will be an optional paid creation service. Charmlet itself, the free gallery and importing compatible packs stay free.'));
+  section.append(element('h2', '', 'Photo Studio is coming soon.'), element('p', '', 'Every released charm and all editor-extension features, including local photo keepsakes and importing compatible packs, are free. The separate Photo Studio creation service is not available during this launch.'));
   const link = element('a', 'button', 'Explore free charms');
   link.href = '../#catalogue';
   section.append(link);
@@ -142,7 +142,7 @@ async function exportPack() {
     link.download = `${id}.charmlet.json`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 0);
-    status('Your personal pack is ready. Import it with Charmlet: Import Charm Pack.');
+    status('Your personal pack is ready. Import it with CharmBits: Import Charm Pack.');
   } catch (error) { status(error instanceof Error ? error.message : 'The keepsake could not be exported.', true); }
 }
 function unlocked() {
@@ -178,7 +178,7 @@ function unlocked() {
   const preview = element('div', 'preview');
   canvas = document.createElement('canvas'); canvas.id = 'studio-canvas'; canvas.width = PHOTO_WIDTH; canvas.height = PHOTO_HEIGHT;
   canvas.setAttribute('aria-label', 'Personal keepsake preview');
-  preview.append(canvas, element('p', '', '216 × 252 PNG · compatible with the free Charmlet importer'));
+  preview.append(canvas, element('p', '', '216 × 252 PNG · compatible with the free CharmBits importer'));
   const state = element('p', '', 'Choose a local photo to begin.'); state.id = 'studio-status'; state.setAttribute('role', 'status');
   grid.append(controls, preview); panel.append(grid, state);
   frame.addEventListener('change', draw);

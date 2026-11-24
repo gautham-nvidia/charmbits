@@ -9,6 +9,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { isWithheldArtworkFile } from '../../release/artwork-policy.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const repo = join(root, '..');
@@ -20,21 +21,27 @@ const winsToday = (wins, now) => {
   return wins.day === day ? wins.today : 0;
 };
 const packaged = process.argv.includes('--packaged');
+const personalEdition = process.argv.includes('--personal');
+const appName = personalEdition ? 'CharmBits Personal' : 'CharmBits';
 const nativeInput = process.env.CHARMLET_DESKTOP_NATIVE_INPUT === '1';
 if (nativeInput && (process.platform !== 'win32' || process.env.GITHUB_ACTIONS !== 'true')) {
   throw new Error('Native pointer checks require the isolated Windows CI desktop.');
 }
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-const trial = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'));
+const trial = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'trial-charms.json'), 'utf8'))
+  .filter(charm => personalEdition || !isWithheldArtworkFile(charm.file));
+const beta = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'beta-catalogue.json'), 'utf8'));
+const starter = JSON.parse(readFileSync(join(repo, 'extension', 'src', 'starter-selection.json'), 'utf8')).starter;
+const retainedIds = new Set([...beta, ...starter]);
 const bundleRoot = process.env.CHARMLET_DESKTOP_BUNDLE_ROOT
   ? resolve(process.env.CHARMLET_DESKTOP_BUNDLE_ROOT) : join(root, 'release', manifest.version);
-const mode = packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : 'packaged' : 'dev';
+const mode = `${personalEdition ? 'personal-' : ''}${packaged ? process.env.CHARMLET_DESKTOP_BUNDLE_ROOT ? 'archive' : 'packaged' : 'dev'}`;
 const arch = process.arch;
 const executablePath = packaged
   ? process.platform === 'win32'
-    ? join(bundleRoot, `Charmlet-win32-${arch}`, 'Charmlet.exe')
+    ? join(bundleRoot, `${appName}-win32-${arch}`, `${appName}.exe`)
     : process.platform === 'darwin'
-      ? join(bundleRoot, `Charmlet-darwin-${arch}`, 'Charmlet.app', 'Contents', 'MacOS', 'Charmlet')
+      ? join(bundleRoot, `${appName}-darwin-${arch}`, `${appName}.app`, 'Contents', 'MacOS', appName)
       : (() => { throw new Error(`Packaged smoke supports only win32/darwin, not ${process.platform}.`); })()
   : require('electron');
 const launchArgs = packaged ? [] : [root];
@@ -86,6 +93,28 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
     try {
       const window = await application.firstWindow({ timeout: 45000 });
       await window.locator('#stage[data-ready="true"][data-companion-ready="true"]').waitFor({ timeout: 30000 });
+      const startup = await diagnostic(application);
+      assert.equal(startup.measuredWindowState.alwaysOnTop, true, 'Every fresh desktop launch must be topmost.');
+      assert.equal(await application.evaluate(({ app }) => app.getName()), personalEdition ? 'CharmBits Personal' : 'Charmlet', 'Each edition must use its intended profile identity.');
+      const publicAssets = await application.evaluate(({ app }) => {
+        const fs = process.getBuiltinModule('fs'), path = process.getBuiltinModule('path');
+        const dist = path.join(app.getAppPath(), 'dist');
+        return { media: fs.readdirSync(path.join(dist, 'media')),
+          terms: Object.fromEntries(['LICENSE', 'ARTWORK-LICENSE.md'].map(name =>
+            [name, fs.readFileSync(path.join(dist, name), 'utf8')])) };
+      });
+      assert.equal(publicAssets.media.some(isWithheldArtworkFile), personalEdition, 'Owner studies belong only in the private personal package.');
+      for (const [name, contents] of Object.entries(publicAssets.terms)) {
+        assert.equal(contents, readFileSync(join(repo, 'extension', name), 'utf8'), `Packaged ${name} must match the source.`);
+      }
+      if (process.platform === 'darwin') {
+        const menu = await application.evaluate(({ Menu }) => {
+          const applicationMenu = Menu.getApplicationMenu().items[0];
+          return { label: applicationMenu.label,
+            actions: applicationMenu.submenu.items.filter(item => ['about', 'quit'].includes(item.role)).map(item => item.label) };
+        });
+        assert.deepEqual(menu, { label: 'CharmBits', actions: ['About CharmBits', 'Quit CharmBits'] });
+      }
       await window.evaluate(() => {
         globalThis.__charmletTestEvents = [];
         const record = value => {
@@ -119,7 +148,9 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   }
   async function openTools(window) {
     if (await window.locator('body').getAttribute('data-desktop-tools') === 'true') return;
-    await window.locator('#charm').hover();
+    // Bracelet mode hides the single pendant; reveal controls from a visible
+    // charm in either arrangement, including when native tests unpin the toolbar.
+    await window.locator('#charm:visible, #bracelet-stage .bracelet-charm:visible').first().hover();
     await window.getByRole('button', { name: 'Show controls', exact: true }).click();
     await expect(window.locator('#primary-nav')).toBeVisible();
   }
@@ -271,8 +302,8 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   let first = await launch();
   const { application, window } = first;
   const start = await diagnostic(application);
-  await expect(window.locator('#app-version')).toHaveText(`v${manifest.version}`);
-  await expect(window.locator('#primary-nav > button')).toHaveCount(5);
+  await expect(window.locator('#app-version')).toHaveText(`v${manifest.version}${personalEdition ? '+personal' : ''}`);
+  await expect(window.locator('#primary-nav > button:not([hidden])')).toHaveCount(5);
   await expect(window.locator('#primary-nav')).toBeHidden();
   await expect(window.locator('#message-card')).toBeHidden();
   await expect(window.locator('.app-footer')).toBeHidden();
@@ -281,7 +312,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.deepEqual(start.desktopView, { background: false, toolbarPinned: false, messagesPinned: false });
   assert.equal(start.geometry.frame.height, 300, 'The controls remain compact.');
   assert.deepEqual(start.anchor, { x: 210, y: 80 }, 'The older window position migrates to a peg position.');
-  assert.equal(start.appName, 'Charmlet');
+  assert.equal(start.appName, personalEdition ? 'CharmBits Personal' : 'Charmlet');
   assert.equal(realpathSync(start.profile), realpathSync(profile));
   assert.equal(start.focusable, false);
   assert.equal(start.configuredWindowFlags.frame, false);
@@ -305,8 +336,15 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.equal(await window.locator('#stage').getAttribute('data-charm'), 'garden:hibiscus');
   await window.locator('#charm-image').evaluate(image => image.decode());
   assert.equal(await window.locator('#charm-image').evaluate(image => image.naturalWidth), 216);
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored, { timeout: 5000 }).toBe(false);
+  const hoverCharm = async () => {
+    // Forwarded physical mouse movement can supersede an injected hover on a
+    // developer desktop. Reapply the action while checking its IPC response.
+    await expect.poll(async () => {
+      await window.locator('#charm').hover();
+      return (await diagnostic(application)).ignored;
+    }, { timeout: 5000 }).toBe(false);
+  };
+  await hoverCharm();
   await window.mouse.move(1, start.bounds.height - 1);
   await expect.poll(async () => (await diagnostic(application)).ignored, { timeout: 5000 }).toBe(true);
 
@@ -326,8 +364,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
       await touch('touchMove', { x: grab.x + (target.x - grab.x) * step / 15, y: grab.y + (target.y - grab.y) * step / 15 });
     }
   };
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored).toBe(false);
+  await hoverCharm();
   await touch('touchStart', grab);
   try {
     await moveTouch({ x: grab.x, y: targetY });
@@ -339,8 +376,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(window.locator('#charm')).not.toHaveClass(/dragging/);
   await expect.poll(async () => Math.abs(Number(await window.locator('#charm').getAttribute('data-position-y')) - grab.y)).toBeLessThan(2);
   const targetX = Math.min(start.bounds.width - 90, grab.x + 500);
-  await window.locator('#charm').hover();
-  await expect.poll(async () => (await diagnostic(application)).ignored).toBe(false);
+  await hoverCharm();
   await touch('touchStart', grab);
   try {
     await moveTouch({ x: targetX, y: grab.y + 60 });
@@ -354,8 +390,8 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(window.locator('#charm')).not.toHaveClass(/dragging/);
 
   await openTools(window);
-  await window.getByRole('button', { name: 'Move Charmlet', exact: true }).press('Shift+ArrowRight');
-  await window.getByRole('button', { name: 'Move Charmlet', exact: true }).press('Shift+ArrowDown');
+  await window.getByRole('button', { name: 'Move CharmBits', exact: true }).press('Shift+ArrowRight');
+  await window.getByRole('button', { name: 'Move CharmBits', exact: true }).press('Shift+ArrowDown');
   await expect.poll(async () => (await diagnostic(application)).anchor).toEqual({ x: start.anchor.x + 20, y: start.anchor.y + 20 });
   const moved = (await diagnostic(application)).anchor;
   const anchorPath = join(profile, 'anchor', 'preferences.json');
@@ -382,8 +418,16 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   assert.deepEqual(savedDisplay, { background: true, toolbarPinned: true, messagesPinned: true });
 
   const gardenBeforeTrial = JSON.parse(readFileSync(companionPath, 'utf8')).garden;
-  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(trial.length);
-  for (const key of ['starter-drishti', 'new-smiley-happy', 'new-drishti-guardian', 'new-earth']) {
+  await expect(window.locator('#charm-select option[value^="trial:"]')).toHaveCount(trial.filter(charm => personalEdition || retainedIds.has(charm.id)).length);
+  await expect(window.locator('#charm-select option[value^="trial:athlete-"]')).toHaveCount(personalEdition ? trial.filter(charm => charm.id.startsWith('trial:athlete-')).length : 0);
+  await expect(window.locator('#charm-select option[value^="trial:artist-"]')).toHaveCount(personalEdition ? trial.filter(charm => charm.id.startsWith('trial:artist-')).length : 0);
+  if (personalEdition) {
+    await expect(window.locator('#access-label')).toHaveText('Personal edition');
+    await expect(window.locator('#activate-access')).toBeHidden();
+    assert.equal(existsSync(join(profile, 'access')), false, 'Personal use must not create a trial or activation store.');
+  }
+  for (const key of ['starter-drishti', 'new-smiley-happy', 'new-drishti-guardian',
+    'new-us-san-francisco-skyline', 'new-cupertino-loop', 'new-earth']) {
     const entry = trial.find(charm => charm.artworkKey === key);
     assert.ok(entry);
     await window.getByRole('button', { name: 'Browse charms', exact: true }).click();
@@ -415,7 +459,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await window.getByRole('button', { name: 'Resume', exact: true }).click();
   await expect.poll(() => JSON.parse(readFileSync(companionPath, 'utf8')).focus.status, { timeout: 5000 }).toBe('running');
 
-  await window.getByRole('button', { name: 'Hide Charmlet to tray', exact: true }).click();
+  await window.getByRole('button', { name: 'Hide CharmBits to tray', exact: true }).click();
   await expect.poll(async () => (await diagnostic(application)).visible, { timeout: 5000 }).toBe(false);
   await application.evaluate(({ powerMonitor }) => powerMonitor.emit('suspend'));
   await expect.poll(() => JSON.parse(readFileSync(companionPath, 'utf8')).focus.status, { timeout: 5000 }).toBe('paused');
@@ -654,6 +698,8 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   for (const [id, character] of [['live:cloud', 'cloud'], ['live:robot', 'robot']]) {
     await selectInteractive(id);
     await expect(face).toHaveAttribute('data-character', character);
+    await expect(face).toHaveAttribute('data-art-ready', `${character}:`);
+    await expect(face).toHaveAttribute('data-art-error', '');
     await expect(face).toBeVisible();
     await third.window.locator('#charm').focus();
     await third.window.keyboard.down('Space');
@@ -664,6 +710,19 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
     finally { await third.window.keyboard.up('Space'); }
     await expect(face).toHaveAttribute('data-expression', 'smile');
     await third.window.locator('#charm').screenshot({ path: join(output, `live-${character}.png`) });
+    const reactions = new Set(), pictures = new Set();
+    for (let index = 0; index < 3; index++) {
+      await third.window.locator('#charm').focus();
+      await third.window.keyboard.press('Enter');
+      await expect(face).toHaveAttribute('data-expression', character === 'cloud'
+        ? /^(sunrise|rain|lightning)$/ : /^(think|cheer|encourage)$/);
+      const expression = await face.getAttribute('data-expression');
+      reactions.add(expression); pictures.add(await face.evaluate(canvas => canvas.toDataURL()));
+      await third.window.locator('#charm').screenshot({ path: join(output, `live-${character}-${expression}.png`) });
+    }
+    assert.deepEqual([...reactions].sort(), character === 'cloud'
+      ? ['lightning', 'rain', 'sunrise'] : ['cheer', 'encourage', 'think']);
+    assert.equal(pictures.size, 3);
   }
   await selectInteractive('fidget:bubbles');
   const toy = third.window.locator('#live-fidget');
@@ -702,6 +761,7 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   console.log('Desktop Cali: optional personal encouragement, confetti, pets and saved quiet preferences.');
   await selectInteractive('live:cali');
   await expect(face).toHaveAttribute('data-character', 'cali');
+  await expect(face).toHaveAttribute('data-art-ready', /^cali:/);
   await expect(face).toBeVisible();
   await third.window.locator('#charm').click();
   await expect(third.window.locator('#mascot-bubble')).toBeVisible();
@@ -744,10 +804,85 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
     await expect(face).toBeHidden();
     await third.window.locator('#charm').screenshot({ path: join(output, `pet-${id}.png`) });
   }
+  console.log('Desktop California family: eleven rendered companions and saved selections.');
+  for (const character of ['redwood', 'yosemite', 'tahoe', 'gull', 'seal', 'golden-gate', 'santa-cruz',
+    'whale', 'dolphin', 'condor', 'eagle']) {
+    await selectInteractive(`live:${character}`);
+    await expect(face).toHaveAttribute('data-art-ready', `${character}:`);
+    await expect(face).toBeVisible();
+    await expect(third.window.locator('#mascot-bubble')).toBeHidden();
+    await third.window.locator('#charm').screenshot({ path: join(output, `california-${character}.png`) });
+  }
+  await selectInteractive('live:cali');
+  await expect(face).toHaveAttribute('data-art-ready', /^cali:/);
+  console.log('Desktop playful Cali: tap gestures, attached wiggle, and saved 200 percent size.');
+  await openTools(third.window);
+  await third.window.getByRole('button', { name: 'Charm settings', exact: true }).click();
+  await third.window.getByRole('menuitem', { name: 'Appearance', exact: true }).click();
+  await third.window.locator('#cali-outfit').selectOption('friday-coast');
+  await third.window.locator('#size').focus();
+  await third.window.keyboard.press('End');
+  await expect(third.window.locator('#size')).toHaveValue('200');
+  await third.window.locator('#motion').click();
+  await third.window.locator('#settings-close').click();
+  await expect(face).toHaveAttribute('data-outfit', 'friday-coast');
+  // Returning from the California family starts Cali's own tap sequence again.
+  for (const gesture of ['curious', 'wink', 'double-take', 'shimmy']) {
+    await third.window.locator('#charm').focus();
+    await third.window.keyboard.press('Enter');
+    await expect(face).toHaveAttribute('data-expression', gesture);
+    await expect(third.window.locator('#charm')).toHaveAttribute('data-tap-motion', 'playing');
+    await expect(face).toHaveAttribute('data-expression', 'smile');
+  }
+  await openTools(third.window);
+  await third.window.getByRole('button', { name: 'Charm settings', exact: true }).click();
+  await third.window.getByRole('menuitem', { name: 'Appearance', exact: true }).click();
+  await third.window.locator('#motion').click();
+  await third.window.locator('#settings-close').click();
+  await expect(third.window.locator('#stage')).toHaveAttribute('data-persisted', 'true');
+  await expect(face).toHaveAttribute('data-motion', 'still');
+  assert.ok(await third.window.locator('#charm').evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    return bounds.left >= 0 && bounds.top >= 0 && bounds.right <= innerWidth && bounds.bottom <= innerHeight;
+  }), 'The 200 percent charm must remain inside the desktop.');
+  await third.window.locator('#charm').screenshot({ path: join(output, 'cali-200-percent.png') });
+  console.log('Desktop puzzles: cube turns, legal tiles, lights, optional panels and saved boards.');
+  for (const kind of ['cube', 'tiles', 'lights']) {
+    await selectInteractive(`fidget:${kind}`);
+    await expect(toy).toHaveAttribute('data-kind', kind);
+    await openTools(third.window);
+    await third.window.getByRole('button', { name: 'Open puzzle', exact: true }).click();
+    await expect(third.window.locator('#puzzle-editor')).toBeVisible();
+    await expect(third.window.locator('body')).toHaveAttribute('data-desktop-panel', 'true');
+    if (kind === 'cube') {
+      await expect(third.window.locator('.cube-net')).toHaveCSS('display', 'grid');
+      await third.window.getByRole('button', { name: 'Turn front clockwise', exact: true }).click();
+      await expect(third.window.locator('#puzzle-editor')).toHaveAttribute('data-solved', 'false');
+      await third.window.locator('#puzzle-undo').click();
+      await expect(third.window.locator('#puzzle-editor')).toHaveAttribute('data-solved', 'true');
+      await third.window.locator('#puzzle-shuffle').click();
+    } else if (kind === 'tiles') {
+      await third.window.getByRole('button', { name: 'Move tile 8', exact: true }).click();
+      await expect(third.window.locator('#puzzle-editor')).toHaveAttribute('data-solved', 'false');
+    } else {
+      await third.window.getByRole('button', { name: 'Light row 2, column 2', exact: true }).click();
+      await expect(third.window.locator('.puzzle-lights [aria-pressed="true"]')).toHaveCount(5);
+    }
+    await third.window.locator('#puzzle-editor').screenshot({ path: join(output, `puzzle-${kind}.png`) });
+    await third.window.locator('#puzzle-close').click();
+    await expect(third.window.locator('#puzzle-editor')).toBeHidden();
+    await expect(third.window.locator('#stage')).toHaveAttribute('data-persisted', 'true');
+  }
+  const savedPuzzles = JSON.parse(readFileSync(preferencesPath, 'utf8')).puzzles;
+  assert.equal(savedPuzzles.lights, 186);
   await selectInteractive('live:cali');
   await quit(third.application);
   const fourth = await launch();
   await expect(fourth.window.locator('#stage')).toHaveAttribute('data-charm', 'live:cali');
+  await expect(fourth.window.locator('#stage')).toHaveAttribute('data-size', '200');
+  assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).size, 200);
+  assert.deepEqual(JSON.parse(readFileSync(preferencesPath, 'utf8')).puzzles, savedPuzzles);
+  await expect(fourth.window.locator('#live-smiley')).toHaveAttribute('data-outfit', 'friday-coast');
   await expect(fourth.window.locator('#mascot-bubble')).toBeHidden();
   await expect(fourth.window.locator('.win-sparkles')).toHaveCount(0);
   // Native click-through checks explicitly unpin the earlier saved controls.
@@ -756,6 +891,99 @@ test(`desktop ${mode} host keeps shared state in its owned profile`, { timeout: 
   await expect(fourth.window.locator('body')).toHaveAttribute('data-desktop-pinned-toolbar', String(!nativeInput));
   assert.deepEqual((await diagnostic(fourth.application)).desktopView,
     { background: !nativeInput, toolbarPinned: !nativeInput, messagesPinned: !nativeInput });
+  console.log('Desktop bracelet: three independent charms pull down, return, move left/right and stop with Reduced Motion.');
+  const appearance = async () => {
+    await openTools(fourth.window);
+    await fourth.window.getByRole('button', { name: 'Charm settings', exact: true }).click();
+    await fourth.window.getByRole('menuitem', { name: 'Appearance', exact: true }).click();
+  };
+  await appearance();
+  if (await fourth.window.locator('#motion').getAttribute('aria-checked') === 'false') {
+    await fourth.window.locator('#motion').click();
+  }
+  await fourth.window.locator('#arrangement').selectOption('bracelet');
+  await expect(fourth.window.locator('#bracelet-controls .bracelet-choice select:visible')).toHaveCount(3);
+  await expect(fourth.window.locator('#bracelet-style option')).toHaveCount(5);
+  await fourth.window.locator('#bracelet-style').selectOption('rose-gold');
+  await fourth.window.getByRole('button', { name: 'Remove charm 3', exact: true }).click();
+  await expect(fourth.window.locator('#bracelet-controls .bracelet-choice select:visible')).toHaveCount(2);
+  await fourth.window.locator('#bracelet-add').click();
+  await fourth.window.locator('#settings-close').click();
+  const bracelet = fourth.window.locator('#bracelet-stage');
+  await expect(bracelet).toHaveAttribute('data-style', 'rose-gold');
+  const slots = bracelet.locator('.bracelet-charm:not([hidden])');
+  await expect(slots).toHaveCount(3);
+  const stageBounds = await fourth.window.locator('#stage').boundingBox(), braceletBounds = await bracelet.boundingBox();
+  assert.ok(Math.abs(braceletBounds.y + braceletBounds.height - stageBounds.y - stageBounds.height) < 1,
+    'The desktop bracelet uses the full available stage height.');
+  await expect(fourth.window.locator('#charm')).toBeHidden();
+  // As with the single-charm geometry check, use an independent touch pointer
+  // so forwarded, unheld physical mouse moves cannot cancel simulated capture.
+  const braceletInput = await fourth.window.context().newCDPSession(fourth.window);
+  await braceletInput.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+  const braceletTouch = (type, point) => braceletInput.send('Input.dispatchTouchEvent', {
+    type, touchPoints: point ? [{ ...point, id: 1, radiusX: 1, radiusY: 1, force: 1 }] : [],
+  });
+  try {
+    for (let index = 0; index < 3; index++) {
+      const slot = slots.nth(index);
+      for (const direction of [-1, 1]) {
+        const box = await slot.boundingBox(), x = box.x + box.width / 2, y = box.y + box.height / 2;
+        await braceletTouch('touchStart', { x, y });
+        try {
+          for (let step = 1; step <= 12; step++) {
+            await braceletTouch('touchMove', { x: x + direction * 45 * step / 12, y: y + 8 * step / 12 });
+          }
+          await expect(slot).toHaveClass(/\bdragging\b/);
+          await expect.poll(async () => {
+            const moved = await slot.boundingBox();
+            return direction * (moved.x + moved.width / 2 - x);
+          }, { message: `Desktop bracelet charm ${index + 1} moves ${direction < 0 ? 'left' : 'right'}` }).toBeGreaterThan(1);
+        } finally { await braceletTouch('touchEnd'); }
+      }
+      await expect(bracelet).toHaveAttribute('data-running', 'false', { timeout: 20000 });
+      const box = await slot.boundingBox(), area = await bracelet.boundingBox();
+      const x = box.x + box.width / 2, y = box.y + box.height / 2;
+      const distance = area.y + area.height - y - Math.hypot(box.width, box.height) / 2 - 8;
+      assert.ok(distance > 30, 'The desktop bracelet leaves room for a downward pull.');
+      const rest = Number(await slot.getAttribute('data-y'));
+      await braceletTouch('touchStart', { x, y });
+      try {
+        for (let step = 1; step <= 16; step++) {
+          await braceletTouch('touchMove', { x, y: y + distance * step / 16 });
+        }
+        await expect(slot).toHaveClass(/\bdragging\b/);
+        await expect.poll(async () => {
+          const moved = await slot.boundingBox();
+          return moved.y + moved.height / 2 - y;
+        }, { message: `Desktop bracelet charm ${index + 1} reaches the bottom of the stage` }).toBeGreaterThan(distance * .9);
+      } finally { await braceletTouch(index === 2 ? 'touchCancel' : 'touchEnd'); }
+      await expect(slot).not.toHaveClass(/\bdragging\b/);
+      await expect.poll(async () => Math.abs(Number(await slot.getAttribute('data-y')) - rest),
+        { message: 'Released and cancelled pulls return to the resting drop', timeout: 10000 }).toBeLessThan(2);
+    }
+  } finally {
+    await braceletInput.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    await braceletInput.detach();
+  }
+  await appearance();
+  await fourth.window.locator('#motion').click();
+  await fourth.window.locator('#settings-close').click();
+  await expect(fourth.window.locator('#stage')).toHaveAttribute('data-persisted', 'true');
+  await expect(bracelet).toHaveAttribute('data-running', 'false');
+  const braceletFrames = await bracelet.getAttribute('data-frames');
+  await new Promise(resolve => setTimeout(resolve, 350));
+  await expect(bracelet).toHaveAttribute('data-frames', braceletFrames);
+  assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).bracelet.charms.length, 3);
+  assert.equal(JSON.parse(readFileSync(preferencesPath, 'utf8')).bracelet.style, 'rose-gold');
+  await bracelet.screenshot({ path: join(output, 'desktop-bracelet.png') });
+  await appearance();
+  await fourth.window.locator('#arrangement').selectOption('single');
+  await fourth.window.locator('#settings-close').click();
+  await openTools(fourth.window);
+  await fourth.window.getByRole('button', { name: 'Browse charms', exact: true }).click();
+  await fourth.window.locator('.charm-tile[data-charm-id="live:cali"]').click();
+  await expect(bracelet).toBeHidden();
   await openTools(fourth.window);
   await fourth.window.getByRole('button', { name: 'Focus', exact: true }).click();
   await fourth.window.locator('#mascot-settings summary').click();

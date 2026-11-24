@@ -1,20 +1,38 @@
-# Charmlet desktop developer beta
+# CharmBits desktop developer beta
 
-Charmlet Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
+The 0.13 candidate shares the editor's quiet charm effects, front-facing flowers on straight leafy stems and optional bracelet. In **Appearance → Arrangement**, choose two or three charms on silver, gold, rose gold, woven linen or pearls, then tap or pull them independently. Reduced Motion stops the decorative effects. Public desktop access still follows the starter, trial and purchase rules below.
 
-The **0.6.0 candidate** starts with just the charm and cord. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+CharmBits Desktop is an unpublished Windows/macOS developer beta. It reuses the extension's charm renderer, physics, Focus/Learn/Garden controller, validated pack parser and confirmed JSON stores in one floating tray-managed window.
+
+The **0.13.0 candidate** starts with just the charm and cord. Desktop keeps its existing 30-day trial and Pro rules, with 31 free starter charms and retained beta access. Provider setup is still required for desktop purchases and trials. The VS Code edition includes all released charms for free. Hover over the charm to reveal **Move**, **Tools** and hide-to-tray controls. **Tools** opens Charms, Focus, Garden, Messages or Settings on demand; closing the selected panel returns to the minimal view.
+
+The public app and archive names are now CharmBits. The internal app name remains `Charmlet` to preserve the existing profile, single-instance lock and macOS encrypted-access keychain entry. The bundle ID, saved filenames and pack/activation formats also stay stable.
+
+The packaged `dist/PRIVACY.md` explains local storage and optional activation refresh. The shared [privacy notice](../extension/PRIVACY.md) and [service setup guide](../service/README.md) cover email verification and purchases. Personal photos, focus notes and garden progress remain local.
 
 Drag **Move** to place the charm, or focus that button and use the arrow keys (Shift moves farther). Pulling the charm itself stretches the cord within the current display's available space, then releases into the shared bounce. The peg starts near the screen's top edge; compact controls no longer restrict the play area.
 
 Under **Tools > Settings**, **Background**, **Keep toolbar visible** and **Keep messages visible** are separate saved preferences, all off by default. The tray's **Open Controls** and **Reset Window Position** remain available.
 
-The trial shares the extension's 167 offline charms: 159 rendered designs, Terminal, four live companions and three fidget tools. **Charms > Live 3D** offers Cali, Sunny, Nimbus and Byte with prompt glances, blinks and reactions. **Stress Busters** brings the working spinner, bubble-pop charm and worry stone together with the existing smiley balls and squishies. Tap/flick, press a bubble or hold/rub the stone; Space/Enter also work. Giant Panda, seven new dog breeds including Goldendoodle and Husky, and two cats join Animals. The eighteen-flower garden, imports, photos, saved cords and pins remain intact. Final release artwork and pricing remain undecided.
+The trial shares the extension's **241 public offline charms**: 216 rendered designs, Terminal, fifteen live companions and nine fidget/puzzle tools. Terminal leads the picker, followed by **Live 3D**, **Stress Busters** and **Music**. Robot Assistant has the preferred ivory body, expressive eyes and thinking, cheering and encouraging gestures. Music includes twelve instruments and controllers. Previously imported packs retain their selections and exact artwork.
 
-Choose **Cali** for a California-inspired golden bear with brief encouragement bubbles. Click for a positive word, or use focus sessions for gentle prompts. **Tools > Focus > Cali's encouragement** saves your optional name and controls for bubbles and focus prompts. Escape dismisses a bubble; it never blocks clicks through the desktop. Confetti for new wins follows the Small wins celebration setting and Reduced Motion. Everything stays silent. Other charms keep their usual appearance.
+Nimbus can optionally follow current US airport weather. Choose Nimbus, then **Tools > Settings > Appearance > Nimbus weather**, select a station and save with weather enabled. The National Weather Service supplies observations without an account or key. Checks run every ten minutes while the app is visible, with observation times and stale/offline labels. With weather off, Nimbus keeps its playful sunrise, rain and lightning reactions.
 
-**Appearance > Cord material** matches the charm or remembers your chosen cord. **Focus > Small wins** records achievements and completed live focus sessions, with undo and optional celebrations. **Photo charms** opens a local crop and frame editor: only the finished keepsake is stored, with no uploads. Sunny blinks, glances toward a nearby pointer and reacts to squeezing and wins; Reduced Motion stops idle animation. All these controls stay tucked away until selected.
+**US Tech Hubs & Skylines** includes 13 cities. Music Icons and Sports Icons are held for separate rights review and excluded from the public package. Saved withheld selections retain their IDs and cords with a neutral placeholder; personal imports remain usable. The starter and free downloads use generic replacements while keeping their counts. The [software licence](../extension/LICENSE) and [artwork terms](../extension/ARTWORK-LICENSE.md) are included in the desktop build.
 
-<img src="../docs/store-assets/desktop-minimal.png" width="960" alt="Actual Charmlet desktop views: charm only, optional background and toolbar, and the selected Focus panel">
+**Live 3D** also includes Cali, Sunny and eleven California companions. **Stress Busters** brings four spinners, Bubble Pop, Worry Stone and three puzzles together with the smiley balls and squishies. **Pets & Wildlife** adds Shiba Inu, French Bulldog, Dachshund, Pomeranian, Maine Coon, Ragdoll, Siamese, Lop Rabbit, Hamster and Cockatiel as desktop extras. Plants and trees have a separate collection from parks and world wonders. The eighteen-flower garden, imports, photos, saved cords and pins carry forward.
+
+Choose **Cali** for a detailed California grizzly with a coder wardrobe, a new outfit each day and a relaxed Friday shirt. Taps cycle through a curious head tilt, a wink, a double take and a victory shimmy. **Tools > Focus > Cali's encouragement** saves your optional name and controls for bubbles and focus prompts. Escape dismisses a bubble; it never blocks clicks through the desktop. Confetti for new wins follows the Small wins celebration setting and Reduced Motion. Everything stays silent.
+
+Every charm gives a brief wiggle when clicked or activated with Space/Enter. A new hold stops the wiggle; Reduced Motion keeps feedback still. The default 100% is 15% larger than earlier trials. **Tools > Settings > Appearance** offers sizes from 60% to 200% in 5% steps, with room for the larger charm at the desktop edges.
+
+With Cali selected, **Appearance > Cali's outfit** offers automatic daily changes or a saved choice of any seven looks. Four spinner designs—Classic, Orbit, Pinwheel and Bar—turn when you drag their rotor and coast after release; pull the centre for the cord. Shift+Space spins backwards.
+
+Select **Twisty Cube**, **Sliding Tiles** or **Lights Out** and open **Tools > Play** for the larger board. The cube has six working faces, tiles slide into the gap and light switches flip their neighbours. Shuffle, undo and reset are available, and progress saves locally. Closing the board returns to the charm; no puzzle timers or scores are added.
+
+**Appearance > Cord material** matches the charm or remembers your choice from thirteen materials. All 23 pets give a calm blink or breath when tapped. Explore Europe, Americas, Asia and National Parks, including fifteen new place miniatures. **Focus > Small wins** records achievements and completed live focus sessions, with undo and optional celebrations. **Photo charms** opens a local crop and frame editor: only the finished keepsake is stored, with no uploads. Sunny blinks, glances toward a nearby pointer and reacts to squeezing and wins; Reduced Motion stops idle animation. All these controls stay tucked away until selected.
+
+<img src="../docs/store-assets/desktop-minimal.png" width="960" alt="Actual desktop views: charm only, optional background and toolbar, and the selected Focus panel">
 
 ## Local commands
 
@@ -26,7 +44,7 @@ npm.cmd --prefix desktop run test
 npm.cmd --prefix desktop run package
 ```
 
-The Windows 0.6.0 packaging target is an unsigned folder under `desktop/release/0.6.0/Charmlet-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. Current checks are recorded in the [Phase 9 verification log](../docs/phase-9-live-fidgets-hosting.md). Signing, notarization, update service, store listing and public distribution remain release work.
+The Windows 0.12.1 packaging target is an unsigned folder under `desktop/release/0.12.1/CharmBits-win32-x64/`. Packaging uses the manifest version and a versioned output directory, refuses overwrites and leaves earlier releases intact. The earlier [playful charms verification log](../docs/phase-11-playful-charms.md) describes its own candidate. Signing, notarization, update service, store listing and public distribution remain release work.
 
 For a portable download, archive and test the extracted application.
 
@@ -66,12 +84,13 @@ Windows 0.1.1 includes the same Charms/Focus/Garden/Settings navigation, motivat
 
 ## Data and security boundaries
 
-- Desktop data stays under the app's own Electron profile: `preferences.json`, `companion.json`, `packs/`, `anchor/preferences.json` and `desktop-view/preferences.json`. Earlier `window/preferences.json` placement is migrated without deleting that file.
+- Desktop data stays under the app's own Electron profile: `preferences.json`, `companion.json`, `weather.json`, `packs/`, `anchor/preferences.json` and `desktop-view/preferences.json`. Earlier `window/preferences.json` placement is migrated without deleting that file.
 - Desktop and IDE profiles do not automatically synchronize focus or garden progress.
 - The renderer uses `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false` and a narrow preload bridge.
 - `charmlet:` serves only the copied template, bundles, styles and known media.
-- Source links are opened only from reviewed learning-card IDs.
-- No telemetry, account, global hotkey, autostart or update polling is present.
+- Learning links use reviewed card IDs; the weather source button opens the fixed National Weather Service website.
+- Optional weather requests send the selected station to `api.weather.gov`, which also sees the connection IP. No GPS, photos, code, email or focus notes are sent. Weather starts off.
+- No telemetry, global hotkey, autostart or application-update polling is present. Desktop trial and purchase activation remain optional and use verified email.
 
 ## What automated evidence proves
 
@@ -87,4 +106,4 @@ The Windows archive job also checks real OS input on its isolated desktop. It ha
 - Monitor disconnect/reconnect, negative-coordinate displays and mixed-DPI movement.
 - OS suspend/lock and macOS Spaces behavior; running focus pauses and never auto-resumes.
 - macOS package/run evidence from the hosted workflow.
-- Owner decisions for source/art license, signing, notarization and distribution.
+- Signing, notarization and distribution decisions. Source and public artwork terms are now included.

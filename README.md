@@ -1,20 +1,34 @@
-# Charmlet
+# CharmBits
 
-**Charmlet: Coding Charms** is a small, interactive hanging charm in a dockable VS Code view.
+**CharmBits: Coding Charms** is a completely free coding companion in a dockable VS Code view, including its full public charm collection.
 
-**Phase 9 candidate, 2026-11-06:** **0.9.0** includes **167 offline charms**: 159 rendered designs, Terminal, four live 3D companions and three interactive fidget tools. **Cali**, a California-inspired golden bear, adds personal encouragement, focus prompts and optional win confetti. Sunny, Nimbus and Byte retain their prompt live reactions. Ten new pets include a giant panda, seven dog breeds and two cats. The spinner, bubble-pop charm and worry stone join the existing smiley balls and squishies. [Verification and release gates](docs/phase-9-live-fidgets-hosting.md) track this candidate; matched cords, small wins, local photos and the eighteen-flower garden carry forward.
+**CharmBits candidate:** extension **0.16.0** includes all software features and all released charms for free, without an account, paid activation or expiring trial. The public artwork stays bundled for offline use. **Desktop** keeps its 31 fixed free starter charms, 15 optional free claims, 30-day Pro trial and **Pro at $7.49 launch / $17.49 regular, once**. Desktop extras use the existing 49¢ / 99¢ / $1.99 tiers; 49¢ items require another paid item at checkout. These purchases are not required in VS Code or compatible extension hosts.
 
-Open **Charms** after installing the trial; separate imports are no longer required. The **Art review** compares **160 selected designs**, including the original Terminal and all eighteen flower illustrations. Flower previews do not unlock garden rewards or change watering progress. Existing imports, saved choices and previously shared pack files remain intact. The final bundled, free-download and paid-download lineup will be chosen later. The separate website Photo Studio's paid access remains disabled; creating local photo charms inside the app is free.
+The rename preserves the extension identity, desktop storage/encryption identity, saved data and legacy `.charmlet.json` packs. User-facing names and download filenames say CharmBits; compatibility identifiers intentionally retain the earlier name.
 
-**Desktop 0.6.0 candidate:** starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Live 3D and Stress Busters appear first in the picker. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
+**US Tech Hubs & Skylines** includes 13 cities. The public release excludes the 34 Music Icons and 17 Sports Icons studies pending their separate rights review. Historical source art and personal imports remain intact. Saved withheld choices and cords use a neutral placeholder; they are not erased. Redwood Grove and Bay Area / Silicon Valley replace the two artist starters, and Electric Guitar replaces the artist free download.
 
-The website has a [Vercel setup guide](docs/vercel-hosting.md) for the owner's `greensilver-personal` team. [Monetization and checkout setup](docs/monetization-and-payments.md) compares one-time packs, Stripe and hosted digital delivery. Prices are proposals; live sales are not enabled.
+Official contact: **getcharmbits@gmail.com**. Subscriber delivery still requires the configured email service.
+
+Email-only verification, a once-per-email 30-day desktop trial, signed charm access and protected delivery are implemented. Free extension downloads do not start that trial. **Live signup, checkout and public installers are not enabled by the checked-in configuration.** Marketplace installation will not require our email signup. [Hosting, sender, payments and file-delivery setup](service/README.md) explains the accounts, private keys and acceptance checks.
+
+The [Phase 15 security review](docs/phase-15-security-and-launch.md) records the applied controls, verification scope, source references and remaining launch checks.
+
+The [current collections and offers guide](docs/phase-16-collections-and-offers.md) records the sports/city lineup, retained access, subscription behavior and required release checks.
+
+**Cali** keeps the approved grizzly face, seven outfits, saved wardrobe choice and four playful tap reactions. Four spinner designs turn under your pointer; Twisty Cube, Sliding Tiles and Lights Out have optional boards and saved progress. Every charm has a brief tap wiggle. The default 100% is 15% larger, and Appearance offers 60-200% sizing. Encouragement, pets, matched cords, small wins, local photos and the eighteen-flower garden carry forward. [Current verification and release gates](docs/phase-13-artists-website.md) distinguish this candidate from earlier checks.
+
+Open **Charms** to browse your available collection. The private **Art review** compares 254 featured designs; the public website and packages use the smaller release selection. Flower previews do not unlock garden rewards or change watering progress. Creating local photo charms inside the app is free. The approved proprietary [software licence](extension/LICENSE) and separate [artwork terms](extension/ARTWORK-LICENSE.md) define permitted use.
+
+**Desktop 0.13.0 candidate:** retains the starter, 30-day trial and purchased-access rules and starts with only the charm and cord. Hover for Move and Tools; open one control panel at a time, with optional background, toolbar and messages. Choose Cali for brief encouragement bubbles, or turn those off under Focus. Pulls use the available screen space. See the [desktop guide](desktop/README.md).
+
+The website is hosted at **https://charmbits.pages.dev/**, with the Terminal logo, a compact Auto/Light/Dark control, a dismissible offer-signup popup and About/Press pages. The [current service guide](service/README.md) uses Cloudflare, Brevo and Lemon Squeezy for the digital launch. Account setup and purchase/refund testing are required before email delivery or checkout opens. Earlier [provider comparisons](docs/monetization-and-payments.md) remain background; Shopify is deferred until merchandise.
 
 Holiday defaults follow **21 US celebration dates** and rotate Christmas designs through December. They are on for new profiles. An update preserves existing opt-outs and pins; use **Settings > Appearance > Follow holiday defaults** to enable and unpin in one click. Picking a charm pins it. Automatic choices use the local date and never replace the saved usual charm. [Phase 6 scope and verification](docs/phase-6-trial-catalogue.md) tracks the candidate's remaining checks.
 
-The accepted Phase 4 head passed all six Windows/Linux/macOS VS Code 1.90/1.140 jobs and both Windows/macOS desktop archive jobs. The automatic post-merge run then exposed an intermittent Linux menu-opening failure; its event capture and subsequent results are tracked in the [Phase 5 release record](docs/phase-5-release.md). Source/art licences, publisher accounts, verified editor forks, public hosting and native desktop/merchant setup remain release gates. See the [Phase 4 verification record](docs/phase-4-validation.md) and [privacy notice](extension/PRIVACY.md).
+Earlier platform results remain in the [Phase 4 verification record](docs/phase-4-validation.md) and [Phase 5 release record](docs/phase-5-release.md). The current candidate must pass its own checks. Marketplace publisher ownership, Trusted Publishing, verified editor forks and native desktop/merchant setup remain release work. Source/artwork terms have been selected and the public website is hosted.
 
-[Gallery and compact-feedback tracking #13](https://github.com/gautham-nvidia/charmlet/issues/13), the
+[Gallery and compact-feedback tracking #13](https://github.com/gautham-nvidia/charmbits/issues/13), the
 [dated validation record](docs/phase-3-gallery-validation.md), and the frozen [desktop platform summary](docs/phase-3-platforms.json)
 show the checks and remaining review items.
 
@@ -29,13 +43,17 @@ preference, while the visible cord may temporarily shorten to fit the current pa
 
 Hold a Stress Buster to squeeze, or hold Space/Enter with the charm focused. Choose happy, determined, calm or winking smiley balls, a soft heart, thumbs-up or rocket, or the original Stress Ball and Squishy Star. Release to let it recover. The cord stays attached; Reduced Motion removes the transition and bounce.
 
-**Charms > Live 3D** offers Cali, Sunny, Nimbus and Byte. Their lit shapes glance toward the pointer, greet, wink and react to holds and wins, then rest between interactions. Reduced Motion stops idle animation; canvas fallback retains the interactions when WebGL is unavailable.
+**Charms > Live Companions** offers Cali, Sunny, Nimbus and Robot Assistant alongside Coast Redwood, Yosemite, Lake Tahoe, Western Gull, Harbor Seal, Golden Gate, Santa Cruz Otter, Pacific Gray Whale, Pacific Dolphin, California Condor and Golden Eagle. They react to nearby input and rest between interactions. Reduced Motion stops idle animation; software rendering retains the detailed artwork and reactions when WebGL is unavailable.
+
+Nimbus can optionally show current US weather. Select Nimbus, open **Settings > Appearance > Nimbus weather**, choose an airport station and save with weather enabled. The National Weather Service supplies timestamped observations; checks run every ten minutes while the app is visible. Weather starts off, uses no GPS or account, and sends only the selected station in an ordinary HTTPS request. Temperature, observation time and stale/offline state appear below the message; live rain or snow remains still with Reduced Motion.
+
+Cali's week goes from **Monday denim** to a **Tuesday hoodie**, **Wednesday vest**, **Thursday flannel**, **Friday coastal shirt**, **Saturday trail fleece** and **Sunday knit**. Outfits follow the local date, including daylight-saving changes. Cali's face stays consistent, and encouragement adds a clear thumbs-up or wave.
 
 **Cali** cheers for your next small step with brief text bubbles. Click or press Enter for encouragement; focus sessions add start, halfway and completion cues. **Focus > Cali's encouragement** lets you add an optional name, turn bubbles off or disable focus prompts. Words and preferences stay on the device. Escape dismisses a bubble; bubbles never take focus or block a desktop click. Enable **Celebrate milestones** under Small wins for Cali's win confetti. Everything is silent, and celebrations stay still with Reduced Motion.
 
-The new pets are **Giant Panda**, **Golden Retriever**, **Labrador**, **German Shepherd**, **Husky**, **Corgi**, **Beagle** and **Goldendoodle**, with just two new cats: **Silver Tabby** and **Tuxedo Cat**. They join the existing pets under **Animals**.
+All **23 Pets & Wildlife** designs react to a gentle tap with a quiet blink or breath. They are free in the editor and optional desktop extras. Travel collections are organized into **Europe**, **Americas**, **Asia** and **National Parks**, with fifteen new landmarks and park miniatures. Existing places keep their saved identities. **Plants & Trees** keeps bonsai and trees together; City Auto is in Culture & Traditions.
 
-**Charms > Stress Busters** also offers a working Fidget Spinner, reusable Bubble Pop and Worry Stone. Tap/flick to spin, tap bubbles to press them in/out, or hold and rub the stone. Space/Enter work too. The tools are silent and have no scores.
+**Charms > Stress Busters** offers four spinner designs, reusable Bubble Pop, Worry Stone and three puzzles. Drag a spinner's rotor to turn it and release to coast; pull the centre for the cord. Select Twisty Cube, Sliding Tiles or Lights Out and open **Play** for the board, shuffle, undo and reset. Puzzle progress saves locally. The tools are silent, with no timers or scores.
 
 Under **Settings > Appearance > Cord material**, choose a matching default or save a separate choice for each charm: thread, soft cord, braid, leather, ribbon, silver chain, gold chain or ball chain.
 
@@ -49,11 +67,11 @@ The card below the charm offers 80 motivational messages by default, with option
 answers or open a trusted source. Automatic five-minute rotation pauses while the view is unavailable,
 settings/tools are open, a card is active or a drag is in progress.
 
-Click **Focus** or run **Charmlet: Focus Session** for a deadline-based focus/break timer with
+Click **Focus** or run **CharmBits: Focus Session** for a deadline-based focus/break timer with
 25/5, 50/10 or custom durations, pause/resume/stop and an optional one-line intention. It restores a real
 running or paused session after reload without auto-starting another session. A live completed focus session records one small win.
 
-Click **Garden**, then **Plant a seed**, or run **Charmlet: Open Garden**. The free garden hides one original species until its eleventh valid watering day, keeps progress through
+Click **Garden**, then **Plant a seed**, or run **CharmBits: Open Garden**. The free garden hides one original species until its eleventh valid watering day, keeps progress through
 missed days, and adds the bloom to **Grown by you** before it can be explicitly hung. Optional water and
 stand/move reminders are off by default under **Settings → Reminders**. They use one quiet in-app notice with Done, ten-minute Snooze or Skip, without moving focus or stacking missed intervals.
 
@@ -72,21 +90,21 @@ code.cmd --new-window --extensionDevelopmentPath "$PWD\extension" --user-data-di
 This opens an isolated **Extension Development Host**; your normal extensions and pane layout remain
 unchanged. After rebuilding, reload that demo window to load the updated code.
 
-1. In the demo window, press **Ctrl+Shift+P**, then run **Charmlet: Show Charm**.
-2. Run **View: Move View**, choose **Charmlet**, then **New Secondary Side Bar Entry** for a right dock.
+1. In the demo window, press **Ctrl+Shift+P**, then run **CharmBits: Show Charm**.
+2. Run **View: Move View**, choose **CharmBits**, then **New Secondary Side Bar Entry** for a right dock.
 3. Click to nudge or pull and release to return to rest. Switch on **Orbit layout** before dragging a full loop. A straight upward pull retracts the charm; the restore arrow brings it back.
 4. Click **Charms** to search/select artwork, or **Settings → Appearance** for size and resting cord. Escape closes the open panel.
 
 | Try | Examples |
 |---|---|
-| Live 3D | Cali, Sunny, Nimbus and Byte |
-| Stress Busters | Fidget Spinner, Bubble Pop, Worry Stone, smiley balls and squishies |
+| Live 3D | Cali, Sunny, Nimbus and Robot Assistant |
+| Stress Busters | Four spinners, Bubble Pop, Worry Stone, Twisty Cube, Sliding Tiles, Lights Out, smiley balls and squishies |
 | Animals | Giant Panda, Goldendoodle, Husky and the other new and existing pets |
 | Test Bench | ATE Tester, Oscilloscope, Tweezers and other lab tools |
 | Garden Flowers | Eighteen varieties, including four rose colours, jasmine and lily |
 
-Extra free charms use validated `.charmlet.json` files. Run **Charmlet: Import Charm Pack** to add one and
-**Charmlet: Remove Charm Pack** to remove an imported pack. Imported PNG artwork is stored separately
+Extra charms use validated `.charmlet.json` files. Run **CharmBits: Import Charm Pack** to add one and
+**CharmBits: Remove Charm Pack** to remove an imported pack. Imported PNG artwork is stored separately
 from extension files, survives updates and works offline.
 
 Motion and reset controls live under Settings. Tab to the charm for Enter/Space, arrow-key and Escape
@@ -108,8 +126,8 @@ downloaded host; otherwise it uses the installed VS Code, with `VSCODE_EXECUTABL
 See the [validation record](docs/phase-3-gallery-validation.md) for compact, gallery, import and message checks.
 
 The VSIX is written under `extension/` and ignored by Git. Install it using **Extensions: Install from
-VSIX...** for manual testing. Packaging uses `--skip-license` because the project's own license decision
-is still open, not because third-party licenses are waived. Required notices ship in the package.
+VSIX...** for manual testing. Both review and release packaging require the software licence.
+The software terms, artwork terms and third-party notices ship in the package.
 
 [CI](.github/workflows/ci.yml) runs six jobs across Windows, Ubuntu 24.04 and macOS 15 with VS Code
 **1.90.0 and 1.140.0**. All six passed the 0.3.2 baseline's 34-unit/UI/package/gallery path in hosted run [37697185841](https://github.com/gautham-nvidia/charmlet/actions/runs/37697185841).
@@ -127,7 +145,7 @@ Local Windows evidence covers the five frozen placement cases, one suspend/lock 
 The source under [website/](website/) builds a local collection playground with nineteen browsing worlds,
 four earlier style studies, a Garden growth demonstration and the curated artwork review downloads.
 Real pack/VSIX downloads and a bounded live swing/pull preview use the extension's
-shared Pendulum model. A `.vsix` installs the extension; a `.charmlet.json` adds artwork only after Charmlet
+shared Pendulum model. A `.vsix` installs the extension; a `.charmlet.json` adds artwork only after CharmBits
 is installed. Store links are driven by validated `website/distribution.json` values and remain null until
 the owner verifies a live identity-matching listing. URL validation is not proof of publication. This is
 a development preview, not a public URL or Marketplace/Open VSX listing.
@@ -196,13 +214,14 @@ git log --follow --date=short --format="%h %ad %s" -- PROJECT_LOG.md
 
 The owner has authorized the [Phase 4 companion work](docs/phase-4-plan.md) and parallel website/desktop
 development. Phase 5 is extension-store launch, Phase 6 the broader product launch, and Phase 7+ later
-integrations. Publisher ownership, source/art licensing, actual launch-target editor checks and public
-hosting/publication remain explicit gates in [Phase 5 #18](https://github.com/gautham-nvidia/charmlet/issues/18).
+integrations. Publisher ownership, actual launch-target editor checks and publication remain explicit
+gates in [Phase 5 #18](https://github.com/gautham-nvidia/charmlet/issues/18). Source/art terms and the public hostname are now configured.
 Each phase keeps its own branch and merges before the next.
 
 ## Ownership and licenses
 
 Personal repository under `gautham-nvidia`, **not** the NVIDIA organization or an endorsed product.
 No NVIDIA-branded assets are included. The core and bundled starter items are intended to remain free.
-Public visibility does not assign an open-source license: Charmlet's source/art license is pending.
+The proprietary [software licence](extension/LICENSE) allows free use of all VS Code features and the included public charm collection.
+First-party artwork has [separate terms](extension/ARTWORK-LICENSE.md). Public source visibility is not an open-source licence.
 [Third-party notices](extension/THIRD_PARTY_NOTICES.md) cover Matter.js and Lucide/Feather assets.

@@ -1,0 +1,10 @@
+CharmBits is proprietary software.
+Copyright (c) 2026 Gautham Anebajagane.
+
+The maintainer's original software throughout this repository is licensed under
+the CharmBits Software Licence in extension/LICENSE. The VS Code extension's
+software features and included public charms are free to use under those terms; public source visibility
+does not grant a general open-source or redistribution licence.
+
+First-party artwork is governed separately by extension/ARTWORK-LICENSE.md.
+Third-party components and fonts retain their own licences and notices.

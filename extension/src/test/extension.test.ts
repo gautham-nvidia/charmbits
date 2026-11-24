@@ -1,20 +1,33 @@
 import { test, expect, _electron as electron, type Frame, type Page } from '@playwright/test';
-import { copyFileSync, cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { CHARMS, ORIGINAL_CHARMS } from '../charm-catalog';
+import { charmCollection } from '../charm-collections';
+import { DEFAULT_STATE, getLayout } from '../charm-state';
+import { DEFAULT_WEATHER } from '../weather-core';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { command, commandInput, endOfDocument, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
+import { captureEditorFailure, closeOwnedEditor, command, commandInput, endOfDocument, isolatedEditorEnvironment, primaryModifier, readyFrame, reloadCharm } from './editor-helpers';
 
-async function dismissPluginUpdateNotice(frame: Frame) {
+async function dismissResolvedHostNotice(frame: Frame) {
 	// This editor-owned marketplace warning can cover the secondary-side toolbar.
 	// Dismiss only the observed unrelated notice; retain application notifications.
 	const notice = frame.page().locator('.notification-toast')
 		.filter({ hasText: 'Failed to update: github/awesome-copilot#marketplace' }).first();
 	if (await notice.isVisible()) { await notice.getByRole('button', { name: /Clear Notification/ }).click(); }
+	const startup = frame.page().locator('.notification-toast')
+		.filter({ hasText: 'Extension host did not start in 10 seconds' }).first();
+	if (await startup.isVisible()) {
+		// Only dismiss the timed startup warning after both extension channels
+		// have actually replied; an unresponsive host must still fail readiness.
+		await expect(frame.locator('#stage')).toHaveAttribute('data-ready', 'true');
+		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-ready', 'true');
+		test.info().annotations.push({ type: 'host-startup', description: 'Host exceeded 10 seconds, then both extension channels became ready.' });
+		await startup.getByRole('button', { name: /Clear Notification/ }).click();
+	}
 }
 
 async function openAppearance(frame: Frame) {
-	await dismissPluginUpdateNotice(frame);
+	await dismissResolvedHostNotice(frame);
 	await frame.locator('#settings-toggle').click();
 	await expect(frame.locator('#settings-toggle')).toHaveAttribute('aria-expanded', 'true');
 	await frame.locator('#menu-appearance').click();
@@ -22,7 +35,7 @@ async function openAppearance(frame: Frame) {
 }
 
 async function menuAction(frame: Frame, id: string) {
-	await dismissPluginUpdateNotice(frame);
+	await dismissResolvedHostNotice(frame);
 	await frame.locator('#settings-toggle').click();
 	await frame.locator(`#${id}`).click();
 }
@@ -85,19 +98,20 @@ async function dragCharm(window: Page, frame: Frame, deltaX: number, deltaY: num
 	await window.mouse.up();
 }
 
-test('real-editor charm supports docking, gestures, focus, persistence and reduced motion', async ({}, testInfo) => {
+test('existing beta editor supports docking, gestures, focus, persistence and reduced motion', async ({}, testInfo) => {
 	// Full desktop scenario includes host startup, reloads, gestures and evidence capture.
 	// Keep individual assertion and performance limits independent of this total budget.
 	test.setTimeout(420000);
 	const profile = mkdtempSync(join(tmpdir(), 'charmlet-ui-'));
+	const storage = join(profile, 'user', 'User', 'globalStorage', 'gautham-nvidia.charmlet');
+	mkdirSync(storage, { recursive: true });
+	// This comprehensive artwork scenario follows a pre-0.13 beta profile.
+	// The companion UI suite separately verifies an empty profile's free catalogue.
+	writeFileSync(join(storage, 'preferences.json'),
+		JSON.stringify({ ...DEFAULT_STATE, editionVersion: undefined }));
 	const scratchFile = join(profile, 'charmlet-trial.ts');
-	writeFileSync(scratchFile, "export const greeting = 'Hello, Charmlet!';\n");
-	const environment: Record<string, string> = {};
-	for (const [key, value] of Object.entries(process.env)) {
-		if (value !== undefined && key !== 'ELECTRON_RUN_AS_NODE') {
-			environment[key] = value;
-		}
-	}
+	writeFileSync(scratchFile, "export const greeting = 'Hello, CharmBits!';\n");
+	const environment = isolatedEditorEnvironment();
 	environment.CHARMLET_TRACE_SAVES = '1';
 	const executablePath = process.env.VSCODE_EXECUTABLE
 		?? (process.platform === 'win32' ? 'C:\\Program Files\\Microsoft VS Code\\Code.exe' : undefined);
@@ -140,14 +154,14 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 		writeFileSync(testInfo.outputPath('editor-window.json'), `${JSON.stringify(windowGeometry, null, 2)}\n`);
 		await window.waitForLoadState('domcontentloaded');
 		await expect(window.locator('.monaco-workbench')).toBeVisible({ timeout: 30000 });
-		await expect(window.locator('.part.editor .view-lines').first()).toContainText('Hello, Charmlet!', { timeout: 30000 });
-		await expect(window.locator('.part.activitybar a.action-label[aria-label="Charmlet"]')).toBeVisible({ timeout: 30000 });
+		await expect(window.locator('.part.editor .view-lines').first()).toContainText('Hello, CharmBits!', { timeout: 30000 });
+		await expect(window.locator('.part.activitybar a.action-label[aria-label="CharmBits"]')).toBeVisible({ timeout: 30000 });
 		await window.keyboard.press(`${primaryModifier}+Shift+P`);
 		const input = commandInput(window);
 		await expect(input).toBeVisible();
 		await input.fill('>');
-		await input.pressSequentially('Charmlet: Show Charm', { delay: 30 });
-		await expect(window.locator('.quick-input-list')).toContainText('Charmlet: Show Charm', { timeout: 15000 });
+		await input.pressSequentially('CharmBits: Show Charm', { delay: 30 });
+		await expect(window.locator('.quick-input-list')).toContainText('CharmBits: Show Charm', { timeout: 15000 });
 		await window.keyboard.press('Enter');
 		await expect.poll(() => window.frames().map(frame => frame.url()).join('\n'), { timeout: 30000 })
 			.toContain('vscode-webview');
@@ -160,15 +174,15 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 		await input.pressSequentially('View: Move View', { delay: 30 });
 		await expect(window.locator('.quick-input-list')).toContainText('View: Move View');
 		await window.locator('.quick-input-list').getByText('View: Move View', { exact: true }).click();
-		await input.fill('Charmlet');
-		await expect(window.locator('.quick-input-list')).toContainText('Charmlet');
-		await window.locator('.quick-input-list .monaco-list-row').filter({ has: window.getByText('Charmlet', { exact: true }) }).click();
+		await input.fill('CharmBits');
+		await expect(window.locator('.quick-input-list')).toContainText('CharmBits');
+		await window.locator('.quick-input-list .monaco-list-row').filter({ has: window.getByText('CharmBits', { exact: true }) }).click();
 		await input.fill('New Secondary Side Bar');
 		await expect(window.locator('.quick-input-list')).toContainText('New Secondary Side Bar');
 		await window.keyboard.press('Enter');
 		await expect(window.locator('.quick-input-widget')).toBeHidden();
 		let frame = await readyFrame(window);
-		await expect(window.locator('.part.auxiliarybar a.action-label[aria-label="Charmlet"]')).toBeVisible();
+		await expect(window.locator('.part.auxiliarybar a.action-label[aria-label="CharmBits"]')).toBeVisible();
 		await expect.poll(() => frame.locator('#stage').evaluate(stage => stage.clientHeight)).toBeGreaterThan(350);
 		await menuAction(frame, 'reset');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '126');
@@ -188,7 +202,14 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 		await expect(frame.locator('#stage')).toHaveAttribute('data-hidden', 'false');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false', { timeout: 20000 });
 		await window.screenshot({ path: testInfo.outputPath('right-dock.png') });
-		await dragCharm(window, frame, -55, 0);
+		await beginDrag(window, frame, -55, 0);
+		await frame.evaluate(settings => globalThis.window.postMessage({
+			type: 'weather', snapshot: { settings, status: 'disabled', stale: false, readOnly: false },
+		}, '*'), DEFAULT_WEATHER);
+		await browserFrames(window, 2);
+		await expect(frame.locator('#phase')).toHaveText('Held');
+		await expect.poll(async () => Math.abs(Number(await frame.locator('#stage').getAttribute('data-cord-bend')))).toBeGreaterThan(.1);
+		await window.mouse.up();
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'true');
 		await menuAction(frame, 'toggle');
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
@@ -217,7 +238,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 		await frame.locator('#charm').click();
 		await browserFrames(window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
-		await command(window, 'Charmlet: Show Charm');
+		await command(window, 'CharmBits: Show Charm');
 		await expect(window.locator('.part.editor .monaco-editor.focused')).toBeVisible();
 		await window.keyboard.press(endOfDocument);
 		await window.keyboard.press('Enter');
@@ -241,8 +262,8 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			await openAppearance(frame);
 			let picker = frame.getByRole('combobox', { name: 'Charm', exact: true });
 			await expect(picker.locator('option')).toHaveCount(CHARMS.length);
-			await expect(picker.locator('optgroup')).toHaveCount(new Set(CHARMS.map(charm => charm.group)).size);
-			await expect(picker.locator('optgroup[label="Solar System"]')).toHaveCount(1);
+			await expect(picker.locator('optgroup')).toHaveCount(new Set(CHARMS.map(charmCollection)).size);
+			await expect(picker.locator('optgroup[label="Space & Stars"]')).toHaveCount(1);
 			await expect(picker.locator('option[value="terminal"]')).toHaveText('Terminal');
 			// Category grouping can place a newly appended charm inside an earlier group.
 			const lastId = await picker.locator('option').last().getAttribute('value');
@@ -355,7 +376,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			expect(JSON.parse(readFileSync(preferencesPath, 'utf8')).charmId).toBe(lastCharm.id);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '146');
 			await expect(frame.locator('#motion')).toHaveAttribute('aria-checked', 'false');
-			await command(window, 'Charmlet: Reset Charm');
+			await command(window, 'CharmBits: Reset Charm');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', lastCharm.id);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '126');
 			await menuAction(frame, 'toggle');
@@ -380,11 +401,26 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			const defaultCharmWidth = await frame.locator('#charm').evaluate(charm => charm.getBoundingClientRect().width);
 			await frame.getByRole('slider', { name: 'Size', exact: true }).focus();
 			await frame.getByRole('slider', { name: 'Size', exact: true }).press('End');
-			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '140');
+			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '200');
 			await expect.poll(() => frame.locator('#charm').evaluate(charm => charm.getBoundingClientRect().width)).toBeGreaterThan(defaultCharmWidth);
 			await frame.getByRole('slider', { name: 'Cord', exact: true }).focus();
 			const maximumCord = (await frame.getByRole('slider', { name: 'Cord', exact: true }).getAttribute('max'))!;
 			expect(Number(maximumCord)).toBeGreaterThan(48);
+			const expectVisibleCordFitsViewport = async () => {
+				// VS Code can reflow its chrome by a few pixels after a native resize.
+				// The preference stays exact; the visible cord must fit the current viewport.
+				await expect.poll(async () => {
+					const stage = await frame.locator('#stage').evaluate(node => {
+						const { width, height } = node.getBoundingClientRect();
+						return { width, height, cord: Number(node.dataset.cord) };
+					});
+					const attachment = CHARMS.find(charm => charm.id === 'terminal')!.attachment;
+					const layout = getLayout(stage.width, stage.height, Number(maximumCord), 200, 'hanging', attachment);
+					const scale = Math.max(.01, Math.min(1, stage.width / layout.minimumWidth, stage.height / layout.minimumHeight));
+					const fitted = getLayout(stage.width / scale, stage.height / scale, Number(maximumCord), 200, 'hanging', attachment);
+					return stage.cord - Math.round(fitted.cordLength);
+				}).toBe(0);
+			};
 			await frame.getByRole('slider', { name: 'Cord', exact: true }).press('End');
 			await expect(frame.getByRole('slider', { name: 'Cord', exact: true })).toHaveValue(maximumCord);
 			expect(Number(await frame.locator('#stage').getAttribute('data-cord'))).toBeLessThanOrEqual(Number(maximumCord));
@@ -404,8 +440,8 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			expect(expandedCordAfterClose).toBeLessThanOrEqual(Number(maximumCord));
 			const expandedVisibleCord = (await frame.locator('#stage').getAttribute('data-cord'))!;
 			frame = await reloadCharm(window);
-			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '140');
-			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', expandedVisibleCord);
+			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '200');
+			await expectVisibleCordFitsViewport();
 			await expect(frame.locator('#cord-length')).toHaveValue(maximumCord);
 			await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 500));
 			frame = await readyFrame(window);
@@ -419,8 +455,11 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			await expect.poll(async () => Number(await frame.locator('#stage').getAttribute('data-cord'))).toBeLessThan(Number(expandedVisibleCord));
 			await expectBalancedSwingRoom(frame);
 			await window.screenshot({ path: testInfo.outputPath('phase-1-compact-large-charm.png') });
+			const compactHeight = await frame.locator('#stage').evaluate(node => node.clientHeight);
 			await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1400, 900));
-			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', expandedVisibleCord);
+			await expect.poll(() => frame.locator('#stage').evaluate(node => node.clientHeight)).toBeGreaterThan(compactHeight);
+			await expectVisibleCordFitsViewport();
+			await expect(frame.locator('#cord-length')).toHaveValue(maximumCord);
 			await openAppearance(frame);
 			await frame.getByRole('slider', { name: 'Cord', exact: true }).focus();
 			await frame.getByRole('slider', { name: 'Cord', exact: true }).press('Home');
@@ -460,7 +499,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 650));
 			await expect(frame.locator('#phase')).toHaveText('Parked');
 			await window.mouse.up();
-			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '140');
+		await expect(frame.locator('#stage')).toHaveAttribute('data-size', '200');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '50');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
 			await expect(frame.locator('#charm')).not.toHaveClass(/dragging/);
@@ -489,7 +528,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			}).toBe(true);
 			await window.keyboard.press(`${primaryModifier}+Alt+B`);
 			frame = await readyFrame(window);
-			await expect(frame.locator('#stage')).toHaveAttribute('data-size', '140');
+		await expect(frame.locator('#stage')).toHaveAttribute('data-size', '200');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-cord', '50');
 			await expect(frame.locator('#phase')).toHaveText('Parked');
 			await expect(frame.locator('#stage')).toHaveAttribute('data-running', 'false');
@@ -790,7 +829,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 				dialog.showOpenDialog = (() => Promise.resolve({ canceled: false, filePaths: [path] })) as typeof dialog.showOpenDialog;
 			}, selectedPack);
 			try {
-				await command(window, 'Charmlet: Import Charm Pack');
+				await command(window, 'CharmBits: Import Charm Pack');
 				await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'pack:probe-card:probe-card');
 			} finally {
 				await app.evaluate(({ dialog }) => {
@@ -830,7 +869,7 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			await expect(frame.locator('#charm-image')).toHaveAttribute('src', /^data:image\/png;base64,/);
 			await expect.poll(() => frame.locator('#charm-image').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(288);
 			await window.screenshot({ path: testInfo.outputPath('imported-probe-card.png') });
-			await command(window, 'Charmlet: Remove Charm Pack');
+			await command(window, 'CharmBits: Remove Charm Pack');
 			await window.locator('.quick-input-list').getByText('Probe Card', { exact: true }).click();
 			await expect(frame.locator('#charm-select option')).toHaveCount(CHARMS.length);
 			await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');
@@ -919,26 +958,16 @@ test('real-editor charm supports docking, gestures, focus, persistence and reduc
 			await testInfo.attach('resource-profile.json', { path: reportPath, contentType: 'application/json' });
 		});
 	} catch (error) {
-		await window.screenshot({ path: testInfo.outputPath('failure.png') });
-		writeFileSync(testInfo.outputPath('host-notifications.json'), JSON.stringify(await window.locator('.notifications-toasts').evaluateAll(nodes =>
-			nodes.map(node => ({ text: node.textContent, controls: [...node.querySelectorAll('[aria-label]')].map(control => control.getAttribute('aria-label')) }))), null, 2));
+		await captureEditorFailure(window, testInfo, error);
 		throw error;
 	} finally {
 		try {
-			await app.close();
+			await closeOwnedEditor({ app, profile }, testInfo);
 		} finally {
 			try {
 				writeFileSync(testInfo.outputPath('preference-events.json'), `${JSON.stringify(preferenceEvents, null, 2)}\n`);
 			} catch {
 				// Keep the original test result if optional diagnostic writing fails.
-			}
-			try {
-				const editorLogs = join(profile, 'user', 'logs');
-				if (existsSync(editorLogs)) {
-					cpSync(editorLogs, testInfo.outputPath('editor-logs'), { recursive: true });
-				}
-			} catch {
-				// Keep the original test result if optional diagnostic copying fails.
 			}
 		}
 	}

@@ -1,4 +1,8 @@
 const esbuild = require("esbuild");
+const { mkdir, writeFile } = require('node:fs/promises');
+const { join } = require('node:path');
+const { buildTarget } = require('../release/build-target.cjs');
+const target = buildTarget(__dirname);
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -24,6 +28,7 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
+	await mkdir(target.dist, { recursive: true });
 	const ctx = await esbuild.context({
 		entryPoints: [
 			'src/extension.ts'
@@ -34,7 +39,8 @@ async function main() {
 		sourcemap: !production,
 		sourcesContent: false,
 		platform: 'node',
-		outfile: 'dist/extension.js',
+		outfile: join(target.dist, 'extension.js'),
+		define: target.define,
 		external: ['vscode'],
 		logLevel: 'silent',
 		plugins: [
@@ -48,7 +54,8 @@ async function main() {
 		format: 'iife',
 		platform: 'browser',
 		target: 'es2022',
-		outfile: 'dist/webview.js',
+		outfile: join(target.dist, 'webview.js'),
+		define: target.define,
 		minify: production,
 		sourcemap: !production,
 	});
@@ -61,6 +68,7 @@ async function main() {
 		await ctx.dispose();
 		await webview.dispose();
 	}
+	await writeFile(join(target.dist, 'edition.json'), `${JSON.stringify(target.metadata)}\n`);
 }
 
 main().catch(e => {

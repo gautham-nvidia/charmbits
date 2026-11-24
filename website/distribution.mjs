@@ -19,3 +19,14 @@ export function validateDistribution(input, manifest) {
   }
   return result;
 }
+
+/** Both Pages projects build this source; only the old project's build redirects. */
+export function legacyPagesRedirect(deploymentUrl) {
+  if (!deploymentUrl) return '';
+  const url = new URL(deploymentUrl);
+  if (url.protocol !== 'https:' || url.username || url.password || url.port) {
+    throw new Error('Cloudflare deployment URL must be a public HTTPS URL.');
+  }
+  return url.hostname === 'charmlet.pages.dev' || url.hostname.endsWith('.charmlet.pages.dev')
+    ? '/* https://charmbits.pages.dev/:splat 301\n' : '';
+}

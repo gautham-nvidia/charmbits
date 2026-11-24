@@ -1,0 +1,4 @@
+{
+  "withheldGroups": ["Music Icons", "Sports Icons"],
+  "withheldFilePrefixes": ["trial-artist-", "trial-athlete-", "artist-", "athlete-"]
+}

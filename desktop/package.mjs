@@ -8,10 +8,14 @@ if (process.platform !== 'win32' && process.platform !== 'darwin') {
   throw new Error(`Desktop packaging supports only win32 and darwin hosts, not ${process.platform}.`);
 }
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+const edition = JSON.parse(await readFile(join(root, 'dist', 'edition.json'), 'utf8'));
+if (edition.edition !== 'public' || manifest.charmbitsEdition === 'personal') {
+  throw new Error('The public desktop packager cannot distribute a personal build.');
+}
 const release = join(root, 'release', manifest.version);
 const paths = await packager({
   dir: root,
-  name: 'Charmlet',
+  name: 'CharmBits',
   appVersion: manifest.version,
   appBundleId: 'dev.charmlet.desktop',
   platform: process.platform,

@@ -1,0 +1,61 @@
+import type { CharmDefinition } from './charm-catalog';
+
+export const COLLECTION_ORDER: readonly string[] = [
+	'Terminal', 'Live 3D', 'Stress Busters', 'Music', 'Music Icons', 'Sports Icons',
+	'California', 'US Tech Hubs & Skylines', 'Pets & Wildlife',
+	'Tech & Lab', 'National Parks', 'Europe', 'Americas', 'Asia', 'Plants & Trees', 'Space & Stars', 'Zodiac', 'Gemstones',
+	'Culture & Traditions', 'Sports', 'Celebrations', 'Flowers', 'Grown by you',
+];
+const GROUP_COLLECTIONS: Readonly<Record<string, string>> = {
+	'Live Companions': 'Live 3D',
+	Animals: 'Pets & Wildlife',
+	AI: 'Tech & Lab',
+	Coding: 'Tech & Lab',
+	'Compute & Silicon': 'Tech & Lab',
+	'Test Bench': 'Tech & Lab',
+	Cities: 'Culture & Traditions',
+	'National Parks': 'National Parks',
+	'World Wonders': 'Nature & Places',
+	'Trees & Forests': 'Plants & Trees',
+	'Solar System': 'Space & Stars',
+	'Stars & Galaxies': 'Space & Stars',
+	'Local Culture': 'Culture & Traditions',
+	'Sacred Traditions': 'Culture & Traditions',
+	'Luck & Little Joys': 'Culture & Traditions',
+	Seasonal: 'Celebrations',
+	'Garden Flowers': 'Flowers',
+};
+const CALIFORNIA_ARTWORK = new Set([
+	'extra-foggy-bay', 'extra-bridge-lights', 'extra-city-tram', 'extra-campus-path',
+	'extra-coffee-street', 'extra-mountain-sun', 'extra-granite-dome', 'extra-redwood-grove',
+	'new-palace-fine-arts', 'new-coastal-cypress', 'new-salesforce-tower', 'new-cupertino-loop',
+]);
+type CollectionCharm = Pick<CharmDefinition, 'id' | 'group' | 'artworkKey'>;
+const PLACE_COLLECTIONS: Readonly<Record<string, string>> = {
+	'extra-granite-dome': 'National Parks', 'extra-redwood-grove': 'National Parks',
+	'new-eiffel-tower': 'Europe', 'new-colosseum': 'Europe', 'new-big-ben': 'Europe',
+	'new-santorini': 'Europe', 'new-neuschwanstein': 'Europe',
+	'new-machu-picchu': 'Americas', 'new-statue-of-liberty': 'Americas', 'new-niagara-falls': 'Americas',
+	'new-mount-fuji': 'Asia', 'new-taj-mahal': 'Asia', 'new-great-wall': 'Asia',
+	'new-angkor-wat': 'Asia', 'new-petra': 'Asia', 'new-kyoto-torii': 'Asia',
+};
+
+/** Keep saved IDs and imported metadata intact while presenting coherent themed packs. */
+export function charmCollection(charm: CollectionCharm): string {
+	if (charm.id === 'terminal') { return 'Terminal'; }
+	if (charm.id.startsWith('live:')) { return 'Live 3D'; }
+	const key = charm.artworkKey ?? charm.id.replace(/^trial:/, '');
+	if (Object.hasOwn(PLACE_COLLECTIONS, key)) { return PLACE_COLLECTIONS[key]; }
+	if (CALIFORNIA_ARTWORK.has(key)) { return 'California'; }
+	return Object.hasOwn(GROUP_COLLECTIONS, charm.group) ? GROUP_COLLECTIONS[charm.group] : charm.group;
+}
+
+export function orderByCollection<T extends CollectionCharm>(charms: readonly T[]): T[] {
+	const order = new Map(COLLECTION_ORDER.map((name, index) => [name, index]));
+	for (const charm of charms) {
+		const name = charmCollection(charm);
+		if (!order.has(name)) { order.set(name, order.size); }
+	}
+	// Stable sorting retains the curated order within a pack and the user's import order.
+	return [...charms].sort((a, b) => order.get(charmCollection(a))! - order.get(charmCollection(b))!);
+}

@@ -1,8 +1,9 @@
 {
   "name": "charmlet-desktop",
-  "version": "0.6.0",
+  "version": "0.13.0",
+  "license": "SEE LICENSE IN dist/LICENSE",
   "private": true,
-  "description": "Charmlet desktop developer beta",
+  "description": "CharmBits desktop companion",
   "main": "dist/main.cjs",
   "scripts": {
     "check-types": "node ../extension/node_modules/typescript/bin/tsc -p . --noEmit",
@@ -12,7 +13,7 @@
     "package": "npm run build && node package.mjs"
   },
   "devDependencies": {
-    "electron": "44.7.0",
+    "electron": "44.11.3",
     "@electron/packager": "20.3.0"
   }
 }

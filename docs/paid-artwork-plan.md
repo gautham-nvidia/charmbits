@@ -93,3 +93,18 @@ The owner has authorized Phase 4 companion work before public extension-store la
 - No live merchant account, product, payment, checkout, approved price, public deployment or Photo Studio exists yet.
 
 These changes authorize planning and Phase 4 implementation on its branch; they do not approve legal terms, merchant accounts, licensed art, charges or public launch.
+
+## 2026-11-16 - CharmBits public selection and terms
+
+The owner subsequently approved the recommended proprietary software and separate artwork
+terms for CharmBits. All VS Code software features remain free; desktop retains its
+30-day trial/Pro model and optional charms. The current service and pricing supersede
+the early proposals above; see [service/README.md](../service/README.md).
+
+The public release has 210 designs, 31 starter picks and 15 optional free claims.
+The 34 Music Icons and 17 Sports Icons studies remain review material, excluded from
+the new public packages and gallery. Saved IDs/cords and personal imports are retained.
+The new terms do not establish third-party likeness or trademark rights.
+
+The website is https://charmbits.pages.dev/. Lemon Squeezy and Brevo account setup,
+authenticated sending, activation keys and purchase/refund rehearsal remain before sales.

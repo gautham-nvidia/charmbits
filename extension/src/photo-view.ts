@@ -225,7 +225,7 @@ export function createPhotoView(options: PhotoViewOptions): PhotoView {
 		core = helpers;
 		for (const [value, choice] of Object.entries(core.FRAMES)) { frame.add(new Option(choice.name, value)); }
 		frame.value = 'copper'; draw(); controls();
-	}).catch(() => status('The photo editor could not start. Reopen Charmlet and try again.'));
+	}).catch(() => status('The photo editor could not start. Reopen CharmBits and try again.'));
 	window.addEventListener('pagehide', releaseDraft);
 	controls();
 	return {

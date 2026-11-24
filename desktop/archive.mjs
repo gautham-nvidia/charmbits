@@ -9,13 +9,13 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
 if (!['win32', 'darwin'].includes(process.platform)) throw new Error('Desktop archives support Windows and macOS.');
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-const bundleName = `Charmlet-${process.platform}-${process.arch}`;
+const bundleName = `CharmBits-${process.platform}-${process.arch}`;
 const releaseRoot = join(root, 'release', manifest.version);
 if (!(await stat(join(releaseRoot, bundleName))).isDirectory()) throw new Error('Package the desktop app before archiving it.');
 const distribution = join(root, 'distribution');
 await mkdir(distribution, { recursive: true });
 const suffix = process.platform === 'win32' ? '.zip' : '.tar.gz';
-const archive = join(distribution, `Charmlet-desktop-${manifest.version}-${process.platform}-${process.arch}${suffix}`);
+const archive = join(distribution, `CharmBits-desktop-${manifest.version}-${process.platform}-${process.arch}${suffix}`);
 execFileSync('tar', [
   ...(process.platform === 'win32' ? ['-a', '-cf'] : ['-czf']),
   archive, '-C', releaseRoot, bundleName,

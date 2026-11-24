@@ -1,7 +1,25 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, rename, rm, type FileHandle } from 'node:fs/promises';
 import { join } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { CharmState } from './charm-state';
+
+async function replaceStateFile(source: string, destination: string): Promise<void> {
+	for (let attempt = 0; ; attempt++) {
+		try {
+			await rename(source, destination);
+			return;
+		} catch (error) {
+			const code = (error as NodeJS.ErrnoException).code;
+			if (process.platform !== 'win32' || !['EPERM', 'EACCES', 'EBUSY'].includes(code ?? '') || attempt >= 5) {
+				throw error;
+			}
+			// Windows can briefly deny replacing an open file. Keep the old file
+			// intact and bound the wait so persistent permission errors still surface.
+			await delay(25 * 2 ** attempt);
+		}
+	}
+}
 
 export interface LoadedState {
 	value: unknown;
@@ -12,8 +30,8 @@ export interface LoadedState {
 export class StateStore<Value = CharmState> {
 	readonly path: string;
 
-	constructor(private readonly directory: string, private readonly filename: 'preferences.json' | 'companion.json' = 'preferences.json') {
-		if (filename !== 'preferences.json' && filename !== 'companion.json') { throw new Error('Unsupported state filename.'); }
+	constructor(private readonly directory: string, private readonly filename: 'preferences.json' | 'companion.json' | 'weather.json' = 'preferences.json') {
+		if (filename !== 'preferences.json' && filename !== 'companion.json' && filename !== 'weather.json') { throw new Error('Unsupported state filename.'); }
 		this.path = join(directory, filename);
 	}
 
@@ -42,7 +60,7 @@ export class StateStore<Value = CharmState> {
 			await handle.sync();
 			await handle.close();
 			handle = undefined;
-			await rename(temporary, this.path);
+			await replaceStateFile(temporary, this.path);
 		} finally {
 			await handle?.close().catch(() => undefined);
 			await rm(temporary, { force: true }).catch(() => undefined);

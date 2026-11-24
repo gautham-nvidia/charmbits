@@ -12,6 +12,10 @@ import { learningCard } from './learning-cards';
 import { StateStore, type LoadedState } from './state-store';
 import { StateWriter } from './state-writer';
 import { isPhotoPack, photoPackInput } from './photo-packs';
+import { AccessController } from './access-controller';
+import { WeatherController } from './weather-controller';
+import type { WeatherSettings, WeatherSnapshot } from './weather-core';
+import { PERSONAL_EDITION } from './build-edition';
 
 let deactivateExtension: (() => Promise<void>) | undefined;
 
@@ -26,31 +30,44 @@ export async function activate(context: vscode.ExtensionContext) {
 		const loaded = await loadPacks(packDirectory);
 		packs = loaded.packs;
 		if (loaded.invalid.length) {
-			console.warn(`Charmlet ignored ${loaded.invalid.length} invalid stored pack file(s).`);
+			console.warn(`CharmBits ignored ${loaded.invalid.length} invalid stored pack file(s).`);
 		}
 	} catch (error) {
-		console.warn(`Charmlet could not load stored packs: ${error instanceof Error ? error.message : 'unknown error'}`);
+		console.warn(`CharmBits could not load stored packs: ${error instanceof Error ? error.message : 'unknown error'}`);
 	}
 
 	const stateStore = new StateStore(context.globalStorageUri.fsPath);
 	const loadedState = await stateStore.load(context.globalState.get('charmlet.state'));
 	if (loadedState.error) {
-		void vscode.window.showWarningMessage('Charmlet could not read its saved preferences. Review your charm settings.');
+		void vscode.window.showWarningMessage('CharmBits could not read its saved preferences. Review your charm settings.');
 	}
-	const baseCatalogue = buildCatalogue(packCharms(packs));
+	const access = new AccessController({
+		application: 'vscode',
+		directory: context.globalStorageUri.fsPath,
+		secrets: {
+			get: async () => context.secrets.get('charmlet.access.tokens'),
+			set: async value => context.secrets.store('charmlet.access.tokens', value),
+		},
+	});
+	await access.initialize(loadedState.value);
+	if (access.notice) { void vscode.window.showWarningMessage(access.notice); }
+	const baseCatalogue = access.catalogue(buildCatalogue(packCharms(packs)));
 	const legacyMessageIndex = restoreState(loadedState.value, baseCatalogue).messageIndex;
 	const companionStore = new StateStore<CompanionState>(context.globalStorageUri.fsPath, 'companion.json');
 	const loadedCompanion = await companionStore.load(undefined);
 	if (loadedCompanion.error) {
-		void vscode.window.showWarningMessage('Charmlet could not read companion settings. Review your focus, learning, garden and reminder controls.');
+		void vscode.window.showWarningMessage('CharmBits could not read companion settings. Review your focus, learning, garden and reminder controls.');
 	}
 	const companion = new CompanionController(loadedCompanion.value, companionStore, legacyMessageIndex);
 	await companion.initialize();
+	const weatherStore = new StateStore<WeatherSettings>(context.globalStorageUri.fsPath, 'weather.json');
+	const loadedWeather = await weatherStore.load(undefined);
+	const weather = new WeatherController({ saved: loadedWeather.value, storage: weatherStore, unreadable: !!loadedWeather.error });
 	const catalogue = [...baseCatalogue, ...gardenCharms(companion.snapshot().state.garden)];
 	const initialCharm = restoreState(loadedState.value, catalogue);
 
 	const status = vscode.window.createStatusBarItem('charmlet', vscode.StatusBarAlignment.Right, -100);
-	status.name = 'Charmlet';
+	status.name = 'CharmBits';
 	let latestCharm = initialCharm;
 	let latestCompanion = companion.snapshot();
 	const updateStatus = () => {
@@ -71,11 +88,11 @@ export async function activate(context: vscode.ExtensionContext) {
 					: `${phase} complete · Open companion tools`;
 		} else {
 			status.command = 'charmlet.toggle';
-			status.text = latestCharm.hidden ? '$(circle-outline) Charmlet' : '$(sparkle) Charmlet';
-			status.tooltip = latestCharm.hidden ? 'Charmlet: Show charm' : 'Charmlet: Hide or restore charm';
+			status.text = latestCharm.hidden ? '$(circle-outline) CharmBits' : '$(sparkle) CharmBits';
+			status.tooltip = latestCharm.hidden ? 'CharmBits: Show charm' : 'CharmBits: Hide or restore charm';
 		}
 	};
-	const provider: CharmletView = new CharmletView(context, state => {
+	const provider: CharmBitsView = new CharmBitsView(context, state => {
 		latestCharm = state;
 		updateStatus();
 	}, catalogue, stateStore, loadedState, companion, async (action, value) => {
@@ -90,12 +107,19 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (selected) { await removePack(packDirectory, value); packs = packs.filter(pack => pack.id !== value); }
 			await refreshCatalogue();
 		}
-	});
+	}, access, weather);
 	const refreshCatalogue = async (selectedId?: string) => {
-		await provider.setCatalogue(buildCatalogue([
+		await provider.setCatalogue(access.catalogue(buildCatalogue([
 			...packCharms(packs), ...gardenCharms(companion.snapshot().state.garden),
-		]), selectedId);
+		])), selectedId);
 	};
+	access.watch(async () => {
+		const next = access.catalogue(buildCatalogue([...packCharms(packs), ...gardenCharms(companion.snapshot().state.garden)]));
+		if (next.map(charm => charm.id).join('|') !== provider.catalogue.map(charm => charm.id).join('|')) {
+			await provider.setCatalogue(next);
+		}
+		provider.postAccess();
+	}, () => console.warn('CharmBits could not refresh access settings.'));
 	let gardenKey = gardenCharms(latestCompanion.state.garden).map(charm => charm.id).join('|');
 	let failedGardenKey: string | undefined;
 	let gardenRefresh: Promise<void> | undefined;
@@ -106,7 +130,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			.then(() => { gardenKey = nextGardenKey; failedGardenKey = undefined; })
 			.catch(() => {
 				failedGardenKey = nextGardenKey;
-				void vscode.window.showErrorMessage('Charmlet saved your flower but could not refresh the charm picker.');
+				void vscode.window.showErrorMessage('CharmBits saved your flower but could not refresh the charm picker.');
 			})
 			.finally(() => { gardenRefresh = undefined; });
 	};
@@ -116,9 +140,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		provider.postCompanion(snapshot);
 		refreshGardenCatalogue();
 	});
+	const unsubscribeWeather = weather.subscribe(snapshot => provider.postWeather(snapshot));
 	let disposePromise: Promise<void> | undefined;
 	const disposeCompanion = () => disposePromise ??= (async () => {
+		access.dispose();
 		unsubscribeCompanion();
+		unsubscribeWeather();
+		await weather.dispose();
 		await companion.dispose();
 		await provider.flush();
 	})();
@@ -129,15 +157,20 @@ export async function activate(context: vscode.ExtensionContext) {
 				canSelectFiles: true,
 				canSelectFolders: false,
 				canSelectMany: false,
-				filters: { 'Charmlet Pack': ['json'] },
+				filters: { 'CharmBits Pack': ['json'] },
 				openLabel: 'Import Charm Pack',
 			});
 			if (!selected?.[0]) { return; }
 			const info = await vscode.workspace.fs.stat(selected[0]);
 			if ((info.type & vscode.FileType.File) === 0 || info.size > MAX_PACK_BYTES) {
-				throw new Error('Choose a bounded Charmlet pack JSON file (maximum 2 MiB).');
+				throw new Error('Choose a bounded CharmBits pack JSON file (maximum 2 MiB).');
 			}
 			const input = await vscode.workspace.fs.readFile(selected[0]);
+			if (await access.importDocument(input)) {
+				await refreshCatalogue();
+				void vscode.window.showInformationMessage(`${access.snapshot.label}. ${access.snapshot.detail}`);
+				return;
+			}
 			const installed = await installPack(packDirectory, input);
 			if (!installed.added) {
 				void vscode.window.showInformationMessage(`${installed.pack.name} is already installed.`);
@@ -148,12 +181,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			await provider.show();
 			void vscode.window.showInformationMessage(`Imported ${installed.pack.name}.`);
 		} catch (error) {
-			void vscode.window.showErrorMessage(`Charmlet could not import the pack: ${error instanceof Error ? error.message : 'unknown error'}`);
+			void vscode.window.showErrorMessage(`CharmBits could not import the pack: ${error instanceof Error ? error.message : 'unknown error'}`);
 		}
 	};
 	const removeInstalledPack = async () => {
 		if (!packs.length) {
-			void vscode.window.showInformationMessage('No imported Charmlet packs are installed.');
+			void vscode.window.showInformationMessage('No imported CharmBits packs are installed.');
 			return;
 		}
 		const selected = await vscode.window.showQuickPick(packs.map(pack => ({
@@ -168,7 +201,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			await refreshCatalogue();
 			void vscode.window.showInformationMessage(`Removed ${selected.pack.name}.`);
 		} catch (error) {
-			void vscode.window.showErrorMessage(`Charmlet could not remove the pack: ${error instanceof Error ? error.message : 'unknown error'}`);
+			void vscode.window.showErrorMessage(`CharmBits could not remove the pack: ${error instanceof Error ? error.message : 'unknown error'}`);
 		}
 	};
 
@@ -197,7 +230,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	};
 }
 
-class CharmletView implements vscode.WebviewViewProvider {
+class CharmBitsView implements vscode.WebviewViewProvider {
 	state: CharmState;
 	catalogue: readonly CharmDefinition[];
 	private view?: vscode.WebviewView;
@@ -206,17 +239,18 @@ class CharmletView implements vscode.WebviewViewProvider {
 	private viewGeneration = 0;
 	private traceOutput?: vscode.LogOutputChannel;
 	private viewReady = false;
+	private pageVisible = true;
 	private pendingCompanionTab: 'focus' | 'learn' | 'garden' | undefined;
 
 	private trace(label: string, details: Record<string, unknown> = {}) {
 		if (this.context.extensionMode !== vscode.ExtensionMode.Development || process.env.CHARMLET_TRACE_SAVES !== '1') { return; }
 		try {
 			if (!this.traceOutput) {
-				this.traceOutput = vscode.window.createOutputChannel('Charmlet State Trace', { log: true });
+				this.traceOutput = vscode.window.createOutputChannel('CharmBits State Trace', { log: true });
 				this.context.subscriptions.push(this.traceOutput);
 			}
 			const legacyStored = this.context.globalState.get<Partial<CharmState>>('charmlet.state');
-			this.traceOutput.info(`[Charmlet state] ${JSON.stringify({
+			this.traceOutput.info(`[CharmBits state] ${JSON.stringify({
 				time: Date.now(), label, current: this.state?.charmId, legacyStored: legacyStored?.charmId,
 				view: this.viewGeneration, ...details,
 			})}`);
@@ -233,6 +267,8 @@ class CharmletView implements vscode.WebviewViewProvider {
 		loadedState: LoadedState,
 		private readonly companion: CompanionController,
 		private readonly photoAction: (action: 'save' | 'remove', value: unknown) => Promise<void>,
+		private readonly access: AccessController,
+		private readonly weather: WeatherController,
 	) {
 		this.stateWriter = new StateWriter(
 			async value => {
@@ -260,7 +296,7 @@ class CharmletView implements vscode.WebviewViewProvider {
 	}
 
 	async flush() {
-		await Promise.all([this.stateWriter.flush(), this.companion.flush()]);
+		await Promise.all([this.stateWriter.flush(), this.companion.flush(), this.weather.flush()]);
 		this.trace('drained');
 	}
 
@@ -282,7 +318,7 @@ class CharmletView implements vscode.WebviewViewProvider {
 		view.webview.html = template
 			.replaceAll('__NONCE__', randomBytes(16).toString('hex'))
 			.replaceAll('__CSP__', view.webview.cspSource)
-			.replaceAll('__APP_VERSION__', String(this.context.extension.packageJSON.version).replace(/[^a-zA-Z0-9.+-]/g, ''))
+			.replaceAll('__APP_VERSION__', String(this.context.extension.packageJSON.version).replace(/[^a-zA-Z0-9.+-]/g, '') + (PERSONAL_EDITION ? '+personal' : ''))
 			.replaceAll('__SCRIPT__', view.webview.asWebviewUri(resource('dist/webview.js')).toString())
 			.replaceAll('__STYLE__', view.webview.asWebviewUri(resource('media/view.css')).toString())
 			.replaceAll('__CHARM__', view.webview.asWebviewUri(resource('media/keycap.svg')).toString());
@@ -290,18 +326,22 @@ class CharmletView implements vscode.WebviewViewProvider {
 			if (!message || typeof message !== 'object' || !('type' in message)) {
 				return;
 			}
+			const allowed = this.access.catalogue(this.catalogue);
+			if (allowed.length !== this.catalogue.length) { await this.setCatalogue(allowed); }
 			if (message.type === 'ready') {
+				this.pageVisible = !('pageVisible' in message) || message.pageVisible === true;
 				await this.flush();
 				this.trace('ready-state', { generation });
 				const includedTab = this.pendingCompanionTab;
 				await view.webview.postMessage({
 					type: 'state', state: this.state, catalogue: this.catalogue, drop: this.dropOnReady, visible: view.visible,
-					companion: this.companion.snapshot(),
+					companion: this.companion.snapshot(), access: this.access.snapshot, weather: this.weather.snapshot(),
 					...(includedTab ? { companionTab: includedTab } : {}),
 				});
 				if (this.view !== view) { return; }
 				if (this.pendingCompanionTab === includedTab) { this.pendingCompanionTab = undefined; }
 				this.viewReady = true;
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 				this.dropOnReady = false;
 				const nextTab = this.pendingCompanionTab;
 				if (nextTab) {
@@ -312,6 +352,7 @@ class CharmletView implements vscode.WebviewViewProvider {
 				const revision = 'revision' in message && Number.isSafeInteger(message.revision) && Number(message.revision) >= 0
 					? Number(message.revision) : undefined;
 				this.state = restoreState(message.state, this.catalogue);
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 				this.changed(this.state);
 				this.trace('save-received', { generation, revision, requested: this.state.charmId });
 				try {
@@ -321,7 +362,7 @@ class CharmletView implements vscode.WebviewViewProvider {
 				} catch {
 					this.trace('save-error', { generation, revision });
 					if (revision !== undefined) { await view.webview.postMessage({ type: 'save-error', revision }); }
-					void vscode.window.showErrorMessage('Charmlet could not save its settings.');
+					void vscode.window.showErrorMessage('CharmBits could not save its settings.');
 				}
 			} else if ((message.type === 'photo-save' || message.type === 'photo-remove') && 'requestId' in message
 				&& Number.isSafeInteger(message.requestId) && Number(message.requestId) >= 0) {
@@ -333,7 +374,7 @@ class CharmletView implements vscode.WebviewViewProvider {
 					await view.webview.postMessage({ type: 'photo-result', requestId });
 				} catch {
 					await view.webview.postMessage({ type: 'photo-result', requestId,
-						error: 'Charmlet could not finish saving or removing the keepsake. Try again. Your original photo is unchanged.' });
+						error: 'CharmBits could not finish saving or removing the keepsake. Try again. Your original photo is unchanged.' });
 				}
 			} else if (message.type === 'companion-action' && 'requestId' in message && 'action' in message
 				&& Number.isSafeInteger(message.requestId) && Number(message.requestId) >= 0) {
@@ -360,17 +401,31 @@ class CharmletView implements vscode.WebviewViewProvider {
 						await view.webview.postMessage({ type: 'companion-result', requestId });
 					}
 				} catch {
-					await view.webview.postMessage({ type: 'companion-result', requestId, error: 'Charmlet could not hang that flower. Try again.' });
+					await view.webview.postMessage({ type: 'companion-result', requestId, error: 'CharmBits could not hang that flower. Try again.' });
 				}
+			} else if (message.type === 'weather-visibility' && 'visible' in message && typeof message.visible === 'boolean') {
+				this.pageVisible = message.visible;
+				this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
+			} else if (message.type === 'weather-settings' && 'settings' in message && 'requestId' in message
+				&& Number.isSafeInteger(message.requestId) && Number(message.requestId) >= 0) {
+				const saved = await this.weather.configure(message.settings);
+				await view.webview.postMessage({ type: 'weather-result', requestId: message.requestId,
+					...(!saved ? { error: 'Weather settings could not be saved. Try again.' } : {}) });
+			} else if (message.type === 'weather-source') {
+				await vscode.env.openExternal(vscode.Uri.parse('https://www.weather.gov/'));
 			} else if (message.type === 'learning-source' && 'cardId' in message) {
 				const card = typeof message.cardId === 'string' ? learningCard(message.cardId) : undefined;
 				if (card?.source) { await vscode.env.openExternal(vscode.Uri.parse(card.source.url)); }
+			} else if (message.type === 'browse-packs') {
+				const url = this.access.website();
+				if (url) { await vscode.env.openExternal(vscode.Uri.parse(url)); }
 			} else if (message.type === 'command' && 'command' in message
 				&& (message.command === 'charmlet.importPack' || message.command === 'charmlet.removePack')) {
 				await vscode.commands.executeCommand(message.command);
 			}
 		});
 		const visibility = view.onDidChangeVisibility(() => {
+			this.weather.setVisible(view.visible && this.pageVisible && !this.state.hidden);
 			void view.webview.postMessage({ type: 'visibility', visible: view.visible });
 			if (view.visible) { this.postCompanion(this.companion.snapshot()); }
 		});
@@ -379,10 +434,17 @@ class CharmletView implements vscode.WebviewViewProvider {
 			messages.dispose();
 			visibility.dispose();
 			if (this.view === view) {
+				this.weather.setVisible(false);
 				this.viewReady = false;
 				this.view = undefined;
 			}
 		});
+	}
+
+	postWeather(snapshot: WeatherSnapshot) {
+		if (this.view?.visible && this.viewReady) {
+			void this.view.webview.postMessage({ type: 'weather', snapshot });
+		}
 	}
 
 	postCompanion(snapshot: CompanionSnapshot) {
@@ -405,13 +467,17 @@ class CharmletView implements vscode.WebviewViewProvider {
 	}
 
 	async setCatalogue(catalogue: readonly CharmDefinition[], selectedId?: string) {
-		this.catalogue = catalogue;
+		this.catalogue = this.access.catalogue(catalogue);
 		this.state = restoreState({ ...this.state, charmId: selectedId ?? this.state.charmId,
-			charmPinned: selectedId !== undefined ? true : this.state.charmPinned }, catalogue);
+			charmPinned: selectedId !== undefined ? true : this.state.charmPinned }, this.catalogue);
 		this.trace('catalogue-state');
 		this.changed(this.state);
 		await this.persist({ ...this.state });
-		await this.view?.webview.postMessage({ type: 'catalogue', catalogue: this.catalogue, state: this.state });
+		await this.view?.webview.postMessage({ type: 'catalogue', catalogue: this.catalogue, state: this.state, access: this.access.snapshot });
+	}
+
+	postAccess() {
+		void this.view?.webview.postMessage({ type: 'access', access: this.access.snapshot });
 	}
 
 	async update(state: CharmState, drop = false) {
