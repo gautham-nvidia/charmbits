@@ -141,7 +141,7 @@
     "@playwright/test": "^1.63.0",
     "@types/matter-js": "^0.20.2",
     "@types/mocha": "^10.0.10",
-    "@types/node": "24.x",
+    "@types/node": "26.x",
     "@types/pngjs": "6.0.5",
     "@types/vscode": "1.90.0",
     "@vscode/test-cli": "^0.0.15",
