@@ -2044,8 +2044,13 @@ test(`${installedPersonalization ? 'installed VSIX' : 'personalization'} keeps l
 
 		frame = await reloadCharm(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', photo);
+		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-ready', 'true');
 		await expect(frame.locator('.win-sparkles')).toHaveCount(0);
-		await frame.getByRole('button', { name: 'Focus', exact: true }).click();
+		// As in the puzzle reload check, establish native iframe focus before
+		// keyboard input; the initial opening above still exercises the mouse.
+		await focusWebviewControl(editor, frame, frame.getByRole('button', { name: 'Focus', exact: true }));
+		await editor.window.keyboard.press('Enter');
+		await expect(frame.locator('#companion-tools')).toBeVisible();
 		await frame.locator('#small-wins summary').click();
 		await expectWins(1);
 		await expect(frame.locator('#win-list')).toContainText('Kept moving forward');
@@ -2061,6 +2066,9 @@ test(`${installedPersonalization ? 'installed VSIX' : 'personalization'} keeps l
 		expect(existsSync(packPath)).toBe(false);
 		await frame.locator('#photo-close').click();
 		await frame.locator('#app').screenshot({ path: testInfo.outputPath('terminal-refreshed.png') });
+	} catch (error) {
+		await captureEditorFailure(editor.window, testInfo, error);
+		throw error;
 	} finally { await closeOwnedEditor(editor, testInfo); }
 });
 

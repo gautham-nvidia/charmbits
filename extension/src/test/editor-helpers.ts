@@ -120,6 +120,8 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 							stage: { ...document.getElementById('stage')?.dataset },
 							selected: (document.getElementById('charm-select') as HTMLSelectElement | null)?.value,
 							appearance: details('settings'), menu: details('settings-menu'),
+							companion: details('companion-tools'), focusPanel: details('focus-panel'),
+							smallWins: details('small-wins'),
 							weather: details('weather-settings'),
 							careCue: details('care-cue'), careDone: details('care-done'),
 							pointerEvents: JSON.parse(document.documentElement.dataset.pointerTrace ?? '[]'),
