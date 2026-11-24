@@ -64,7 +64,7 @@ const run = (script, args, cwd, env = process.env) => execFileSync(process.execP
 run(join(extension, 'esbuild.js'), ['--production', '--personal', '--outdir', join(stagedExtension, 'dist')], extension);
 run(join(desktop, 'build.mjs'), ['--personal', '--outdir', join(stagedDesktop, 'dist')], repo);
 const vsix = join(output, `CharmBits-Personal-${extensionManifest.version}.vsix`);
-run(join(extension, 'node_modules/@vscode/vsce/vsce'), ['package', '--no-dependencies', '--out', vsix], stagedExtension);
+run(join(extension, 'node_modules/@vscode/vsce/vsce'), ['package', '--no-dependencies', '--allow-missing-repository', '--out', vsix], stagedExtension);
 const desktopRequire = createRequire(join(desktop, 'package.json'));
 const { packager } = await import(pathToFileURL(desktopRequire.resolve('@electron/packager')).href);
 const [application] = await packager({

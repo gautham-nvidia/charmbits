@@ -16,6 +16,7 @@ The site is static and uses the extension's locked build dependencies. It does n
 | `charms.html`, `app.js` | Search, collection filters, URL state, preview dialog and optional legacy downloads |
 | `site.css`, `site.js` | Shared styling, public product metadata and Reduced Motion-aware reveals |
 | `assets/fonts/` | Self-hosted Manrope and Bricolage Grotesque, with their font licences |
+| `../docs/store-assets/*-0161.png` | Four reviewed Marketplace image boards; built into `assets/store/` with versioned URLs |
 | `demo.ts` | Shared app physics, live renderer and puzzle preview; bounded page-specific size/camera |
 | `trial-collections.mjs` | Eighteen current themed collections, ordered with the shared app helper |
 | `launch.json`, `launch.mjs` | Validated public desktop/shop links; null means hidden |
@@ -95,6 +96,11 @@ Changed payloads get new immutable pack identities; retain previously shared dow
 `launch.json` accepts only public desktop/archive URLs and an optional shop provider/URL. Desktop links must be this repository's GitHub Release archives; Windows is ZIP and macOS is tar.gz. Paid deliverables and keys do not belong in public metadata or assets.
 
 Shop and desktop links start hidden. The local Windows archive does not establish a public download URL. Marketplace/Open VSX links are independently validated by `distribution.json`. Future paid digital collections use hosted checkout/private delivery; merchandise can join that store later.
+
+The Marketplace route is enabled for the verified public 0.16.0 listing:
+`https://marketplace.visualstudio.com/items?itemName=gautham-nvidia.charmlet`.
+The free editor install button opens that listing directly, without the email
+portal. Open VSX remains unconfigured.
 
 The old `/studio/` URL remains unavailable. The public static `/api/studio/config` exposes disabled status only, and the refreshed navigation does not promote Studio. Local photo charms inside the apps remain free. Legacy Studio tests use fake licence/order responses and isolated local sessions.
 

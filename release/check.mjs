@@ -30,8 +30,8 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
   assert.equal(manifest.displayName, 'CharmBits: Coding Charms');
   assert.equal(manifest.publisher, 'gautham-nvidia');
   assert.equal(manifest.pricing, 'Free', 'Core extension must remain free.');
-  assert.equal(manifest.bugs?.url, 'https://github.com/gautham-nvidia/charmbits/issues', 'Support route is missing.');
-  for (const key of ['name', 'displayName', 'publisher', 'version', 'pricing', 'license', 'description', 'homepage', 'bugs', 'keywords', 'categories', 'engines', 'icon', 'main', 'capabilities', 'contributes', 'dependencies']) {
+  assert.equal(manifest.bugs?.email, 'getcharmbits@gmail.com', 'Support contact is missing.');
+  for (const key of ['name', 'displayName', 'publisher', 'version', 'pricing', 'license', 'description', 'author', 'repository', 'homepage', 'bugs', 'keywords', 'categories', 'engines', 'icon', 'main', 'capabilities', 'contributes', 'dependencies']) {
     assert.deepEqual(packaged[key], manifest[key], `VSIX ${key} differs from source.`);
   }
   assert.deepEqual({ id: identity.Id, publisher: identity.Publisher, version: identity.Version },

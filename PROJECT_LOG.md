@@ -816,3 +816,43 @@ saved-file diagnostics on failure. No assertions were relaxed and no runtime
 code changed. Type checking, lint and three consecutive installed-package runs
 of this scenario pass locally on Windows VS Code 1.140. Fresh hosted results
 are still required before merge.
+
+### CharmBits 0.16.0 published to the VS Code Marketplace
+
+PR #30 merged as `da5666959291dfea79fcd587448faa0a1a7e814d` after all nine
+candidate jobs and both Pages deployments passed. All nine checks then passed
+again on that exact `main` commit. The separate artifact run and all three
+public listing screenshot URLs were verified before publication.
+
+Release run 45339901948 successfully used `vsce publish --oidc` on November 24,
+2026 at 06:33 UTC. The public registry reports version 0.16.0 and Free pricing.
+Its downloaded VSIX is byte-identical to the uploaded artifact; all 340 file
+contents match the separately reviewed candidate. The public package is
+20,292,684 bytes with SHA-256
+`e1512aa029e4b132ce0426e8dd2e45a14bf29ab92263cbe66c6eb4c02ce0f047`.
+
+The website distribution setting now points directly to the live Marketplace
+listing. Open VSX remains unconfigured. Cursor/Devin authenticated runtime and
+the other host limits remain documented separately from Marketplace publication.
+
+### Prepare the Cali Marketplace visual update
+
+Version 0.16.1 replaces the Marketplace icon with Cali and reduces the overview
+to Install, Features, and Terms and conditions. Four image boards combine the
+existing mascot illustration with actual installed-app captures of the
+collection, bracelet, focus timer, garden and a dog locket. The dog is an
+original generated demo portrait; no owner's photo or workspace is used.
+The finished images were checked for notifications, clipping and legibility.
+
+GreenSilver is the public creator label. Support uses the branded email, and
+the optional repository attribution is omitted from the extension metadata.
+The existing extension identity remains in place for update continuity. A new
+publisher and a tested migration still need the owner's account setup before
+that identifier can change. Desktop copy explicitly distinguishes the paid
+Windows/macOS beta from the free editor edition and marks Linux as planned.
+
+The public package passes type checking, lint, all eleven release tests and
+the package inspection. The full website suite passes with 241 public designs,
+both store and unpublished-fallback install flows, desktop/mobile layouts and
+zero console errors. Hosted candidate/main checks and live publication still
+need verification before this patch is reported as released.

@@ -1,6 +1,9 @@
-# CharmBits 0.16 Marketplace release candidate
+# CharmBits 0.16 Marketplace release
 
-This is the public editor candidate for owner review. All 241 released charms and all editor features are free. The listing body is [extension/README.md](../extension/README.md); use that same body for Microsoft Marketplace and Open VSX.
+**Published:** [CharmBits: Coding Charms 0.16.0](https://marketplace.visualstudio.com/items?itemName=gautham-nvidia.charmlet).
+All 241 released charms and all editor features are free. The listing body is
+[extension/README.md](../extension/README.md); the same body can be used for a
+future Open VSX release.
 
 ## Listing fields
 
@@ -52,7 +55,8 @@ These captures come from the actual 0.16 editor tests using disposable profiles:
 | [Bracelet](store-assets/bracelet.png) | Shiba Inu, front-facing rose and Cali attached to the same curved cord |
 | [Flower attachment](store-assets/flower.png) | The original front-facing bloom joined underneath |
 
-The README's hosted image URLs use `main`; merge these reviewed assets before publishing so the store displays the same captures.
+The README's hosted image URLs use `main`. All three listing images were fetched
+anonymously after the merge and matched the reviewed captures byte for byte.
 
 ## Distribution and remaining account steps
 
@@ -62,15 +66,19 @@ The owner created the publisher **CharmBits (`gautham-nvidia`)** under the perso
 Microsoft account **getcharmbits@gmail.com** on November 23, 2026. The publisher
 screen confirms Owner access. The **CharmBits releases** Trusted Publishing
 policy is configured for `gautham-nvidia/charmbits`, workflow `release.yml`, with
-no GitHub environment. Its first authenticated use and the public listing still
-need verification. The current release target is Microsoft Marketplace.
+no GitHub environment. Its first authenticated publication succeeded on
+November 24, 2026 at 06:33 UTC in
+[release run 45339901948](https://github.com/gautham-nvidia/charmbits/actions/runs/45339901948).
+The public listing reports version 0.16.0 and Free pricing. Its downloaded VSIX
+exactly matches the uploaded package; every file also matches the separately
+reviewed artifact from the same source commit.
 
 The public homepage uses the released collection only; its former athlete and
 musician previews are excluded along with the withheld app artwork. Cursor and
 Devin installation evidence remains separate from their unverified authenticated
 runtime behavior.
 
-The source and artwork terms are already chosen. To publish:
+For the next version, retain this release sequence:
 
 1. Review and merge the tested candidate, then confirm successful CI for that exact `main` commit.
 2. Run the release workflow with destination `artifact` and review the public VSIX and checksum.
@@ -80,4 +88,7 @@ The source and artwork terms are already chosen. To publish:
 Open VSX remains a separate future step: claim the matching namespace, accept
 its publisher agreement and configure its separate publishing secret.
 
-No store publication is implied by this draft or by a locally packaged VSIX. Payment and Brevo accounts are not required for the free editor release.
+The verified publication source is `da5666959291dfea79fcd587448faa0a1a7e814d`,
+with all nine checks passing before upload. The public VSIX SHA-256 is
+`e1512aa029e4b132ce0426e8dd2e45a14bf29ab92263cbe66c6eb4c02ce0f047`.
+Payment and Brevo accounts are not required for this free editor release.

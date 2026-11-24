@@ -42,10 +42,10 @@ Clear Cali's optional name under **Focus > Cali's encouragement**, then save pre
 
 Removing an app or its local preferences does not restart or erase the service's trial and purchase records. Use the contact on the published website's privacy page for requests about those records; do not post email links or activation files in a public issue.
 
-To remove all extension data, first back up any packs or progress you want to keep, close the editor, and remove only CharmBits' `gautham-nvidia.charmlet` directory from that editor profile's `User/globalStorage` folder. That compatibility identifier retains the previous name so upgrades can use the same saved data. Editor profiles and forks can use different locations. Uninstalling an extension may leave its saved storage behind.
+To remove all extension data, first back up any packs or progress you want to keep. Copy the installed extension's ID from its details page, close the editor, and remove only the folder matching that ID inside the profile's `User/globalStorage` directory. Editor profiles and forks can use different locations. Uninstalling an extension may leave its saved storage behind.
 
 The standalone desktop beta uses its own storage and is independent of the IDE extension. Removing extension data does not remove desktop progress.
 
 ## Questions
 
-[Open a CharmBits issue](https://github.com/gautham-nvidia/charmbits/issues) for privacy questions. Do not attach private photos, licence keys, focus notes, credentials or workspace contents to a public issue.
+[Contact CharmBits](mailto:getcharmbits@gmail.com) for privacy questions. Do not include private photos, licence keys, focus notes, credentials or workspace contents.
