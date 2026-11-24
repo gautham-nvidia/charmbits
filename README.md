@@ -28,7 +28,7 @@ Holiday defaults follow **21 US celebration dates** and rotate Christmas designs
 
 Earlier platform results remain in the [Phase 4 verification record](docs/phase-4-validation.md) and [Phase 5 release record](docs/phase-5-release.md). The current candidate must pass its own checks. Marketplace publisher ownership, Trusted Publishing, verified editor forks and native desktop/merchant setup remain release work. Source/artwork terms have been selected and the public website is hosted.
 
-[Gallery and compact-feedback tracking #13](https://github.com/gautham-nvidia/charmbits/issues/13), the
+[Gallery and compact-feedback tracking #13](../../issues/13), the
 [dated validation record](docs/phase-3-gallery-validation.md), and the frozen [desktop platform summary](docs/phase-3-platforms.json)
 show the checks and remaining review items.
 
@@ -130,7 +130,7 @@ VSIX...** for manual testing. Both review and release packaging require the soft
 The software terms, artwork terms and third-party notices ship in the package.
 
 [CI](.github/workflows/ci.yml) runs six jobs across Windows, Ubuntu 24.04 and macOS 15 with VS Code
-**1.90.0 and 1.140.0**. All six passed the 0.3.2 baseline's 34-unit/UI/package/gallery path in hosted run [37697185841](https://github.com/gautham-nvidia/charmlet/actions/runs/37697185841).
+**1.90.0 and 1.140.0**. All six passed the 0.3.2 baseline's 34-unit/UI/package/gallery path in hosted run [37697185841](../../actions/runs/37697185841).
 Linux uses Xvfb; screenshots, resource snapshots, the VSIX and static gallery are retained as workflow
 artifacts. This verifies the listed runners, not every OS/hardware/editor host. CI does not deploy or publish.
 
@@ -168,25 +168,25 @@ run `node website/check.mjs` to verify filters, images, downloads, overflow, key
 | Record | Purpose |
 |---|---|
 | [PROJECT_LOG.md](PROJECT_LOG.md) | Dated decisions, commits, verification evidence and milestone status |
-| [Roadmap issue #1](https://github.com/gautham-nvidia/charmlet/issues/1) | Project-wide milestones and release gates |
-| [Phase 0 issue #3](https://github.com/gautham-nvidia/charmlet/issues/3) | Prototype delivery and acceptance checks |
-| [Phase 1 issue #2](https://github.com/gautham-nvidia/charmlet/issues/2) | Free-core polish, accessibility and compatibility checks |
+| [Roadmap issue #1](../../issues/1) | Project-wide milestones and release gates |
+| [Phase 0 issue #3](../../issues/3) | Prototype delivery and acceptance checks |
+| [Phase 1 issue #2](../../issues/2) | Free-core polish, accessibility and compatibility checks |
 | [Phase 1 validation](docs/phase-1-validation.md) | Windows compatibility, interaction evidence and resource captures |
-| [Phase 2 issue #9](https://github.com/gautham-nvidia/charmlet/issues/9) | Free collection, saved selection and trial package |
+| [Phase 2 issue #9](../../issues/9) | Free collection, saved selection and trial package |
 | [Phase 2 validation](docs/phase-2-validation.md) | Collection screenshots and Windows checks |
-| [Phase 3 issue #11](https://github.com/gautham-nvidia/charmlet/issues/11) | Compatibility and release readiness |
+| [Phase 3 issue #11](../../issues/11) | Compatibility and release readiness |
 | [Phase 3 readiness](docs/phase-3-readiness.md) | Host evidence, automation limits and release gates |
-| [Phase 4 issue #17](https://github.com/gautham-nvidia/charmlet/issues/17) | Focus, learning, reminders, garden and original collections implementation |
+| [Phase 4 issue #17](../../issues/17) | Focus, learning, reminders, garden and original collections implementation |
 | [Phase 4 plan](docs/phase-4-plan.md) | Current product scope, architecture, slices and acceptance gates |
 | [Desktop beta guide](desktop/README.md) | Local build/test/package commands, security boundaries and manual Windows/macOS gates |
 | [Phase 4 collection brief](docs/phase-4-original-collections.md) | Implemented 60-design free website catalogue direction and garden palette |
-| [Phase 5 issue #18](https://github.com/gautham-nvidia/charmlet/issues/18) | Publisher/license decisions and extension-store launch gates |
+| [Phase 5 issue #18](../../issues/18) | Publisher/license decisions and extension-store launch gates |
 | [Phase 5 release preparation](docs/phase-5-release.md) | Versioned candidate, privacy, checksum checks, registry workflow and actual setup gaps |
 | [Store and launch copy](docs/store-listing.md) | Prepared listing text, screenshot scope and later product-launch checklist |
 | [Desktop platform summary](docs/phase-3-platforms.json) | Frozen six-job Windows/Linux/macOS identities and accepted motion/lifecycle values |
 | [Preference restoration proof](docs/phase-3-preferences.json) | Frozen canonical-file readback/ack/restart evidence from both macOS versions |
 | [Full-circle validation](docs/full-circle-validation.md) | Orbit screenshots and rendered-motion evidence |
-| [Gallery and compact feedback #13](https://github.com/gautham-nvidia/charmlet/issues/13) | Ten defaults, messages, packs and companion gallery |
+| [Gallery and compact feedback #13](../../issues/13) | Ten defaults, messages, packs and companion gallery |
 | [Gallery validation](docs/phase-3-gallery-validation.md) | Compact, message, import, orbit and website evidence |
 | [Website guide](website/README.md) | Build, preview and reusable browser check |
 | [Charm pack format](docs/charm-packs.md) | Validated data-only import format and limits |
@@ -215,13 +215,13 @@ git log --follow --date=short --format="%h %ad %s" -- PROJECT_LOG.md
 The owner has authorized the [Phase 4 companion work](docs/phase-4-plan.md) and parallel website/desktop
 development. Phase 5 is extension-store launch, Phase 6 the broader product launch, and Phase 7+ later
 integrations. Publisher ownership, actual launch-target editor checks and publication remain explicit
-gates in [Phase 5 #18](https://github.com/gautham-nvidia/charmlet/issues/18). Source/art terms and the public hostname are now configured.
+gates in [Phase 5 #18](../../issues/18). Source/art terms and the public hostname are now configured.
 Each phase keeps its own branch and merges before the next.
 
 ## Ownership and licenses
 
-Personal repository under `gautham-nvidia`, **not** the NVIDIA organization or an endorsed product.
-No NVIDIA-branded assets are included. The core and bundled starter items are intended to remain free.
+CharmBits is an independent project by GreenSilver. Every released editor charm
+and feature is free; the standalone Desktop Pro edition is separate.
 The proprietary [software licence](extension/LICENSE) allows free use of all VS Code features and the included public charm collection.
 First-party artwork has [separate terms](extension/ARTWORK-LICENSE.md). Public source visibility is not an open-source licence.
 [Third-party notices](extension/THIRD_PARTY_NOTICES.md) cover Matter.js and Lucide/Feather assets.

@@ -11,7 +11,7 @@ import targetTools from './build-target.cjs';
 
 function fixture() {
   const manifest = { name: 'charmlet', displayName: 'CharmBits: Coding Charms', publisher: 'gautham-nvidia', version: '0.5.0', pricing: 'Free',
-    bugs: { url: 'https://github.com/gautham-nvidia/charmbits/issues' } };
+    bugs: { email: 'getcharmbits@gmail.com' } };
   const files = new Map([
     ['extension/package.json', Buffer.from(JSON.stringify(manifest))],
     ['extension/readme.md', Buffer.from('CharmBits 0.5.0')],

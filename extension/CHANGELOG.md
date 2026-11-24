@@ -3,7 +3,13 @@
 User-visible changes, newest first. Dates use YYYY-MM-DD. Development versions are not
 Marketplace releases. See the repository PROJECT_LOG.md for commit and verification evidence.
 
-## 0.16.0 - Unreleased
+## 0.16.1 - 2026-11-24
+
+- Introduce Cali as the Marketplace picture mascot, with a concise visual overview of installation, features and terms.
+- Show the actual charm collection, bracelet, focus timer, garden and a dog photo locket.
+- Use independent creator branding and direct support contact; distinguish the free editor edition from paid Desktop Pro and label Linux as planned.
+
+## 0.16.0 - 2026-11-24
 
 - Update the official support, licensing and weather-service contact to getcharmbits@gmail.com.
 - Make every released editor charm and feature free without activation. Desktop retains its starter, 30-day Pro trial and purchases.

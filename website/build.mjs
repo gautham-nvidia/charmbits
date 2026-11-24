@@ -161,6 +161,12 @@ for (const file of await readdir(join(root, 'assets/app-review'), { withFileType
     await copyFile(join(root, 'assets/app-review', file.name), join(dist, 'assets/app-review', file.name));
   }
 }
+await mkdir(join(dist, 'assets/store'), { recursive: true });
+for (const filename of [
+  'cali-hero-0161.png', 'choose-and-play-0161.png', 'garden-focus-0161.png', 'dog-keepsake-0161.png',
+]) {
+  await copyFile(join(repo, 'docs/store-assets', filename), join(dist, 'assets/store', filename));
+}
 const gardenArt = JSON.parse(await readFile(join(root, 'garden-art.json'), 'utf8'));
 if (gardenArt.items.length !== 4) throw new Error('The garden needs all four growth stages.');
 for (const [stage, file] of Object.entries(GARDEN_STAGE_FILES)) {
@@ -311,4 +317,4 @@ if (redirect) {
   console.log('Old Pages project redirects to https://charmbits.pages.dev/.');
 }
 if (privateReview) console.log('PRIVATE OWNER PREVIEW: contains review packs and an installer. Do not deploy this output.');
-else console.log('Public build excludes installers and raw download packs. Delivery requires the verified-email service.');
+else console.log('Public build excludes onsite installers and raw packs. Store links and verified-email delivery are configured separately.');

@@ -315,13 +315,10 @@ try {
   await chooseTheme('dark');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await chooseTheme('light');
-  await page.locator('#email-download').click();
-  await expect(page.locator('#signup-preview')).toBeVisible();
-  await expect(page.locator('#download-signup button[type="submit"]')).toBeDisabled();
-  await expect(page.locator('#download-signup input[name="offers"]')).not.toBeChecked();
-  assert.equal(await page.locator('input[type="password"], input[name="username"]').count(), 0);
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#email-download')).toBeFocused();
+  if (data.distribution?.marketplace) {
+    await expect(page.locator('#email-download')).toContainText('Install free from Marketplace');
+    await expect(page.locator('[data-free-install-note]')).toContainText('No CharmBits email signup');
+  }
   await page.locator('[data-growth="sunflower"]').click();
   await expect(page.locator('[data-growth="sunflower"]')).toHaveAttribute('aria-pressed', 'true');
   await page.locator('#memory-locket').click();
@@ -669,6 +666,22 @@ try {
   await page.locator('#close-downloads').click();
   await expect(page.locator('#confirm-email')).toBeVisible();
   assert.equal(await page.evaluate(() => sessionStorage.getItem('charmlet-download-session-v1')), null);
+  // Keep the unpublished fallback covered after the real store URL is enabled.
+  await page.unroute('**/commerce-public.json');
+  await page.route('**/commerce-public.json', route => route.fulfill({
+    json: { ...publicCommerce, apiOrigin: null, salesEnabled: false },
+  }));
+  await page.route('**/catalogue.json', route => route.fulfill({
+    json: { ...data, distribution: { marketplace: null, openVsx: null } },
+  }));
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.locator('#email-download').click();
+  await expect(page.locator('#signup-preview')).toBeVisible();
+  await expect(page.locator('#download-signup button[type="submit"]')).toBeDisabled();
+  await expect(page.locator('#download-signup input[name="offers"]')).not.toBeChecked();
+  assert.equal(await page.locator('input[type="password"], input[name="username"]').count(), 0);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#email-download')).toBeFocused();
   // A published free extension goes directly to the store, without the email portal.
   await page.route('**/catalogue.json', route => route.fulfill({
     json: { ...data, distribution: { marketplace, openVsx: null } },
@@ -687,7 +700,8 @@ try {
     desktop: true, mobileWidths: [390, 320, 768], caliBidirectionalSwing: true, liveCompanions: 15, puzzleBoards: 3,
     publicDownloadsGated: true, rawPackUrlsExcluded: true, reducedMotion: true, braceletDownwardPullAndReturn: true,
     checkoutDisabledByDefault: true, connectedPortalFixture: true, offersVerifiedWithoutTrial: true,
-    popupDismissal: true, compactAutoTheme: true, marketplaceDirectInstall: true, consoleErrors: errors };
+    popupDismissal: true, compactAutoTheme: true, marketplaceDirectInstall: true,
+    marketplaceEnabled: Boolean(data.distribution?.marketplace), consoleErrors: errors };
   await writeFile(join(output, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);
   console.log(JSON.stringify(result));
 } finally { await browser.close(); }

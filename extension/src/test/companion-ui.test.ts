@@ -584,8 +584,20 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		await expect(frame.locator('.app-footer')).toContainText('Made in Silicon Valley');
 		await expect(frame.locator('#website-placeholder')).toHaveText('Gallery ↗');
 		await expect(frame.locator('#website-placeholder')).toBeEnabled();
-		await frame.getByRole('button', { name: 'Done', exact: true }).click();
+		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-ready', 'true');
+		await tracePointerInput(editor.window);
+		const done = frame.getByRole('button', { name: 'Done', exact: true });
+		// This is the first webview interaction in a fresh native window. Establish
+		// activation and iframe focus before the single pointer click.
+		await focusWebviewControl(editor, frame, done);
+		const beforeDone = Date.now();
+		await done.click();
 		await expect(frame.locator('#care-cue')).toBeHidden();
+		await expect(frame.locator('#stage')).toHaveAttribute('data-companion-persisted', 'true');
+		const savedReminder = JSON.parse(readFileSync(editor.companionPath, 'utf8')).care.water;
+		expect(savedReminder.pendingAt).toBeNull();
+		expect(savedReminder.dueAt).toBeGreaterThanOrEqual(beforeDone + 15 * 60000);
+		expect(savedReminder.dueAt).toBeLessThanOrEqual(Date.now() + 15 * 60000);
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-search')).toBeFocused();
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
@@ -652,6 +664,11 @@ test(`${process.env.CHARMLET_TEST_PACKAGED === '1' ? 'installed VSIX' : 'navigat
 		await frame.locator('#picker-close').click();
 		frame = await reloadCharm(editor.window);
 		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'pack:review-starter-redraws-1:starter-terminal');
+	} catch (error) {
+		try { cpSync(editor.companionPath, testInfo.outputPath('navigation-companion.json')); }
+		catch { /* Preserve the original failure if the profile is unavailable. */ }
+		await captureEditorFailure(editor.window, testInfo, error);
+		throw error;
 	} finally {
 		await closeOwnedEditor(editor, testInfo);
 	}
@@ -938,7 +955,10 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
 		if (installedPersonalization) {
-			await expect(editor.window.getByRole('button', { name: /^Restricted Mode/ })).toBeVisible();
+			// Verify the host's visible mode without relying on its accessibility
+			// role; allow the same startup deadline as the activity bar.
+			await expect(editor.window.locator('.part.statusbar').getByText('Restricted Mode', { exact: true }))
+				.toBeVisible({ timeout: 30000 });
 		}
 		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);

@@ -1,8 +1,8 @@
 {
   "name": "charmlet",
   "displayName": "CharmBits: Coding Charms",
-  "description": "Free coding companions, calm pet reactions, charm bracelets, focus sessions, a daily garden and local photo keepsakes.",
-  "version": "0.16.0",
+  "description": "Free VS Code companions with Cali, photo lockets, charm bracelets, focus sessions and a daily garden.",
+  "version": "0.16.1",
   "license": "SEE LICENSE IN LICENSE",
   "pricing": "Free",
   "icon": "media/marketplace-icon.png",
@@ -14,13 +14,14 @@
     "vscode": "^1.90.0"
   },
   "publisher": "gautham-nvidia",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gautham-nvidia/charmbits.git"
+  "author": {
+    "name": "GreenSilver",
+    "email": "getcharmbits@gmail.com",
+    "url": "https://charmbits.pages.dev/"
   },
   "homepage": "https://charmbits.pages.dev/",
   "bugs": {
-    "url": "https://github.com/gautham-nvidia/charmbits/issues"
+    "email": "getcharmbits@gmail.com"
   },
   "extensionKind": [
     "ui"

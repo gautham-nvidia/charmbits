@@ -7,11 +7,15 @@ The extension keeps **`gautham-nvidia.charmlet`** as its internal identity so ex
 settings, photos and progress stay connected. Its visible name and package filename
 are **CharmBits** and **`charmbits-0.16.0.vsix`**.
 
+**Version 0.16.0 is published on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=gautham-nvidia.charmlet).**
+Trusted Publishing succeeded on November 24, 2026 (UTC). The public listing
+reports Free, and its downloaded VSIX exactly matches the uploaded artifact.
+
 ## Three installation routes
 
 | Route | What it provides | Remaining account step |
 |---|---|---|
-| Microsoft Visual Studio Marketplace | The normal VS Code installation and update route | Publisher and Trusted Publishing policy created; first authenticated release and public listing verification pending |
+| Microsoft Visual Studio Marketplace | The normal VS Code installation and update route | Version 0.16.0 is live; Trusted Publishing and the public download are verified |
 | Open VSX | A separate registry used by compatible editors | Claim the matching namespace, complete the publisher agreement and add `OVSX_PAT` to repository Actions secrets |
 | VSIX | The same package installed manually through **Extensions → Install from VSIX…** | Retain a tested artifact and its checksum; do not describe a local package as a published store listing |
 
@@ -43,6 +47,13 @@ On November 23, 2026, the owner's Marketplace screens confirmed **CharmBits
 Inactive / Last used: Never, with a first-use deadline of **November 25, 2026,
 5:19 PM local time**. The first successful token exchange activates the policy;
 an artifact-only workflow run does not exchange a publishing token.
+
+The first publication subsequently succeeded through
+[release run 45339901948](https://github.com/gautham-nvidia/charmbits/actions/runs/45339901948)
+from `da5666959291dfea79fcd587448faa0a1a7e814d`. All nine checks passed on that
+exact `main` commit before upload. The public package contains 340 files and
+20,292,684 bytes, with SHA-256
+`e1512aa029e4b132ce0426e8dd2e45a14bf29ab92263cbe66c6eb4c02ce0f047`.
 
 Start with the workflow's **artifact** destination. Review the listing, screenshots,
 VSIX and SHA-256, then choose the intended store destination after the account setup
