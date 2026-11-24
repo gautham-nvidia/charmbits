@@ -8,6 +8,7 @@ Marketplace releases. See the repository PROJECT_LOG.md for commit and verificat
 - Introduce Cali as the Marketplace picture mascot, with a concise visual overview of installation, features and terms.
 - Show the actual charm collection, bracelet, focus timer, garden and a dog photo locket.
 - Use independent creator branding and direct support contact; distinguish the free editor edition from paid Desktop Pro and label Linux as planned.
+- Gently return rotated bracelet charms upright, fixing a case where they could stick at the top of the panel after a long pull.
 
 ## 0.16.0 - 2026-11-24
 
