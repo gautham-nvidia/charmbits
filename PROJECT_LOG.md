@@ -907,3 +907,13 @@ mouse opening and saved-photo/win assertions remain required.
 
 Type checking, lint and three consecutive installed-VSIX runs of that check pass
 on Windows with VS Code 1.140.0. Fresh hosted results remain required.
+
+## 2026-11-24 - Mac editor CI runner capacity
+
+The two Mac editor jobs could not acquire an Apple Silicon runner in three
+consecutive attempts; no test steps ran. GitHub explicitly reported hosted
+macOS arm64 capacity constraints. Use the supported `macos-15-intel` standard
+pool for both editor versions. The complete six-job editor matrix, security
+checks and release gate remain required. Desktop CI continues on Apple Silicon.
+
+Runner specifications: https://docs.github.com/en/actions/reference/runners/github-hosted-runners

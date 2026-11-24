@@ -76,14 +76,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-24.04, macos-15]
+        os: [windows-latest, ubuntu-24.04, macos-15-intel]
         vscode: ['1.90.0', '1.140.0']
         include:
           - os: windows-latest
             label: Windows
           - os: ubuntu-24.04
             label: Linux
-          - os: macos-15
+          - os: macos-15-intel
             label: macOS
     env:
       VSCODE_TEST_VERSION: ${{ matrix.vscode }}
