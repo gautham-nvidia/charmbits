@@ -5,6 +5,36 @@ import { join } from 'node:path';
 export const primaryModifier = process.platform === 'darwin' ? 'Meta' : 'Control';
 export const endOfDocument = process.platform === 'darwin' ? 'Meta+ArrowDown' : 'Control+End';
 
+interface BrowserEvent { time: number; type: string; text: string; url?: string }
+const browserEvents = new WeakMap<Page, BrowserEvent[]>();
+const webviewResource = /^(?:vscode-webview:|https:\/\/file(?:\+|%2B)\.vscode-resource\.vscode-cdn\.net\/)/i;
+
+function trackBrowserEvents(window: Page) {
+	if (browserEvents.has(window)) { return; }
+	const events: BrowserEvent[] = [];
+	browserEvents.set(window, events);
+	const record = (event: Omit<BrowserEvent, 'time'>) => {
+		events.push({ ...event, time: Date.now(), text: event.text.slice(0, 2000) });
+		if (events.length > 60) { events.shift(); }
+	};
+	window.on('console', message => {
+		if (message.type() === 'error' || message.type() === 'warning') {
+			record({ type: message.type(), text: message.text(), url: message.location().url });
+		}
+	});
+	window.on('pageerror', error => record({ type: 'pageerror', text: error.message }));
+	window.on('requestfailed', request => {
+		if (webviewResource.test(request.url())) {
+			record({ type: 'requestfailed', text: request.failure()?.errorText ?? 'Unknown network failure', url: request.url() });
+		}
+	});
+	window.on('response', response => {
+		if (response.status() >= 400 && webviewResource.test(response.url())) {
+			record({ type: 'http-error', text: `HTTP ${response.status()}`, url: response.url() });
+		}
+	});
+}
+
 export function isolatedEditorEnvironment(): Record<string, string> {
 	const environment: Record<string, string> = {};
 	for (const [key, value] of Object.entries(process.env)) {
@@ -49,6 +79,7 @@ export async function command(window: Page, title: string) {
 }
 
 export async function readyFrame(window: Page, excluded: ReadonlySet<Frame> = new Set<Frame>()): Promise<Frame> {
+	trackBrowserEvents(window);
 	let result: Frame | undefined;
 	try {
 		await expect.poll(async () => {
@@ -95,6 +126,7 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 	writeFileSync(testInfo.outputPath('original-error.json'), JSON.stringify({
 		message: String(error), stack: error instanceof Error ? error.stack : undefined,
 		frames: window.frames().map(frame => ({ url: frame.url(), detached: frame.isDetached() })),
+		browserEvents: browserEvents.get(window) ?? [],
 	}, null, 2));
 	const snapshots: unknown[] = [];
 	let timer: ReturnType<typeof setTimeout> | undefined;
@@ -118,6 +150,13 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 							statusBarText: document.querySelector('.part.statusbar')?.textContent,
 							bannerText: document.querySelector('.part.banner')?.textContent,
 							stage: { ...document.getElementById('stage')?.dataset },
+							document: document.getElementById('stage') ? {
+								readyState: document.readyState,
+								head: document.head.innerHTML,
+								styleSheets: Array.from(document.styleSheets, sheet => ({ href: sheet.href, disabled: sheet.disabled })),
+								scripts: Array.from(document.scripts, script => ({ src: script.src, type: script.type })),
+								resources: performance.getEntriesByType('resource').map(entry => entry.toJSON()),
+							} : undefined,
 							selected: (document.getElementById('charm-select') as HTMLSelectElement | null)?.value,
 							appearance: details('settings'), menu: details('settings-menu'),
 							companion: details('companion-tools'), focusPanel: details('focus-panel'),
