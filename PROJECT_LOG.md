@@ -864,3 +864,10 @@ click, verifies the reminder's saved reschedule, and retains pointer/state
 diagnostics before editor cleanup on failure. Type checking, lint and three
 consecutive Windows installed-package runs pass. The new hosted Mac result is
 still required; no application behavior or assertions were relaxed.
+
+The next hosted pass cleared that reminder check. Its older macOS 1.90 run
+stopped before opening CharmBits because the test did not find a Restricted Mode
+button; the failure screenshot shows both the Restricted Mode banner and status
+label. The fixture now checks the visible status-bar label within the editor's
+30-second startup deadline, and captures the host's mode text on failures.
+Restricted Mode remains required for the installed-package coverage.

@@ -955,7 +955,10 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 	try {
 		await editor.window.emulateMedia({ reducedMotion: 'no-preference' });
 		if (installedPersonalization) {
-			await expect(editor.window.getByRole('button', { name: /^Restricted Mode/ })).toBeVisible();
+			// Verify the host's visible mode without relying on its accessibility
+			// role; allow the same startup deadline as the activity bar.
+			await expect(editor.window.locator('.part.statusbar').getByText('Restricted Mode', { exact: true }))
+				.toBeVisible({ timeout: 30000 });
 		}
 		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);

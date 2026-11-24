@@ -115,6 +115,8 @@ export async function captureEditorFailure(window: Page, testInfo: TestInfo, err
 							url: location.href, visibility: document.visibilityState,
 							focus: document.activeElement?.id, documentFocused: document.hasFocus(),
 							viewport: { width: innerWidth, height: innerHeight },
+							statusBarText: document.querySelector('.part.statusbar')?.textContent,
+							bannerText: document.querySelector('.part.banner')?.textContent,
 							stage: { ...document.getElementById('stage')?.dataset },
 							selected: (document.getElementById('charm-select') as HTMLSelectElement | null)?.value,
 							appearance: details('settings'), menu: details('settings-menu'),
