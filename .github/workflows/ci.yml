@@ -87,7 +87,7 @@ jobs:
             label: macOS
     env:
       VSCODE_TEST_VERSION: ${{ matrix.vscode }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ matrix.os == 'macos-15-intel' && 45 || 30 }}
     defaults:
       run:
         shell: pwsh

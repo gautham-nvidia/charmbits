@@ -930,3 +930,12 @@ test deadlines are unchanged. Fresh hosted validation is still required.
 
 Type checking, lint and both affected navigation/reload checks pass locally
 on VS Code 1.90.0 and 1.140.0.
+
+## 2026-11-24 - Intel Mac job allowance
+
+All nine PR checks passed after the runner change. On main, the Mac 1.140 job
+passed all 16 source cases and eight installed-package cases before GitHub
+cancelled it at the 30-minute job limit. The source suite alone took 20.6 minutes.
+Give Intel Mac jobs 45 minutes to finish the complete suite and packaging checks.
+Windows and Linux retain their 30-minute job allowance; individual test deadlines
+and assertions are unchanged.
