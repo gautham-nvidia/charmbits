@@ -13,7 +13,7 @@
     "package": "npm run build && node package.mjs"
   },
   "devDependencies": {
-    "electron": "44.11.3",
+    "electron": "45.4.1",
     "@electron/packager": "20.3.0"
   }
 }
