@@ -2,6 +2,8 @@
 
 This service prepares **email confirmation → app download → optional 30-day Pro trial → one-time purchase → protected downloads**. It uses no customer passwords. **The checked-in configuration is inactive.** Real email, checkout and file delivery require your accounts, sender and release artifacts.
 
+**New-store setup notice, November 24, 2026:** [Lemon Squeezy closed new store sign-ups on November 16 and stops processing payments on March 31, 2027](https://www.lemonsqueezy.com/blog/saying-goodbye-to-lemon-squeezy). Its recommended successor is Stripe Managed Payments, subject to business-country eligibility. The Lemon-specific steps below describe the existing adapter and are only relevant to existing accounts. New stores need a supported provider and a verified replacement integration before enabling checkout.
+
 The frontend is a static site; the service runs on Cloudflare Workers with D1 for records and a private R2 bucket for downloads. Brevo sends email. Lemon Squeezy provides hosted, one-time checkout and transaction-tax handling as merchant of record. Shopify can wait until physical merchandise exists.
 
 ## Product rules
@@ -33,7 +35,7 @@ Use your own browser for login, recovery details and merchant verification. Do n
 
 1. The website is **https://charmbits.pages.dev/**. Create a Workers subdomain and a managed Turnstile widget for `charmbits.pages.dev`. Start on the free tiers; R2 activation may require a billing method and usage beyond allowances can cost money.
 2. Create a Brevo account using the current official inbox, **getcharmbits@gmail.com**, and verify an authenticated-domain sender for transactional delivery. Create a separate list for **confirmed, optional offers**. Free-plan sending limits apply to all email, not just campaigns.
-3. Create a Lemon Squeezy store when ready for payment testing. Confirm your business country is supported and complete merchant approval. Use USD and create **two fixed-price, one-time variants**: CharmBits Pro and a digital-items basket. Do not enable a subscription, quantity changes or pay-what-you-want. Hosted coupon entry is enabled for Pro; individual-item checkout keeps it off.
+3. **Existing Lemon Squeezy accounts only:** confirm your store is approved and plan its migration before March 31, 2027. The current adapter uses USD and **two fixed-price, one-time variants**: CharmBits Pro and a digital-items basket. Do not enable a subscription, quantity changes or pay-what-you-want. Hosted coupon entry is enabled for Pro; individual-item checkout keeps it off. This step cannot onboard a new store.
 4. Configure the payment webhook for `/v1/webhooks/lemon`, with `order_created` and `order_refunded`, and keep its signing secret private.
 
 No physical products, shipping fields or merchandise preorders are needed. Keep future merchandise separate from digital access.

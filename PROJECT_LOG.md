@@ -939,3 +939,14 @@ cancelled it at the 30-minute job limit. The source suite alone took 20.6 minute
 Give Intel Mac jobs 45 minutes to finish the complete suite and packaging checks.
 Windows and Linux retain their 30-minute job allowance; individual test deadlines
 and assertions are unchanged.
+
+## 2026-11-24 - Garden feature and animation wording
+
+Following approval of the Cali visual story, clarify the garden's daily watering
+and flower reward. Add the existing, reviewed app screenshot to the homepage's
+garden growth preview and make its heading explicit. Preserve all four approved
+listing images and the three-section overview. Describe the animated charms as
+having a 3D look, without claiming a real-time 3D renderer.
+
+Prepare extension0.16.2 for the listing copy update;0.16.1 is already published
+and must not be uploaded again. No app behavior, pricing or identity changes.
