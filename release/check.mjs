@@ -59,6 +59,8 @@ export function validateCandidate({ manifest, packaged, identity, files, built, 
 export function publicationBlockers({ manifest, files, target, environment = {} }) {
   assert.ok(targets.includes(target), 'Choose artifact, marketplace, open-vsx or both.');
   const blockers = [];
+  const hasGitHubOidc = environment.GITHUB_ACTIONS === 'true'
+    && Boolean(environment.ACTIONS_ID_TOKEN_REQUEST_URL?.trim() && environment.ACTIONS_ID_TOKEN_REQUEST_TOKEN?.trim());
   if (!manifest.license || manifest.license === 'UNLICENSED'
     || ![...files.keys()].some(name => /^extension\/licen[cs]e(?:\.txt|\.md)?$/.test(name))) {
     blockers.push('Choose the source licence, add extension/LICENSE and set package.json license.');
@@ -69,8 +71,7 @@ export function publicationBlockers({ manifest, files, target, environment = {} 
   if (['marketplace', 'both'].includes(target)) {
     const authentication = environment.CHARMLET_RELEASE_AUTH || 'pat';
     if (authentication === 'oidc') {
-      if (environment.GITHUB_ACTIONS !== 'true' || !environment.ACTIONS_ID_TOKEN_REQUEST_URL?.trim()
-        || !environment.ACTIONS_ID_TOKEN_REQUEST_TOKEN?.trim()) {
+      if (!hasGitHubOidc) {
         blockers.push('Use GitHub Actions with id-token: write and a configured Marketplace Trusted Publishing policy.');
       }
     } else if (authentication !== 'pat') {
@@ -79,8 +80,20 @@ export function publicationBlockers({ manifest, files, target, environment = {} 
       blockers.push('Configure VSCE_PAT for the owned gautham-nvidia Marketplace publisher, or use the trusted publishing workflow.');
     }
   }
-  if (['open-vsx', 'both'].includes(target) && !environment.OVSX_PAT?.trim()) {
-    blockers.push('Configure OVSX_PAT for the owned gautham-nvidia Open VSX namespace.');
+  if (['open-vsx', 'both'].includes(target)) {
+    const authentication = environment.CHARMLET_OPEN_VSX_AUTH || 'pat';
+    if (authentication === 'oidc') {
+      if (!hasGitHubOidc) {
+        blockers.push('Use GitHub Actions with id-token: write and an Open VSX trusted publisher for an existing extension in your owned namespace.');
+      }
+      if (environment.OVSX_PAT?.trim()) {
+        blockers.push('Unset OVSX_PAT when selecting Open VSX OIDC so a token cannot override trusted publishing.');
+      }
+    } else if (authentication !== 'pat') {
+      blockers.push('Choose pat or oidc for CHARMLET_OPEN_VSX_AUTH.');
+    } else if (!environment.OVSX_PAT?.trim()) {
+      blockers.push(`Configure OVSX_PAT for the owned ${manifest.publisher} Open VSX namespace. The first publication requires a token.`);
+    }
   }
   return blockers;
 }

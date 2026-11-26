@@ -950,3 +950,22 @@ having a 3D look, without claiming a real-time 3D renderer.
 
 Prepare extension0.16.2 for the listing copy update;0.16.1 is already published
 and must not be uploaded again. No app behavior, pricing or identity changes.
+
+## 2026-11-26 - Open VSX distribution preparation
+
+Microsoft Marketplace 0.16.2 is live. Cursor and Devin use Open VSX mirrors;
+VSCodium and compatible Theia products also use Open VSX. A separate registry
+publication is required. Both isolated editor profiles accepted the public VSIX,
+but their sign-in screens prevented full runtime verification.
+
+Add an explicit PAT/OIDC choice to Extension Release. The first Open VSX upload
+defaults to a token; later trusted releases require the GitHub identity-token
+context and exclude the bootstrap PAT. Preserve the package, licence, artwork,
+source and main-CI gates. Document account, namespace and compatibility steps in
+docs/ide-distribution.md. Publisher identity and application contents are unchanged.
+
+Local validation: all 13 release tests pass, including missing credentials,
+mixed registry authentication, conflicting PAT/OIDC and licence gates. The
+workflow parses with the installed js-yaml; declared, locked and installed ovsx
+versions are all 1.3.0. Hosted checks remain required before merge.
+No namespace, registry listing, account or payment provider was changed.
