@@ -969,3 +969,14 @@ mixed registry authentication, conflicting PAT/OIDC and licence gates. The
 workflow parses with the installed js-yaml; declared, locked and installed ovsx
 versions are all 1.3.0. Hosted checks remain required before merge.
 No namespace, registry listing, account or payment provider was changed.
+
+The editor checks encountered Thanksgiving's intended automatic charm selection.
+The empty-profile test expected Terminal on screen although its saved preference
+was still Terminal; the legacy artwork test measured the holiday pie instead of
+its baseline artwork. Keep the first profile empty and check its saved default
+and displayed charm's catalogue membership. Pin the second fixture's baseline
+so its image-dimension checks work throughout the year.
+
+Type checking and both affected scenarios pass on Windows VS Code 1.140.0.
+The dedicated seasonal-selection checks remain in the suite. No application
+behavior or version changes; fresh hosted checks are required for these fixtures.
