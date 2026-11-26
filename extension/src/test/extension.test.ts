@@ -107,8 +107,9 @@ test('existing beta editor supports docking, gestures, focus, persistence and re
 	mkdirSync(storage, { recursive: true });
 	// This comprehensive artwork scenario follows a pre-0.13 beta profile.
 	// The companion UI suite separately verifies an empty profile's free catalogue.
+	// Pin the baseline artwork so holiday defaults cannot change its measured size.
 	writeFileSync(join(storage, 'preferences.json'),
-		JSON.stringify({ ...DEFAULT_STATE, editionVersion: undefined }));
+		JSON.stringify({ ...DEFAULT_STATE, charmPinned: true, editionVersion: undefined }));
 	const scratchFile = join(profile, 'charmlet-trial.ts');
 	writeFileSync(scratchFile, "export const greeting = 'Hello, CharmBits!';\n");
 	const environment = isolatedEditorEnvironment();

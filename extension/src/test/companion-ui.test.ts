@@ -962,7 +962,10 @@ test(`${installedPersonalization ? 'installed VSIX' : 'free VS Code'} includes e
 		}
 		await command(editor.window, 'CharmBits: Show Charm');
 		let frame = await readyFrame(editor.window);
-		await expect(frame.locator('#stage')).toHaveAttribute('data-charm', 'terminal');
+		// Keep this profile empty: holidays can override its display without changing its saved default.
+		const initialStage = frame.locator('#stage');
+		await expect(initialStage).toHaveAttribute('data-preferred-charm', 'terminal');
+		expect(CHARMS.map(charm => charm.id)).toContain(await initialStage.getAttribute('data-charm'));
 		await frame.getByRole('button', { name: 'Browse charms', exact: true }).click();
 		await expect(frame.locator('#charm-grid .charm-tile')).toHaveCount(CHARMS.length);
 		await expect(frame.locator('#access-label')).toHaveText('Free for VS Code');

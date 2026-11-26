@@ -950,3 +950,33 @@ having a 3D look, without claiming a real-time 3D renderer.
 
 Prepare extension0.16.2 for the listing copy update;0.16.1 is already published
 and must not be uploaded again. No app behavior, pricing or identity changes.
+
+## 2026-11-26 - Open VSX distribution preparation
+
+Microsoft Marketplace 0.16.2 is live. Cursor and Devin use Open VSX mirrors;
+VSCodium and compatible Theia products also use Open VSX. A separate registry
+publication is required. Both isolated editor profiles accepted the public VSIX,
+but their sign-in screens prevented full runtime verification.
+
+Add an explicit PAT/OIDC choice to Extension Release. The first Open VSX upload
+defaults to a token; later trusted releases require the GitHub identity-token
+context and exclude the bootstrap PAT. Preserve the package, licence, artwork,
+source and main-CI gates. Document account, namespace and compatibility steps in
+docs/ide-distribution.md. Publisher identity and application contents are unchanged.
+
+Local validation: all 13 release tests pass, including missing credentials,
+mixed registry authentication, conflicting PAT/OIDC and licence gates. The
+workflow parses with the installed js-yaml; declared, locked and installed ovsx
+versions are all 1.3.0. Hosted checks remain required before merge.
+No namespace, registry listing, account or payment provider was changed.
+
+The editor checks encountered Thanksgiving's intended automatic charm selection.
+The empty-profile test expected Terminal on screen although its saved preference
+was still Terminal; the legacy artwork test measured the holiday pie instead of
+its baseline artwork. Keep the first profile empty and check its saved default
+and displayed charm's catalogue membership. Pin the second fixture's baseline
+so its image-dimension checks work throughout the year.
+
+Type checking and both affected scenarios pass on Windows VS Code 1.140.0.
+The dedicated seasonal-selection checks remain in the suite. No application
+behavior or version changes; fresh hosted checks are required for these fixtures.

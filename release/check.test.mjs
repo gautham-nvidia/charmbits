@@ -104,6 +104,46 @@ test('trusted publishing requires the GitHub OIDC context and retains source and
     environment: { VSCE_PAT: 'fixture-only', CHARMLET_RELEASE_AUTH: 'unknown' } }), /Choose pat or oidc/);
 });
 
+test('Open VSX trusted publishing retains licence gates and requires every GitHub OIDC field', () => {
+  const data = fixture();
+  const environment = { CHARMLET_OPEN_VSX_AUTH: 'oidc', GITHUB_ACTIONS: 'true',
+    ACTIONS_ID_TOKEN_REQUEST_URL: 'https://example.invalid/fixture-only',
+    ACTIONS_ID_TOKEN_REQUEST_TOKEN: 'fixture-only' };
+  assert.equal(publicationBlockers({ ...data, target: 'open-vsx', environment }).length, 2);
+  data.manifest.license = 'MIT';
+  data.files.set('extension/license', Buffer.from('Fixture source licence'));
+  data.files.set('extension/artwork-license.md', Buffer.from('Fixture artwork terms'));
+  requirePublicationReady({ ...data, target: 'open-vsx', environment });
+  for (const key of ['GITHUB_ACTIONS', 'ACTIONS_ID_TOKEN_REQUEST_URL', 'ACTIONS_ID_TOKEN_REQUEST_TOKEN']) {
+    assert.throws(() => requirePublicationReady({ ...data, target: 'open-vsx',
+      environment: { ...environment, [key]: ' ' } }), /id-token: write/);
+  }
+  assert.throws(() => requirePublicationReady({ ...data, target: 'open-vsx',
+    environment: { ...environment, OVSX_PAT: 'fixture-only' } }), /Unset OVSX_PAT/);
+  assert.throws(() => requirePublicationReady({ ...data, target: 'open-vsx',
+    environment: { ...environment, CHARMLET_OPEN_VSX_AUTH: undefined } }), /first publication requires a token/);
+  assert.throws(() => requirePublicationReady({ ...data, target: 'open-vsx',
+    environment: { OVSX_PAT: 'fixture-only', CHARMLET_OPEN_VSX_AUTH: 'unknown' } }), /Choose pat or oidc/);
+});
+
+test('each selected registry requires its own authentication and supports a mixed first Open VSX upload', () => {
+  const data = fixture();
+  data.manifest.license = 'MIT';
+  data.files.set('extension/license', Buffer.from('Fixture source licence'));
+  data.files.set('extension/artwork-license.md', Buffer.from('Fixture artwork terms'));
+  const environment = { CHARMLET_RELEASE_AUTH: 'oidc', GITHUB_ACTIONS: 'true',
+    ACTIONS_ID_TOKEN_REQUEST_URL: 'https://example.invalid/fixture-only',
+    ACTIONS_ID_TOKEN_REQUEST_TOKEN: 'fixture-only' };
+  requirePublicationReady({ ...data, target: 'both', environment: { ...environment, OVSX_PAT: 'fixture-only' } });
+  requirePublicationReady({ ...data, target: 'both', environment: { ...environment, CHARMLET_OPEN_VSX_AUTH: 'oidc' } });
+  assert.throws(() => requirePublicationReady({ ...data, target: 'both', environment }), /OVSX_PAT/);
+  assert.throws(() => requirePublicationReady({ ...data, target: 'both',
+    environment: { OVSX_PAT: 'fixture-only' } }), /VSCE_PAT/);
+  requirePublicationReady({ ...data, target: 'marketplace',
+    environment: { ...environment, CHARMLET_OPEN_VSX_AUTH: 'unknown' } });
+  requirePublicationReady({ ...data, target: 'artifact' });
+});
+
 test('withheld artwork cannot enter a VSIX even through an archived revision', () => {
   for (const name of ['trial-artist-travis-scott-r1-p4.png', 'trial-athlete-lionel-messi-r2.png', 'artist-old-preview.png']) {
     const data = fixture();
